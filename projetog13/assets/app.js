@@ -36,20 +36,40 @@ addEventListener('keydown', event => {
 
 const mainVideo = document.querySelector('#main-video');
 const mainVideoCaption = document.querySelector('#main-video-caption');
-const videoTiles = [...document.querySelectorAll('.video-tile[data-video-src]')];
-videoTiles.forEach(tile => tile.addEventListener('click', () => {
-  const source = tile.dataset.videoSrc;
-  if (mainVideo.getAttribute('src') !== source) {
-    mainVideo.pause();
-    mainVideo.setAttribute('src', source);
-    mainVideo.load();
-  }
-  mainVideoCaption.textContent = tile.dataset.videoCaption;
+const videoTiles = [...document.querySelectorAll('.video-tile')];
+
+const activateTile = tile => {
   videoTiles.forEach(item => item.classList.toggle('active', item === tile));
+  mainVideoCaption.textContent = tile.dataset.videoCaption;
+};
+
+const showYouTube = (tile, autoplay = false) => {
+  const youtubeId = tile.dataset.youtubeId;
+  if (!autoplay) {
+    mainVideo.innerHTML = `<button class="main-video-preview" type="button" aria-label="Reproduzir ${tile.dataset.videoCaption}" style="background-image:url('https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg')"><span class="main-video-play" aria-hidden="true">▶</span><span class="main-video-hint">Reproduzir no YouTube</span></button>`;
+    mainVideo.querySelector('.main-video-preview').addEventListener('click', () => showYouTube(tile, true));
+    return;
+  }
+  mainVideo.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0&playsinline=1" title="${tile.dataset.videoCaption}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+};
+
+const showLocalVideo = (tile, autoplay = false) => {
+  mainVideo.innerHTML = `<video controls preload="metadata" playsinline ${autoplay ? 'autoplay' : ''} src="${tile.dataset.videoSrc}"></video>`;
+  if (autoplay) mainVideo.querySelector('video').play().catch(() => {});
+};
+
+const showTile = (tile, autoplay = false) => {
+  activateTile(tile);
+  if (tile.dataset.videoType === 'youtube') showYouTube(tile, autoplay);
+  else showLocalVideo(tile, autoplay);
+};
+
+videoTiles.forEach(tile => tile.addEventListener('click', () => {
+  showTile(tile, true);
   mainVideo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  mainVideo.play().catch(() => {});
 }));
-mainVideo.addEventListener('play', () => videoTiles.forEach(tile => tile.querySelector('video')?.pause()));
+
+if (videoTiles.length) showTile(videoTiles[0]);
 
 const carousel = document.querySelector('.lead-carousel');
 document.querySelector('[data-direction="prev"]')?.addEventListener('click', () => carousel.scrollBy({left: -carousel.clientWidth * .72, behavior:'smooth'}));
