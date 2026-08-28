@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    
+  </defs>
+  
+  
+  <polygon points="200,30 310,100 90,100" fill="#3A4A5A"></polygon>
+  
+  <rect x="100" y="100" width="200" height="120" fill="none" stroke="#3A4A5A" stroke-width="4"></rect>
+  
+  <rect x="118" y="118" width="52" height="42" fill="none" stroke="#D4880A" stroke-width="3"></rect>
+  <line x1="144" y1="118" x2="144" y2="160" stroke="#D4880A" stroke-width="2"></line>
+  <line x1="118" y1="139" x2="170" y2="139" stroke="#D4880A" stroke-width="2"></line>
+  
+  <rect x="230" y="118" width="52" height="42" fill="none" stroke="#D4880A" stroke-width="3"></rect>
+  <line x1="256" y1="118" x2="256" y2="160" stroke="#D4880A" stroke-width="2"></line>
+  <line x1="230" y1="139" x2="282" y2="139" stroke="#D4880A" stroke-width="2"></line>
+  
+  <rect x="174" y="158" width="52" height="62" fill="#3A4A5A"></rect>
+  
+  <line x1="88" y1="220" x2="312" y2="220" stroke="#3A4A5A" stroke-width="6"></line>
+  
+  <text x="200" y="254" text-anchor="middle" class="name">ÁGORA</text>
+  <text x="200" y="276" text-anchor="middle" class="sub">CONSTRUTORA</text>
+</svg>
