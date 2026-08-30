@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apresentações Galpão V1 · Ágora Construtora</title>
+<style>
+:root{
+  --ardosia:#3A4A5A;
+  --ardosia-2:#26333E;
+  --ambar:#D4880A;
+  --ambar-2:#F0A820;
+  --argamassa:#EEF1F4;
+  --concreto:#8A9BAC;
+  --asfalto:#0E1418;
+  --papel:#FFFFFF;
+  --verde:#2F6B3F;
+  --risco:#9E3E2F;
+  --linha:rgba(58,74,90,.18);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--argamassa);color:var(--ardosia);font-family:"Montserrat","Segoe UI",Arial,sans-serif}
+body{padding:28px}
+.deck{display:flex;flex-direction:column;gap:28px;align-items:center}
+.slide{
+  position:relative;
+  width:min(1280px,100%);
+  aspect-ratio:16/9;
+  overflow:hidden;
+  background:var(--papel);
+  border-radius:10px;
+  box-shadow:0 18px 48px rgba(14,20,24,.16);
+  isolation:isolate;
+}
+.cover{
+  color:var(--papel);
+  background:
+    linear-gradient(90deg,rgba(14,20,24,.70),rgba(14,20,24,.28) 46%,rgba(14,20,24,.06)),
+    url("./assets/fachada-agora-principal.png") center/cover;
+}
+.brand{position:absolute;top:42px;left:58px;z-index:2}
+.brand .name{font-family:Georgia,"Times New Roman",serif;font-size:34px;letter-spacing:.07em;line-height:1;color:inherit}
+.brand .sub{margin-top:6px;font-size:10px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--ambar-2)}
+.cover-title{position:absolute;left:58px;bottom:78px;width:58%;z-index:2}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ambar-2)}
+h1,h2,h3,p{margin:0}
+h1{font-family:Georgia,"Times New Roman",serif;font-size:82px;font-weight:500;line-height:.92;letter-spacing:0;margin-top:16px}
+.cover-title p{margin-top:22px;font-size:18px;line-height:1.55;color:rgba(255,255,255,.86);max-width:640px}
+.date-chip{position:absolute;right:54px;bottom:48px;border-top:2px solid var(--ambar);padding-top:10px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.82)}
+.topbar{position:absolute;left:54px;right:54px;top:34px;display:flex;justify-content:space-between;align-items:flex-start;z-index:2}
+.mini-brand{font-family:Georgia,"Times New Roman",serif;font-size:26px;letter-spacing:.07em;color:var(--ardosia)}
+.mini-brand span{display:block;margin-top:4px;font-family:"Segoe UI",Arial,sans-serif;font-size:8px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--ambar)}
+.slide-num{font-size:10px;font-weight:700;letter-spacing:.18em;color:var(--concreto);text-transform:uppercase}
+.content{position:absolute;left:72px;right:72px;top:104px;bottom:58px}
+.section-kicker{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ambar);margin-bottom:12px}
+h2{font-family:Georgia,"Times New Roman",serif;font-size:48px;font-weight:500;line-height:1.02;color:var(--ardosia);max-width:900px}
+.lead{font-size:18px;line-height:1.55;color:var(--ardosia);max-width:760px;margin-top:18px}
+.split{display:grid;grid-template-columns:1.04fr .96fr;gap:54px;align-items:center;height:100%}
+.hero-number{font-family:Georgia,"Times New Roman",serif;font-size:90px;line-height:.92;color:var(--asfalto)}
+.hero-label{margin-top:16px;font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ambar)}
+.note{margin-top:18px;font-size:14px;line-height:1.55;color:var(--concreto)}
+.metric-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:34px}
+.metric{border-top:2px solid var(--ambar);padding-top:12px}
+.metric strong{display:block;font-family:Georgia,"Times New Roman",serif;font-size:40px;line-height:1;color:var(--ardosia)}
+.metric span{display:block;margin-top:8px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--concreto)}
+.structure-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:42px;align-items:start;margin-top:28px}
+.fact-list{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.fact{border-top:2px solid var(--ambar);padding-top:12px}
+.fact strong{display:block;font-family:Georgia,"Times New Roman",serif;font-size:34px;line-height:1;color:var(--ardosia)}
+.fact span{display:block;margin-top:8px;font-size:12px;line-height:1.35;color:var(--concreto)}
+.formula{margin-top:24px;background:var(--ardosia);color:var(--papel);padding:24px 28px;border-radius:8px}
+.formula .small{font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--ambar-2)}
+.formula .big{margin-top:10px;font-family:Georgia,"Times New Roman",serif;font-size:38px;line-height:1.05;color:var(--papel)}
+.formula p{margin-top:10px;font-size:13px;line-height:1.5;color:rgba(255,255,255,.74)}
+.bar-list{display:flex;flex-direction:column;gap:18px;margin-top:8px}
+.bar-item{display:grid;grid-template-columns:188px 1fr 116px;gap:16px;align-items:center}
+.bar-item .label{font-size:13px;line-height:1.25;color:var(--ardosia)}
+.bar-track{height:12px;background:#E3E8ED;border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--ambar),var(--ambar-2));border-radius:999px}
+.bar-value{text-align:right;font-size:13px;font-weight:700;color:var(--ardosia)}
+.table{width:100%;border-collapse:collapse;margin-top:24px;font-size:14px}
+.table th{padding:0 0 12px;text-align:left;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--concreto);border-bottom:1px solid var(--linha)}
+.table td{padding:13px 0;border-bottom:1px solid var(--linha);vertical-align:top}
+.table td:last-child,.table th:last-child{text-align:right}
+.status{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;border-radius:3px;padding:4px 7px}
+.ok{background:#E8F3EA;color:var(--verde)}
+.parcial{background:#FFF3D7;color:#885600}
+.pend{background:#F7E4E1;color:var(--risco)}
+.callout-line{margin-top:28px;border-left:4px solid var(--ambar);padding-left:18px;font-size:17px;line-height:1.5;color:var(--ardosia);max-width:880px}
+.image-band{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(110deg,rgba(212,136,10,.10),rgba(212,136,10,0) 44%),
+    linear-gradient(180deg,rgba(58,74,90,.06),rgba(58,74,90,0) 62%);
+}
+.dark{background:var(--ardosia-2);color:var(--papel)}
+.dark .mini-brand,.dark h2{color:var(--papel)}
+.dark .lead,.dark .note{color:rgba(255,255,255,.72)}
+.dark .slide-num{color:rgba(255,255,255,.38)}
+.dark .table th{color:rgba(255,255,255,.46)}
+.dark .table td{border-color:rgba(255,255,255,.14);color:rgba(255,255,255,.88)}
+.risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:34px}
+.risk{border-top:3px solid var(--ambar);padding-top:14px}
+.risk h3{font-size:16px;line-height:1.3;color:inherit}
+.risk p{margin-top:10px;font-size:13px;line-height:1.5;color:rgba(255,255,255,.70)}
+.dark .fact strong,.dark .fact span{color:var(--papel)}
+.dark .fact span{color:rgba(255,255,255,.70)}
+.two-col-list{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:30px}
+.line-item{border-top:1px solid var(--linha);padding:13px 0}
+.line-item strong{display:block;font-size:15px;color:var(--ardosia)}
+.line-item span{display:block;margin-top:5px;font-size:13px;line-height:1.45;color:var(--concreto)}
+.dark .line-item{border-color:rgba(255,255,255,.16)}
+.dark .line-item strong{color:var(--papel)}
+.dark .line-item span{color:rgba(255,255,255,.70)}
+.steps{counter-reset:step;display:grid;grid-template-columns:1fr 1fr;gap:20px 46px;margin-top:32px}
+.step{position:relative;padding-left:58px;min-height:52px}
+.step::before{counter-increment:step;content:counter(step,decimal-leading-zero);position:absolute;left:0;top:-3px;font-family:Georgia,"Times New Roman",serif;font-size:34px;color:var(--ambar)}
+.step strong{display:block;font-size:16px;color:var(--ardosia)}
+.step span{display:block;margin-top:6px;font-size:13px;line-height:1.45;color:var(--concreto)}
+.final{
+  background:
+    linear-gradient(90deg,rgba(14,20,24,.85),rgba(14,20,24,.50)),
+    url("./assets/fachada-agora-final.png") center/cover;
+  color:var(--papel);
+}
+.final .content{display:flex;flex-direction:column;justify-content:center}
+.final h2{color:var(--papel);font-size:64px;max-width:760px}
+.final p{margin-top:20px;font-size:18px;line-height:1.55;color:rgba(255,255,255,.78);max-width:760px}
+.footer-note{position:absolute;left:54px;right:54px;bottom:28px;font-size:10px;line-height:1.4;color:var(--concreto)}
+.dark .footer-note,.cover .footer-note,.final .footer-note{color:rgba(255,255,255,.52)}
+@media print{
+  @page{size:13.333in 7.5in;margin:0}
+  body{padding:0;background:#fff}
+  .deck{display:block}
+  .slide{width:13.333in;height:7.5in;box-shadow:none;border-radius:0;page-break-after:always}
+}
+@media screen and (max-width: 760px){
+  html,body{max-width:100%;overflow-x:hidden}
+  body{padding:10px;background:#E8EDF2}
+  .deck{gap:14px}
+  .slide{
+    width:calc(100vw - 20px);
+    max-width:100%;
+    min-height:0;
+    aspect-ratio:auto;
+    height:auto;
+    overflow:visible;
+    border-radius:8px;
+  }
+  .topbar,
+  .content,
+  .footer-note,
+  .brand,
+  .cover-title,
+  .date-chip{
+    position:relative;
+    left:auto;
+    right:auto;
+    top:auto;
+    bottom:auto;
+  }
+  .topbar{
+    display:block;
+    padding:22px 22px 0;
+  }
+  .content{
+    padding:30px 20px 36px;
+    width:100%;
+    max-width:calc(100vw - 20px);
+    min-width:0;
+  }
+  .content > *,
+  .cover-title > *,
+  .metric,
+  .fact,
+  .line-item,
+  .risk,
+  .step{
+    max-width:calc(100vw - 92px);
+  }
+  .footer-note{
+    padding:0 22px 18px;
+  }
+  .mini-brand{font-size:23px}
+  .slide-num{
+    display:block;
+    max-width:100%;
+    text-align:left;
+    margin-top:10px;
+    line-height:1.35;
+    overflow-wrap:anywhere;
+  }
+  .cover{
+    min-height:620px;
+    background:
+      linear-gradient(180deg,rgba(14,20,24,.44),rgba(14,20,24,.78)),
+      url("./assets/fachada-agora-principal.png") center/cover;
+    display:flex;
+    flex-direction:column;
+  }
+  .cover .brand{padding:28px 24px 0}
+  .brand .name{font-size:28px}
+  .brand .sub{font-size:9px}
+  .cover-title{
+    width:auto;
+    padding:130px 24px 20px;
+    margin-top:auto;
+  }
+  .eyebrow{font-size:10px;line-height:1.45}
+  h1{
+    font-size:clamp(44px,14vw,68px);
+    line-height:.96;
+    overflow-wrap:anywhere;
+  }
+  .cover-title p{
+    font-size:15px;
+    line-height:1.55;
+    max-width:none;
+  }
+  .date-chip{
+    margin:0 24px 20px;
+    align-self:flex-start;
+  }
+  h2{
+    font-size:clamp(22px,6.1vw,30px);
+    line-height:1.14;
+    max-width:min(100%, 280px);
+    overflow-wrap:anywhere;
+    word-break:normal;
+  }
+  .lead{
+    font-size:15px;
+    max-width:min(100%, 280px);
+    overflow-wrap:anywhere;
+  }
+  .note{
+    max-width:min(100%, 280px);
+    overflow-wrap:anywhere;
+  }
+  .split,
+  .structure-grid,
+  .two-col-list{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:24px;
+    height:auto;
+  }
+  .hero-number{
+    font-size:clamp(36px,10.5vw,48px);
+    max-width:min(100%, 280px);
+    overflow-wrap:anywhere;
+  }
+  .metric-row,
+  .fact-list,
+  .risk-grid,
+  .steps{
+    grid-template-columns:1fr;
+  }
+  .metric strong{font-size:27px;overflow-wrap:anywhere}
+  .fact strong{font-size:28px;overflow-wrap:anywhere}
+  .formula{padding:20px}
+  .formula .big{
+    font-size:clamp(25px,7.4vw,36px);
+    overflow-wrap:anywhere;
+  }
+  .bar-list{gap:16px}
+  .bar-item{
+    grid-template-columns:1fr;
+    gap:7px;
+  }
+  .bar-value{text-align:left}
+  .table{
+    display:block;
+    overflow-x:auto;
+    max-width:100%;
+    white-space:normal;
+    font-size:12px;
+    margin-top:18px;
+  }
+  .table th,
+  .table td{
+    min-width:130px;
+    padding:10px 12px 10px 0;
+  }
+  .table td:last-child,
+  .table th:last-child{text-align:left}
+  .callout-line{
+    font-size:14px;
+    line-height:1.55;
+    margin-top:20px;
+    max-width:min(100%, 280px);
+    overflow-wrap:anywhere;
+  }
+  .cover-title p{max-width:280px}
+  .risk p,
+  .line-item span,
+  .step span{font-size:12px}
+  .step{padding-left:46px}
+  .step::before{font-size:28px}
+  .final{min-height:560px}
+  .final .content{display:block}
+  .final h2{font-size:clamp(38px,11vw,58px)}
+  .final p{font-size:15px}
+}
+@media screen and (min-width: 761px) and (max-width: 1100px){
+  body{padding:18px}
+  .content{left:54px;right:54px;top:92px;bottom:48px}
+  h2{font-size:40px}
+  .hero-number{font-size:72px}
+  .bar-item{grid-template-columns:160px 1fr 104px}
+  .risk-grid{gap:16px}
+  .risk p{font-size:12px}
+  .table{font-size:12px}
+}
+</style>
+</head>
+<body>
+<main class="deck">
+  <section class="slide cover">
+    <div class="brand"><div class="name">ÁGORA</div><div class="sub">Materiais de Construção</div></div>
+    <div class="cover-title">
+      <div class="eyebrow">Galpão Smart City Q33 L25</div>
+      <h1>Orçamento da obra</h1>
+      <p>Resumo técnico-comercial com valores confirmados, estimativas acumuladas, pendências e próximos passos para fechamento do custo executivo.</p>
+    </div>
+    <div class="date-chip">Atualizado em 25/04/2026</div>
+    <div class="footer-note">Base: orçamento consolidado, documentos financeiros, cotações recebidas e premissas informadas pelo proprietário.</div>
+  </section>
+
+  <section class="slide">
+    <div class="topbar"><div class="mini-brand">ÁGORA<span>Construtora</span></div><div class="slide-num">Resumo executivo</div></div>
+    <div class="content split">
+      <div>
+        <div class="section-kicker">Leitura principal</div>
+        <h2>O orçamento está bom para decisão inicial, mas ainda não é valor fechado de obra.</h2>
+        <p class="lead">Hoje há R$ 93.040,97 confirmados e R$ 28.704,26 em estimativas acumuladas. O total de referência chega a R$ 121.745,23, sem incluir frentes importantes ainda pendentes.</p>
+        <div class="callout-line">Itens estruturais, acessibilidade, porta automática e telhas já têm base de preço. Elétrica, hidráulica, drenagem, SPDA, incêndio, fechamento, pintura e parte da cobertura ainda precisam de projeto ou cotação.</div>
+      </div>
+      <div>
+        <div class="hero-number">R$ 121.745,23</div>
+        <div class="hero-label">Total com estimativas acumuladas</div>
+        <p class="note">Referência parcial para acompanhamento e compras iniciais. O valor definitivo permanece PENDENTE até fechar projetos e preços faltantes.</p>
+        <div class="metric-row">
+          <div class="metric"><strong>R$ 93.040,97</strong><span>confirmado</span></div>
+          <div class="metric"><strong>R$ 28.704,26</strong><span>estimado</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-note">Não substitui validação por engenheiro responsável, ART/RRT ou projetistas habilitados.</div>
+  </section>
+
+  <section class="slide">
+    <div class="topbar"><div class="mini-brand">ÁGORA<span>Construtora</span></div><div class="slide-num">Composição dos valores</div></div>
+    <div class="content">
+      <div class="section-kicker">Onde está o dinheiro já mapeado</div>
+      <h2>Estrutura, acessibilidade e esquadrias concentram o valor confirmado.</h2>
+      <div class="bar-list">
+        <div class="bar-item"><div class="label">Estrutura em concreto armado</div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="bar-value">R$ 34.462,82</div></div>
+        <div class="bar-item"><div class="label">Plataforma elevatória</div><div class="bar-track"><div class="bar-fill" style="width:86.7%"></div></div><div class="bar-value">R$ 29.890,00</div></div>
+        <div class="bar-item"><div class="label">Porta automática</div><div class="bar-track"><div class="bar-fill" style="width:31.5%"></div></div><div class="bar-value">R$ 10.854,13</div></div>
+        <div class="bar-item"><div class="label">Telhas Zincatto 6135</div><div class="bar-track"><div class="bar-fill" style="width:30.3%"></div></div><div class="bar-value">R$ 10.450,02</div></div>
+        <div class="bar-item"><div class="label">Serviços técnicos</div><div class="bar-track"><div class="bar-fill" style="width:15.4%"></div></div><div class="bar-value">R$ 5.320,00</div></div>
+        <div class="bar-item"><div class="label">Perfuração das brocas</div><div class="bar-track"><div class="bar-fill" style="width:6%"></div></div><div class="bar-value">R$ 2.064,00</div></div>
+      </div>
+      <div class="callout-line">O custo de formas aparece como quantidade na estrutura, mas não tem preço unitário. Isso pode subestimar o total estrutural.</div>
+    </div>
+    <div class="footer-note">Valores extraídos de `orcamentos/orcamento_galpao.md`, atualizado em 25/04/2026.</div>
+  </section>
+
+  <section class="slide">
+    <div class="topbar"><div class="mini-brand">ÁGORA<span>Construtora</span></div><div class="slide-num">Estrutura rev5</div></div>
+    <div class="content">
+      <div class="section-kicker">O que o relatório estrutural acrescenta</div>
+      <h2>A revisão 5 consolida as folhas estruturais vigentes e explica o critério das estacas.</h2>
+      <div class="structure-grid">
+        <div>
+          <div class="fact-list">
+            <div class="fact"><strong>FLH01 R01</strong><span>Profundidades das brocas revisadas e resumo geral de aço das estacas.</span></div>
+            <div class="fact"><strong>FLH13 R01</strong><span>Cobertura metálica revisada, com alteração nas cantoneiras.</span></div>
+            <div class="fact"><strong>172,00 m</strong><span>Perfuração total considerada: 20 brocas de 7,00 m e 8 brocas de 4,00 m.</span></div>
+            <div class="fact"><strong>411,00 kg</strong><span>Aço das estacas mantido conforme resumo geral da FLH01 R01.</span></div>
+          </div>
+          <div class="callout-line">As demais folhas estruturais foram mantidas na revisão anterior, conforme o relatório.</div>
+        </div>
+        <div class="formula">
+          <div class="small">Critério executivo das estacas</div>
+          <div class="big">V = π × 0,15² × 172,00 = 12,158 m³</div>
+          <p>O relatório substitui o volume de 10,00 m³ mostrado na folha original pelo volume geométrico recalculado a partir das profundidades revisadas.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-note">Fonte: `relatorio_orcamento_estrutura_036_2026_rev5.docx/pdf`.</div>
+  </section>
+
+  <section class="slide">
+    <div class="topbar"><div class="mini-brand">ÁGORA<span>Construtora</span></div><div class="slide-num">Detalhe estrutural</div></div>
+    <div class="content">
+      <div class="section-kicker">Concreto armado</div>
+      <h2>O total estrutural de R$ 34.462,82 vem de 36,088 m³ de concreto e 2.105,00 kg de aço.</h2>
+      <table class="table">
+        <thead><tr><th>Macroetapa</th><th>Composição</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr><td>Fundação estrutural</td><td>Estacas, blocos, baldrames e pilares da fundação</td><td>R$ 15.869,32</td></tr>
+          <tr><td>Fundação + perfuração</td><td>Fundação estrutural mais perfuração das brocas</td><td>R$ 17.933,32</td></tr>
+          <tr><td>Superestrutura em concreto armado</td><td>Pilares, vigas, reservatório, cobertura em concreto e escada</td><td>R$ 18.593,50</td></tr>
+          <tr><td>Estrutura em concreto armado</td><td>Concreto C30 e aço armado, sem formas precificadas</td><td>R$ 34.462,82</td></tr>
+        </tbody>
+      </table>
+      <div class="callout-line">Observação: o relatório estrutural calcula a perfuração a R$ 10,00/m. O orçamento consolidado atual usa R$ 12,00/m, informado posteriormente, totalizando R$ 2.064,00.</div>
+    </div>
+    <div class="footer-note">A fundação + perfuração acima usa o valor atualizado de perfuração do orçamento principal.</div>
+  </section>
+
+  <section class="slide dark">
+    <div class="topbar"><div class="mini-brand">ÁGORA<span>Construtora</span></div><div class="slide-num">Itens fora do total principal</div></div>
+    <div class="content">
+      <div class="section-kicker">Pontos que o relatório destaca</div>
+      <h2>Alguns elementos estruturais aparecem no relatório, mas seguem fora do custo principal.</h2>
+      <div class="two-col-list">
+        <div class="line-item"><strong>Cobertura metálica: 1.424,75 kg</strong><span>659,60 kg de aço laminado e 765,15 kg de aço dobrado. O relatório apresenta peso informativo, sem custo por kg, fabricação, pintura ou montagem.</span></div>
+        <div class="line-item"><strong>Lajes treliçadas fora do total</strong><span>Continuam fora do total principal por não haver quadro fechado de aço e concreto no mesmo padrão das demais etapas.</span></div>
+        <div class="line-item"><strong>Áreas de laje indicadas</strong><span>Mezanino com 62,66 m² e reservatório com 5,48 m² nas folhas de forma.</span></div>
+        <div class="line-item"><strong>Escada maciça</strong><span>Área maciça associada à escada: 6,60 m², além do concreto e aço já considerados na etapa de escada.</span></div>
+        <div class="line-item"><strong>Formas quantificadas</strong><span>Há 308,14 m² de formas no quadro estrutural, mas sem preço unitário no relatório.</span></div>
+        <div class="line-item"><strong>Validação técnica</strong><span>Critérios de fundação, carga, cobertura e lajes devem ser confirmados pelo engenheiro responsável antes da execução.</span></div>
+      </div>
+    </div>
+    <div class="footer-note">Esses itens explicam por que o valor estrutural ainda não deve ser lido como custo completo de execução.</div>
+  </section>
+
+  <section class="slide">
+    <div class="topbar"><div class="mini-brand">ÁGORA<span>Construtora</span></div><div class="slide-num">Estimativas incorporadas</div></div>
+    <div class="content">
+      <div class="section-kicker">Ainda não fechado, mas já dimensionado</div>
+      <h2>As estimativas atuais somam R$ 28.704,26 e ajudam a preparar as próximas compras.</h2>
+      <table class="table">
+        <thead><tr><th>Frente</th><th>Situação</th><th>Total parcial</th></tr></thead>
+        <tbody>
+          <tr><td>Piso térreo</td><td><span class="status parcial">Parcial</span></td><td>R$ 4.802,00</td></tr>
+          <tr><td>Mezanino e banheiros</td><td><span class="status parcial">Estimado</span></td><td>R$ 17.693,00</td></tr>
+          <tr><td>Jardim vertical e reservatório</td><td><span class="status parcial">Estimado</span></td><td>R$ 4.994,87</td></tr>
+          <tr><td>Aprovações e documentação identificadas</td><td><span class="status parcial">Parcial</span></td><td>R$ 528,39</td></tr>
+          <tr><td>Diferença residual das estimativas acumuladas</td><td><span class="status parcial">Conferir</span></td><td>R$ 686,00</td></tr>
+        </tbody>
+      </table>
+      <div class="callout-line">O concreto do piso, juntas, consumíveis, contrapiso, rejunte, box, assentos, tubulações e conexões gerais ainda não estão fechados.</div>
+    </div>
+    <div class="footer-note">Itens marcados como estimados devem ser confirmados antes de compra ou contratação.</div>
+  </section>
+
+  <section class="slide dark">
+    <div class="topbar"><div class="mini-brand">ÁGORA<span>Construtora</span></div><div class="slide-num">Pendências críticas</div></div>
+    <div class="content">
+      <div class="section-kicker">O que impede fechar o orçamento</div>
+      <h2>As maiores incertezas estão nas disciplinas que ainda não têm projeto ou cotação completa.</h2>
+      <div class="risk-grid">
+        <div class="risk"><h3>Projetos complementares</h3><p>Elétrica, hidráulica, drenagem, SPDA e incêndio não foram identificados. Risco alto para custo, aprovação e execução.</p></div>
+        <div class="risk"><h3>Cobertura completa</h3><p>Há telha escolhida, mas faltam preço da estrutura metálica, fabricação, pintura, montagem, calhas, rufos e fixadores.</p></div>
+        <div class="risk"><h3>Piso industrial</h3><p>Há critérios iniciais de concreto e malha, porém falta preço do concreto FCK 30 MPa e validação da carga de uso.</p></div>
+        <div class="risk"><h3>Formas da estrutura</h3><p>A planilha informa 308,14 m² de formas sem preço. O total estrutural pode estar abaixo do custo real.</p></div>
+        <div class="risk"><h3>Portão e acesso</h3><p>Altura até a viga de 5,25 m e largura de 4,20 m ainda precisam virar altura livre operacional.</p></div>
+        <div class="risk"><h3>Valores divergentes</h3><p>A porta automática aparece com R$ 10.854,13 e R$ 10.310,00. O fornecedor deve confirmar o valor final.</p></div>
+      </div>
+    </div>
+    <div class="footer-note">Classificação técnica baseada em `relatorios/pendencias_orcamento.md`.</div>
+  </section>
+
+  <section class="slide">
+    <div class="topbar"><div class="mini-brand">ÁGORA<span>Construtora</span></div><div class="slide-num">Documentos usados</div></div>
+    <div class="content">
+      <div class="section-kicker">Rastreabilidade</div>
+      <h2>O orçamento foi montado a partir de fontes identificadas, com ressalvas onde há lacunas.</h2>
+      <table class="table">
+        <thead><tr><th>Fonte</th><th>Uso no orçamento</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Planilha estrutural rev5</td><td>Concreto, aço, perfuração e serviços técnicos</td><td><span class="status ok">Confirmado</span></td></tr>
+          <tr><td>Relatório estrutural rev5</td><td>Premissas, revisão das folhas, critério das estacas, macroetapas e itens fora do total</td><td><span class="status ok">Base</span></td></tr>
+          <tr><td>Sondagem de solo</td><td>Referência técnica de fundação</td><td><span class="status parcial">Validar</span></td></tr>
+          <tr><td>Cotação plataforma elevatória</td><td>Acessibilidade, portas de pavimento, frete e mobilização</td><td><span class="status ok">Cotado</span></td></tr>
+          <tr><td>Cotação porta automática</td><td>Porta de enrolar completa</td><td><span class="status parcial">Divergência</span></td></tr>
+          <tr><td>Zincatto orçamento 6135</td><td>Telha sanduíche EPS 30 mm com pintura preta inferior</td><td><span class="status parcial">Parcial</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="footer-note">Documentos conferidos em `documentos/`, base de preços conferida em `dados/base_precos.csv`.</div>
+  </section>
+
+  <section class="slide">
+    <div class="image-band"></div>
+    <div class="topbar"><div class="mini-brand">ÁGORA<span>Construtora</span></div><div class="slide-num">Decisões de compra</div></div>
+    <div class="content split">
+      <div>
+        <div class="section-kicker">Pode avançar com cuidado</div>
+        <h2>Algumas compras já têm direção, mas devem respeitar as confirmações técnicas.</h2>
+        <p class="lead">A compra antecipada só faz sentido para itens com escopo estável, preço confirmado e baixa chance de retrabalho.</p>
+      </div>
+      <div>
+        <table class="table">
+          <thead><tr><th>Item</th><th>Leitura</th></tr></thead>
+          <tbody>
+            <tr><td>Telha Zincatto 6135</td><td>Escolhida como referência mais barata, mas faltam complementos da cobertura.</td></tr>
+            <tr><td>Plataforma elevatória</td><td>Confirmar ART, instalação, impostos e alimentação elétrica.</td></tr>
+            <tr><td>Porta automática</td><td>Confirmar valor final e altura útil antes do fechamento.</td></tr>
+            <tr><td>Telas Q61</td><td>Quantitativo estimado; aguardar paginação final do piso.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="footer-note">Compras estruturais e de instalações devem seguir validação do responsável técnico.</div>
+  </section>
+
+  <section class="slide">
+    <div class="topbar"><div class="mini-brand">ÁGORA<span>Construtora</span></div><div class="slide-num">Próximos passos</div></div>
+    <div class="content">
+      <div class="section-kicker">Roteiro para fechar o custo</div>
+      <h2>O caminho mais curto é tirar as lacunas que mais mudam preço e execução.</h2>
+      <div class="steps">
+        <div class="step"><strong>Confirmar revisões estruturais</strong><span>Validar folhas vigentes, critério das estacas e custo das formas.</span></div>
+        <div class="step"><strong>Cotar cobertura completa</strong><span>Estrutura metálica, pintura, montagem, calhas, rufos, fixadores e frete.</span></div>
+        <div class="step"><strong>Fechar piso térreo</strong><span>Preço do concreto FCK 30 MPa, juntas, consumíveis e paginação das telas.</span></div>
+        <div class="step"><strong>Solicitar complementares</strong><span>Elétrica, hidráulica, drenagem, SPDA e incêndio para orçamento executivo.</span></div>
+        <div class="step"><strong>Confirmar fornecedores</strong><span>Valor final da porta automática e escopo da plataforma elevatória.</span></div>
+        <div class="step"><strong>Montar cronograma físico-financeiro</strong><span>Organizar compras e pagamentos depois das frentes críticas fechadas.</span></div>
+      </div>
+    </div>
+    <div class="footer-note">Prioridades extraídas do relatório de pendências do orçamento.</div>
+  </section>
+
+  <section class="slide final">
+    <div class="topbar"><div class="mini-brand" style="color:#fff">ÁGORA<span>Construtora</span></div><div class="slide-num">Fechamento</div></div>
+    <div class="content">
+      <div class="section-kicker">Mensagem final</div>
+      <h2>Base pronta para conduzir compras iniciais. Ainda não pronta para contrato fechado.</h2>
+      <p>O orçamento atual é uma boa fotografia de avanço: concentra valores reais onde já há fonte, marca estimativas onde faltam definições e protege a obra contra decisões prematuras nas frentes críticas.</p>
+    </div>
+    <div class="footer-note">Responsável técnico deve validar fundação, estrutura, cobertura, instalações e segurança antes de execução.</div>
+  </section>
+</main>
+</body>
+</html>
