@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Salto M14 | Apresentação Ágora</title>
+<style>
+:root{
+  --ardosia:#3A4A5A;
+  --ardosia-escuro:#26333E;
+  --ambar:#D4880A;
+  --ambar-claro:#F0A820;
+  --argamassa:#EEF1F4;
+  --concreto:#8A9BAC;
+  --asfalto:#0E1418;
+  --branco:#FFFFFF;
+  --borda:rgba(58,74,90,.14);
+  --sombra:0 18px 40px rgba(14,20,24,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Georgia,"Times New Roman",serif;
+  color:var(--ardosia);
+  background:
+    radial-gradient(circle at top left, rgba(212,136,10,.10), transparent 32%),
+    linear-gradient(180deg,#F7F8FA 0%, #EEF1F4 100%);
+}
+img,video{max-width:100%;display:block}
+a{color:inherit}
+.page{max-width:1220px;margin:0 auto;padding:22px 18px 64px}
+.brand{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  margin-bottom:18px;
+}
+.brand strong{
+  font-size:42px;
+  font-weight:500;
+  letter-spacing:.04em;
+  color:var(--ardosia);
+}
+.brand span{
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--ambar);
+}
+.hero{
+  display:grid;
+  grid-template-columns:1.06fr .94fr;
+  gap:20px;
+  align-items:stretch;
+}
+.hero-copy,.hero-media,.panel,.gallery-card,.feature-card,.summary-card,.video-card{
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(10px);
+  border:1px solid var(--borda);
+  box-shadow:var(--sombra);
+  border-radius:18px;
+}
+.hero-copy{
+  padding:38px 36px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:540px;
+}
+.eyebrow,.section-tag{
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--ambar);
+}
+h1,h2,h3,p{margin:0}
+h1{
+  font-size:78px;
+  line-height:.92;
+  font-weight:500;
+  margin-top:12px;
+  color:var(--ardosia-escuro);
+}
+.hero-sub{
+  margin-top:18px;
+  max-width:520px;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:18px;
+  line-height:1.6;
+  color:#445566;
+}
+.chip-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:26px;
+}
+.chip{
+  border:1px solid rgba(212,136,10,.26);
+  background:rgba(253,246,232,.90);
+  border-radius:999px;
+  padding:8px 14px;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ardosia);
+}
+.hero-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:30px;
+}
+.stat{
+  border-top:2px solid var(--ambar);
+  padding-top:12px;
+}
+.stat strong{
+  display:block;
+  font-size:38px;
+  line-height:1;
+  color:var(--asfalto);
+}
+.stat span{
+  display:block;
+  margin-top:8px;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--concreto);
+}
+.hero-media{
+  position:relative;
+  overflow:hidden;
+  min-height:540px;
+}
+.hero-media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:48% center;
+}
+.hero-mobile-copy{display:none}
+.hero-mobile-panel{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap:18px;
+  position:absolute;
+  top:18px;
+  right:18px;
+  width:min(46%,260px);
+  min-height:calc(100% - 120px);
+  padding:20px 18px;
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(14,20,24,.86),rgba(14,20,24,.58));
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 18px 36px rgba(14,20,24,.22);
+  color:var(--branco);
+  backdrop-filter:blur(8px);
+}
+.hero-mobile-panel .eyebrow{
+  color:rgba(240,168,32,.92);
+}
+.hero-mobile-panel h1{
+  margin-top:10px;
+  font-size:42px;
+  line-height:.94;
+  color:var(--branco);
+}
+.hero-mobile-panel .hero-sub{
+  max-width:none;
+  color:rgba(255,255,255,.84);
+  font-size:14px;
+  line-height:1.55;
+}
+.hero-mobile-panel .chip-row{
+  margin-top:18px;
+  gap:8px;
+}
+.hero-mobile-panel .chip{
+  background:rgba(255,255,255,.10);
+  border-color:rgba(255,255,255,.14);
+  color:var(--branco);
+}
+.hero-mobile-stats{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+.hero-mobile-stats .stat{
+  border-top:1px solid rgba(240,168,32,.72);
+  padding-top:10px;
+}
+.hero-mobile-stats .stat strong{
+  font-size:26px;
+  color:var(--branco);
+}
+.hero-mobile-stats .stat span{
+  color:rgba(255,255,255,.68);
+}
+.hero-overlay{
+  position:absolute;
+  inset:auto 24px 24px 24px;
+  background:linear-gradient(180deg,rgba(14,20,24,.12),rgba(14,20,24,.72));
+  border-radius:16px;
+  padding:20px 20px 18px;
+  color:var(--branco);
+}
+.hero-overlay strong{
+  display:block;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.78);
+}
+.hero-overlay span{
+  display:block;
+  margin-top:10px;
+  font-size:24px;
+  line-height:1.15;
+}
+.grid-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  margin-top:20px;
+}
+.panel{
+  padding:28px 28px 30px;
+}
+.panel h2{
+  margin-top:12px;
+  font-size:42px;
+  line-height:1;
+  color:var(--ardosia-escuro);
+}
+.panel p{
+  margin-top:14px;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:15px;
+  line-height:1.65;
+  color:#556575;
+}
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+  margin-top:22px;
+}
+.summary-card{
+  padding:18px 16px;
+  border-radius:14px;
+  background:var(--argamassa);
+  box-shadow:none;
+}
+.summary-card strong{
+  display:block;
+  font-size:26px;
+  color:var(--ardosia-escuro);
+}
+.summary-card span{
+  display:block;
+  margin-top:8px;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--concreto);
+}
+.feature-list{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin-top:22px;
+}
+.feature-card{
+  padding:18px 16px;
+  border-radius:14px;
+  background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(247,248,250,.92));
+}
+.feature-card strong{
+  display:block;
+  font-size:20px;
+  line-height:1.15;
+  color:var(--ardosia-escuro);
+}
+.feature-card span{
+  display:block;
+  margin-top:8px;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:13px;
+  line-height:1.5;
+  color:#566575;
+}
+.gallery-wrap{
+  margin-top:20px;
+}
+.gallery-card{
+  overflow:hidden;
+}
+.gallery-top{
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:0;
+  min-height:620px;
+}
+.gallery-stage{
+  position:relative;
+  background:var(--asfalto);
+}
+.gallery-stage img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.gallery-stage button{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:48px;
+  height:48px;
+  border:none;
+  border-radius:50%;
+  background:rgba(14,20,24,.62);
+  color:#fff;
+  font-size:22px;
+  cursor:pointer;
+}
+.gallery-stage .prev{left:18px}
+.gallery-stage .next{right:18px}
+.gallery-info{
+  padding:30px 28px 24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.gallery-info h2{
+  margin-top:12px;
+  font-size:48px;
+  line-height:.98;
+}
+.gallery-info p{
+  margin-top:16px;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:15px;
+  line-height:1.65;
+  color:#566575;
+}
+.gallery-meta{
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px solid var(--borda);
+}
+.gallery-meta strong{
+  display:block;
+  font-size:20px;
+  color:var(--ardosia-escuro);
+}
+.gallery-meta span{
+  display:block;
+  margin-top:8px;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:13px;
+  line-height:1.5;
+  color:#566575;
+}
+.thumbs{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  padding:14px;
+  background:#F9FBFC;
+  border-top:1px solid var(--borda);
+}
+.thumb{
+  position:relative;
+  border:none;
+  background:none;
+  padding:0;
+  cursor:pointer;
+  border-radius:12px;
+  overflow:hidden;
+  aspect-ratio:4/5;
+  box-shadow:inset 0 0 0 2px transparent;
+}
+.thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.thumb.active{
+  box-shadow:inset 0 0 0 2px var(--ambar);
+}
+.video-card{
+  margin-top:20px;
+  padding:22px;
+}
+.video-card h2{
+  font-size:38px;
+  color:var(--ardosia-escuro);
+}
+.video-card p{
+  margin-top:10px;
+  margin-bottom:16px;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:15px;
+  line-height:1.6;
+  color:#566575;
+}
+.video-frame{
+  border-radius:16px;
+  overflow:hidden;
+  background:var(--asfalto);
+}
+.video-frame video{
+  width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
+}
+.footer-note{
+  margin-top:26px;
+  text-align:center;
+  font-family:"Segoe UI",Arial,sans-serif;
+  font-size:11px;
+  color:#6B7987;
+}
+@media (max-width: 980px){
+  .hero,.gallery-top,.grid-2{grid-template-columns:1fr}
+  .hero-copy,.hero-media{min-height:0}
+  h1{font-size:56px}
+  .panel h2,.gallery-info h2{font-size:38px}
+  .feature-list,.summary-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width: 720px){
+  .page{padding:14px 12px 44px}
+  .brand strong{font-size:32px}
+  .hero-copy,.panel,.gallery-info,.video-card{padding:22px 20px}
+  .hero-copy{display:none}
+  .hero-media{
+    min-height:760px;
+    border-radius:22px;
+  }
+  .hero-media img{
+    object-position:38% center;
+  }
+  .hero-mobile-copy{display:block}
+  .hero-mobile-panel{
+    top:16px;
+    right:16px;
+    left:52%;
+    width:auto;
+    min-height:0;
+    padding:16px 14px;
+    gap:14px;
+  }
+  .hero-mobile-panel h1{font-size:34px}
+  .hero-mobile-panel .hero-sub{font-size:13px}
+  .hero-mobile-panel .chip-row{display:none}
+  .hero-mobile-stats .stat strong{font-size:22px}
+  .hero-overlay{
+    inset:auto 16px 16px 16px;
+    padding:16px 16px 14px;
+  }
+  .hero-overlay span{font-size:18px}
+  h1{font-size:44px}
+  .hero-sub,.panel p,.gallery-info p,.video-card p{font-size:14px}
+  .hero-stats,.summary-grid,.feature-list{grid-template-columns:1fr}
+  .stat strong{font-size:32px}
+  .gallery-stage button{
+    width:42px;
+    height:42px;
+    font-size:20px;
+  }
+  .thumbs{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="brand">
+    <strong>ÁGORA</strong>
+    <span>Construtora</span>
+  </div>
+
+  <section class="hero">
+    <article class="hero-copy">
+      <div>
+        <div class="eyebrow">Salto M14</div>
+        <h1>Casa térrea à venda</h1>
+        <p class="hero-sub">Apresentação comercial do imóvel com foco em área externa, jacuzzi aquecida, garagem coberta e acabamento de alto padrão no estilo Ágora.</p>
+        <div class="chip-row">
+          <span class="chip">Jacuzzi aquecida</span>
+          <span class="chip">Área gourmet</span>
+          <span class="chip">Telha sanduíche</span>
+          <span class="chip">Portão automático</span>
+          <span class="chip">Paisagismo</span>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><strong>90,11 m²</strong><span>área construída</span></div>
+        <div class="stat"><strong>175 m²</strong><span>terreno</span></div>
+        <div class="stat"><strong>2 quartos</strong><span>dormitórios</span></div>
+      </div>
+    </article>
+    <aside class="hero-media">
+      <img src="./assets/DJI_20260208201145_0008_D.JPG" alt="Vista aérea noturna do imóvel Salto M14" />
+      <div class="hero-overlay">
+        <strong>Vista aérea</strong>
+        <span>Leitura completa do lote com jacuzzi, jardim iluminado e apoio externo em um único quadro.</span>
+      </div>
+    </aside>
+  </section>
+
+  <section class="grid-2">
+    <article class="panel">
+      <div class="section-tag">Ficha técnica</div>
+      <h2>Dados principais</h2>
+      <p>Casa térrea com sala e cozinha integradas, banheiro social, área gourmet, garagem coberta e área externa com jacuzzi, paisagismo e iluminação decorativa.</p>
+      <div class="summary-grid">
+        <div class="summary-card"><strong>2.000 L</strong><span>caixa d'água</span></div>
+        <div class="summary-card"><strong>3 m</strong><span>pé-direito nos quartos</span></div>
+        <div class="summary-card"><strong>5 pessoas</strong><span>jacuzzi</span></div>
+        <div class="summary-card"><strong>220V</strong><span>chuveiro principal</span></div>
+      </div>
+    </article>
+    <article class="panel">
+      <div class="section-tag">Acabamentos</div>
+      <h2>O que valoriza a obra</h2>
+      <div class="feature-list">
+        <div class="feature-card"><strong>Interno</strong><span>Piso em porcelanato Delta 73x100, pintura interna na cor Crômio e iluminação com perfis de LED.</span></div>
+        <div class="feature-card"><strong>Portas</strong><span>Portas prontas Rohden, com leitura de acabamento mais premium.</span></div>
+        <div class="feature-card"><strong>Cobertura</strong><span>Telha sanduíche em toda a casa, com garagem de fundo amadeirado e estrutura metálica preta aparente.</span></div>
+        <div class="feature-card"><strong>Banheiro</strong><span>Vaso Deca Quadra e chuveiro Lorenzetti Acqua Ultra Storm Preto.</span></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="gallery-wrap">
+    <article class="gallery-card">
+      <div class="gallery-top">
+        <div class="gallery-stage">
+          <img id="gallery-image" src="./assets/salto-m14-area-externa-01.jpeg" alt="Área externa do Salto M14" />
+          <button class="prev" id="gallery-prev" aria-label="Foto anterior">‹</button>
+          <button class="next" id="gallery-next" aria-label="Próxima foto">›</button>
+        </div>
+        <div class="gallery-info">
+          <div>
+            <div class="section-tag">Galeria</div>
+            <h2 id="gallery-title">Área externa com jacuzzi e jardim</h2>
+            <p id="gallery-text">A sequência mostra os principais diferenciais usados na apresentação: circulação ajardinada, iluminação cênica, deck em madeira, garagem coberta e pergolado de eucalipto.</p>
+          </div>
+          <div class="gallery-meta">
+            <strong id="gallery-caption">Vista principal dos fundos</strong>
+            <span id="gallery-meta">Jardim, caminho em placas, iluminação nas paredes e jacuzzi ao fundo.</span>
+          </div>
+        </div>
+      </div>
+      <div class="thumbs" id="gallery-thumbs"></div>
+    </article>
+  </section>
+
+  <section class="grid-2">
+    <article class="panel">
+      <div class="section-tag">Área externa</div>
+      <h2>Jacuzzi, deck, jardim e iluminação</h2>
+      <p>O conjunto dos fundos é um dos pontos mais fortes do imóvel: jacuzzi para 5 pessoas com aquecimento, cromoterapia e hidromassagem, deck em madeira, painel ripado e paisagismo com iluminação decorativa.</p>
+      <div class="feature-list">
+        <div class="feature-card"><strong>Jacuzzi</strong><span>Capacidade para 5 pessoas, aquecimento e jatos de hidromassagem.</span></div>
+        <div class="feature-card"><strong>Deck</strong><span>Acabamento em madeira ao redor da jacuzzi e nos degraus de acesso.</span></div>
+        <div class="feature-card"><strong>Paisagismo</strong><span>Composição vegetal lateral e fundo, reforçando a leitura de área de lazer pronta.</span></div>
+        <div class="feature-card"><strong>Iluminação</strong><span>Arandelas no muro, luz de jardim e beirais com LED valorizando o uso noturno.</span></div>
+      </div>
+    </article>
+    <article class="panel">
+      <div class="section-tag">Gourmet e garagem</div>
+      <h2>Uso completo no dia a dia</h2>
+      <p>A apresentação original destaca também a churrasqueira em alvenaria, toda revestida em porcelanato, com exaustor, além da garagem coberta com telha sanduíche, fundo amadeirado, spots e paisagismo lateral.</p>
+      <div class="feature-list">
+        <div class="feature-card"><strong>Área gourmet</strong><span>Pia, churrasqueira em alvenaria, abertura lateral e exaustor.</span></div>
+        <div class="feature-card"><strong>Pergolado</strong><span>Toras de eucalipto compondo a área social externa.</span></div>
+        <div class="feature-card"><strong>Garagem</strong><span>Estrutura metálica preta aparente, piso revestido e spots de iluminação.</span></div>
+        <div class="feature-card"><strong>Infraestrutura</strong><span>Portão automático, pontos automatizados e caixa d'água de 2.000 litros.</span></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="video-card">
+    <div class="section-tag">Vídeo</div>
+    <h2>Passeio rápido do imóvel</h2>
+    <p>O vídeo foi mantido nesta versão para complementar a percepção espacial da área externa e reforçar o acabamento noturno com iluminação ligada.</p>
+    <div class="video-frame">
+      <video controls preload="metadata">
+        <source src="./assets/salto-m14-tour.mp4" type="video/mp4" />
+      </video>
+    </div>
+  </section>
+
+  <p class="footer-note">Apresentação comercial do imóvel | Ágora Construtora</p>
+</main>
+
+<script>
+const galleryItems = [
+  {
+    src: "./assets/salto-m14-area-externa-01.jpeg",
+    title: "Área externa com jacuzzi e jardim",
+    text: "A leitura mais completa do fundo: caminho em placas, paisagismo lateral, iluminação decorativa e deck da jacuzzi ao final do lote.",
+    caption: "Vista principal dos fundos",
+    meta: "Jardim, caminho em placas e jacuzzi ao fundo."
+  },
+  {
+    src: "./assets/DJI_20260208201145_0008_D.JPG",
+    title: "Vista aérea noturna do lote",
+    text: "A imagem superior organiza bem a leitura do imóvel, mostrando jacuzzi, paisagismo, circulação e apoio externo em uma composição forte para abertura comercial.",
+    caption: "Vista aérea do quintal",
+    meta: "Leitura completa da área de lazer e do paisagismo em foto aérea noturna."
+  },
+  {
+    src: "./assets/salto-m14-garagem-01.jpeg",
+    title: "Garagem coberta com fundo amadeirado",
+    text: "A cobertura da garagem aparece como um diferencial visual importante, com estrutura metálica preta aparente e acabamento amadeirado no forro.",
+    caption: "Garagem coberta",
+    meta: "Iluminação pontual, arandelas e paisagismo lateral."
+  },
+  {
+    src: "./assets/salto-m14-area-externa-02.jpeg",
+    title: "Circulação externa iluminada",
+    text: "A área externa funciona bem para uso noturno e divulgação comercial porque entrega profundidade, contraste e leitura de lazer pronto.",
+    caption: "Caminho de acesso até a jacuzzi",
+    meta: "Placas em concreto, gramado e iluminação de muro."
+  },
+  {
+    src: "./assets/salto-m14-jacuzzi-01.jpeg",
+    title: "Jacuzzi em destaque",
+    text: "Aproximação da jacuzzi com deck em madeira, ripado e iluminação cênica. É um dos principais elementos de venda do imóvel.",
+    caption: "Jacuzzi aquecida",
+    meta: "Deck em madeira, cromoterapia e painel ripado."
+  },
+  {
+    src: "./assets/salto-m14-pergolado-01.jpeg",
+    title: "Jacuzzi e pergolado no mesmo quadro",
+    text: "A composição final integra lazer, jardim e apoio externo, aproximando a área gourmet da experiência de descanso e uso social.",
+    caption: "Vista ampliada dos fundos",
+    meta: "Pergolado de eucalipto e deck da jacuzzi no mesmo eixo visual."
+  }
+];
+
+let currentIndex = 0;
+const imageEl = document.getElementById("gallery-image");
+const titleEl = document.getElementById("gallery-title");
+const textEl = document.getElementById("gallery-text");
+const captionEl = document.getElementById("gallery-caption");
+const metaEl = document.getElementById("gallery-meta");
+const thumbsEl = document.getElementById("gallery-thumbs");
+
+function renderThumbs() {
+  thumbsEl.innerHTML = galleryItems.map((item, index) => `
+    <button class="thumb ${index === currentIndex ? "active" : ""}" data-index="${index}" aria-label="Abrir foto ${index + 1}">
+      <img src="${item.src}" alt="${item.caption}">
+    </button>
+  `).join("");
+  document.querySelectorAll(".thumb").forEach((thumb) => {
+    thumb.addEventListener("click", () => showGalleryItem(Number(thumb.dataset.index)));
+  });
+}
+
+function showGalleryItem(index) {
+  currentIndex = (index + galleryItems.length) % galleryItems.length;
+  const item = galleryItems[currentIndex];
+  imageEl.src = item.src;
+  imageEl.alt = item.caption;
+  titleEl.textContent = item.title;
+  textEl.textContent = item.text;
+  captionEl.textContent = item.caption;
+  metaEl.textContent = item.meta;
+  renderThumbs();
+}
+
+document.getElementById("gallery-prev").addEventListener("click", () => showGalleryItem(currentIndex - 1));
+document.getElementById("gallery-next").addEventListener("click", () => showGalleryItem(currentIndex + 1));
+
+let touchStartX = 0;
+imageEl.addEventListener("touchstart", (event) => {
+  touchStartX = event.changedTouches[0].clientX;
+}, { passive: true });
+imageEl.addEventListener("touchend", (event) => {
+  const diff = event.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(diff) < 40) return;
+  showGalleryItem(diff < 0 ? currentIndex + 1 : currentIndex - 1);
+}, { passive: true });
+
+showGalleryItem(0);
+</script>
+</body>
+</html>
