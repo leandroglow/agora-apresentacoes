@@ -115,6 +115,7 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
 .closing p{max-width:680px;margin:auto;color:#565a55;font-size:1rem;line-height:1.75}
 .download-link{display:inline-flex;align-items:center;justify-content:center;margin-top:28px;padding:15px 20px;border:1px solid #8d7440;background:#171a17;color:var(--paper);font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transition:.25s}
 .download-link:hover{background:#8d7440;transform:translateY(-2px)}
+.generate-pdf[aria-busy="true"]{cursor:wait;opacity:.65;pointer-events:none}
 .disclaimer{margin-top:38px!important;padding-top:22px;border-top:1px solid #171a1720;font-size:.78rem!important;color:#777b76!important}
 .lightbox{position:fixed;z-index:220;inset:0;display:none;place-items:center;padding:64px 24px;background:#050706f2;backdrop-filter:blur(18px)}
 .lightbox.open{display:grid}
@@ -157,7 +158,7 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
 <header>
   <div class="shell">
     <a class="brand" href="#inicio"><span class="brand-mark">A</span><span class="brand-copy"><b>ÁGORA</b><small>CONSTRUTORA</small></span></a>
-    <nav class="header-links" aria-label="Navegação da página"><a href="#planta">Planta</a><a href="#acabamentos">Acabamentos</a><a href="#investimento">Investimento</a><a href="apresentacao-casa-50m2.pdf" download>PDF A4</a></nav>
+    <nav class="header-links" aria-label="Navegação da página"><a href="#planta">Planta</a><a href="#acabamentos">Acabamentos</a><a href="#investimento">Investimento</a><a class="generate-pdf" href="apresentacao-casa-50m2.pdf">Gerar PDF</a></nav>
   </div>
 </header>
 <main>
@@ -173,7 +174,7 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
         <div><b>02</b><span>quartos</span></div>
         <div><b>01</b><span>banheiro</span></div>
       </div>
-      <div class="hero-price"><small>Investimento estimado</small><strong>R$ 185.000,00</strong><span class="proposal-inline">Proposta AG-50-20260905-1847 · emitida em 05/09/2026 às 18:47 · válida até 10/09/2026 às 18:47</span></div>
+      <div class="hero-price"><small>Investimento estimado</small><strong>R$ 185.000,00</strong><span class="proposal-inline">O PDF recebe código, data, hora e validade no momento do download.</span></div>
     </div>
     <div class="plan-wrap" id="planta">
       <span class="plan-note">Clique para ampliar</span>
@@ -226,9 +227,9 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
         <small>Investimento estimado</small>
         <strong>R$ 185.000,00</strong>
         <div class="proposal-meta" aria-label="Identificação e validade da proposta">
-          <div><span>Código</span><b>AG-50-20260905-1847</b></div>
-          <div><span>Emissão</span><b>05/09/2026 às 18:47</b></div>
-          <div><span>Validade</span><b>5 dias · até 10/09/2026 às 18:47</b></div>
+          <div><span>Código</span><b>Gerado ao clicar</b></div>
+          <div><span>Emissão</span><b>Data e hora do clique</b></div>
+          <div><span>Validade</span><b>5 dias após a emissão</b></div>
         </div>
         <p>Estimativa preliminar sujeita à análise do terreno, disponibilidade de materiais, detalhamento técnico e data de contratação.</p>
       </aside>
@@ -240,7 +241,7 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
     <p class="eyebrow">Ágora Construtora</p>
     <h2>50 m² para morar bem.<em>Do projeto à construção.</em></h2>
     <p>Uma solução compacta, com ambientes bem definidos e um memorial de acabamento objetivo para facilitar a decisão.</p>
-    <a class="download-link" href="apresentacao-casa-50m2.pdf" download>Baixar apresentação em PDF A4</a>
+    <a class="download-link generate-pdf" href="apresentacao-casa-50m2.pdf">Gerar proposta em PDF A4</a>
     <p class="disclaimer">Estudo preliminar. A planta, o memorial, os valores e as condições estão sujeitos à revisão técnica, adequação ao terreno e formalização da proposta.</p>
   </div>
 </section>
@@ -249,6 +250,7 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
   <button type="button">Fechar ×</button>
   <img alt="Planta ampliada da casa de 50 metros quadrados">
 </div>
+<script src="assets/pdf-lib.min.js"></script>
 <script>
 const bar=document.querySelector(".progress span");
 addEventListener("scroll",()=>{const m=document.documentElement.scrollHeight-innerHeight;bar.style.width=(m?scrollY/m*100:0)+"%"});
@@ -258,6 +260,59 @@ function closeBox(){box.classList.remove("open");pic.src="";document.body.style.
 box.querySelector("button").addEventListener("click",closeBox);
 box.addEventListener("click",e=>{if(e.target===box)closeBox()});
 addEventListener("keydown",e=>{if(e.key==="Escape")closeBox()});
+
+function proposalParts(date){
+  const formatter=new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Sao_Paulo",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"});
+  return Object.fromEntries(formatter.formatToParts(date).filter(part=>part.type!=="literal").map(part=>[part.type,part.value]));
+}
+
+function proposalStamp(){
+  const now=new Date(),expires=new Date(now.getTime()+5*24*60*60*1000),issued=proposalParts(now),valid=proposalParts(expires);
+  const date=parts=>`${parts.day}/${parts.month}/${parts.year}`;
+  const time=parts=>`${parts.hour}:${parts.minute}:${parts.second}`;
+  return {
+    code:`AG-50-${issued.year}${issued.month}${issued.day}-${issued.hour}${issued.minute}${issued.second}`,
+    issued:`${date(issued)} às ${time(issued)}`,
+    valid:`${date(valid)} às ${time(valid)}`
+  };
+}
+
+async function generateProposal(event){
+  event.preventDefault();
+  const buttons=[...document.querySelectorAll(".generate-pdf")],labels=buttons.map(button=>button.textContent),stamp=proposalStamp();
+  buttons.forEach(button=>{button.setAttribute("aria-busy","true");button.textContent="Gerando PDF..."});
+  try{
+    if(!window.PDFLib)throw new Error("Gerador indisponível");
+    const response=await fetch("apresentacao-casa-50m2.pdf",{cache:"no-store"});
+    if(!response.ok)throw new Error("Modelo de PDF indisponível");
+    const {PDFDocument,StandardFonts,rgb}=PDFLib;
+    const pdf=await PDFDocument.load(await response.arrayBuffer());
+    const regular=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold);
+    const [first,second]=pdf.getPages(),paper=rgb(241/255,238/255,230/255),ink=rgb(9/255,11/255,10/255),gold=rgb(128/255,108/255,63/255),gray=rgb(90/255,97/255,91/255),muted=rgb(185/255,183/255,175/255);
+
+    first.drawRectangle({x:32,y:40,width:355,height:43,color:paper});
+    first.drawText(`PROPOSTA ${stamp.code}`,{x:36,y:68,size:6.4,font:bold,color:gold});
+    first.drawText(`Emitida em ${stamp.issued} | validade de 5 dias, até ${stamp.valid}`,{x:36,y:53,size:7.2,font:regular,color:gray});
+
+    second.drawRectangle({x:375,y:770,width:190,height:58,color:ink});
+    second.drawText(`PROPOSTA ${stamp.code}`,{x:390,y:813,size:6,font:bold,color:muted});
+    second.drawText(`EMISSÃO ${stamp.issued}`,{x:390,y:798,size:5.5,font:regular,color:muted});
+    second.drawText(`VALIDADE ATÉ ${stamp.valid}`,{x:390,y:783,size:5.5,font:regular,color:muted});
+
+    pdf.setTitle(`Proposta ${stamp.code} | Casa 50 m² | Ágora Construtora`);
+    pdf.setSubject(`Emitida em ${stamp.issued}; válida até ${stamp.valid}`);
+    pdf.setModificationDate(new Date());
+    const bytes=await pdf.save(),blob=new Blob([bytes],{type:"application/pdf"}),url=URL.createObjectURL(blob),link=document.createElement("a");
+    link.href=url;link.download=`proposta-agora-casa-50m2-${stamp.code}.pdf`;document.body.appendChild(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+  }catch(error){
+    console.error(error);
+    alert("Não foi possível gerar a proposta agora. Recarregue a página e tente novamente.");
+  }finally{
+    buttons.forEach((button,index)=>{button.removeAttribute("aria-busy");button.textContent=labels[index]});
+  }
+}
+document.querySelectorAll(".generate-pdf").forEach(button=>button.addEventListener("click",generateProposal));
 </script>
 </body>
 </html>
