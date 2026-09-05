@@ -85,6 +85,14 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
 .spec-card i{display:grid;width:34px;height:34px;place-items:center;border:1px solid #dfca8f70;color:var(--gold-2);font:italic 1.05rem var(--serif)}
 .spec-card h3{margin:27px 0 12px;font-size:1.65rem;line-height:1}
 .spec-card p{margin:0;color:#f1eee69d;font-size:.9rem;line-height:1.65}
+.optional-card{position:relative;display:grid;grid-template-columns:1fr auto;gap:42px;align-items:center;margin-top:28px;padding:34px 36px;border:1px solid #dfca8f78;background:linear-gradient(135deg,#c4ad7118,#080a096e)}
+.optional-card:before{content:"OPCIONAL";position:absolute;left:36px;top:-12px;padding:5px 10px;background:var(--gold);color:var(--ink);font-size:.72rem;font-weight:800;letter-spacing:.14em}
+.optional-card h3{margin:5px 0 10px;font:400 2.2rem/1 var(--serif)}
+.optional-card p{max-width:720px;margin:0;color:#f1eee6a5;font-size:.95rem;line-height:1.65}
+.optional-price{min-width:245px;padding-left:35px;border-left:1px solid var(--line);text-align:right}
+.optional-price small{display:block;color:#f1eee689;font-size:.72rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+.optional-price strong{display:block;margin-top:8px;color:var(--gold-2);font:400 2.5rem/1 var(--serif)}
+.optional-price b{display:block;margin-top:8px;color:#f1eee683;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
 .investment{padding:110px 0;background:radial-gradient(circle at 85% 20%,#c4ad712d,transparent 34%),var(--ink)}
 .investment-card{display:grid;grid-template-columns:1fr .72fr;border-top:3px solid var(--gold);background:#0c0f0de8;box-shadow:0 28px 90px #0005}
 .investment-copy{padding:55px}
@@ -100,6 +108,8 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
 .closing h2{max-width:850px;margin:25px auto;font-size:clamp(50px,6vw,88px);line-height:.94}
 .closing h2 em{color:#8d7440}
 .closing p{max-width:680px;margin:auto;color:#565a55;font-size:1rem;line-height:1.75}
+.download-link{display:inline-flex;align-items:center;justify-content:center;margin-top:28px;padding:15px 20px;border:1px solid #8d7440;background:#171a17;color:var(--paper);font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transition:.25s}
+.download-link:hover{background:#8d7440;transform:translateY(-2px)}
 .disclaimer{margin-top:38px!important;padding-top:22px;border-top:1px solid #171a1720;font-size:.78rem!important;color:#777b76!important}
 .lightbox{position:fixed;z-index:220;inset:0;display:none;place-items:center;padding:64px 24px;background:#050706f2;backdrop-filter:blur(18px)}
 .lightbox.open{display:grid}
@@ -111,6 +121,8 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
   .plan-sheet img{height:455px}
   .overview-grid,.section-head{grid-template-columns:1fr;gap:45px}
   .spec-grid{grid-template-columns:1fr 1fr}
+  .optional-card{grid-template-columns:1fr}
+  .optional-price{padding:22px 0 0;border-left:0;border-top:1px solid var(--line);text-align:left}
   .investment-card{grid-template-columns:1fr}
 }
 @media(max-width:690px){
@@ -140,7 +152,7 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
 <header>
   <div class="shell">
     <a class="brand" href="#inicio"><span class="brand-mark">A</span><span class="brand-copy"><b>ÁGORA</b><small>CONSTRUTORA</small></span></a>
-    <nav class="header-links" aria-label="Navegação da página"><a href="#planta">Planta</a><a href="#acabamentos">Acabamentos</a><a href="#investimento">Investimento</a></nav>
+    <nav class="header-links" aria-label="Navegação da página"><a href="#planta">Planta</a><a href="#acabamentos">Acabamentos</a><a href="#investimento">Investimento</a><a href="apresentacao-casa-50m2.pdf" download>PDF A4</a></nav>
   </div>
 </header>
 <main>
@@ -191,6 +203,10 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
       <article class="spec-card"><i>07</i><h3>Portas semiocas</h3><p>Portas internas semiocas, adequadas ao uso residencial e ao padrão desta configuração.</p></article>
       <article class="spec-card"><i>08</i><h3>Torneiras metálicas</h3><p>Torneiras com corpo metálico em todos os pontos previstos no projeto.</p></article>
     </div>
+    <aside class="optional-card">
+      <div><h3>Muro e portão de correr</h3><p>Execução de muro e portão de correr com 3 m, contratados como complemento opcional à casa.</p></div>
+      <div class="optional-price"><small>Valor adicional</small><strong>R$ 38.000,00</strong><b>Não incluído no valor-base</b></div>
+    </aside>
   </div>
 </section>
 <section class="investment" id="investimento">
@@ -214,6 +230,7 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
     <p class="eyebrow">Ágora Construtora</p>
     <h2>50 m² para morar bem.<em>Do projeto à construção.</em></h2>
     <p>Uma solução compacta, com ambientes bem definidos e um memorial de acabamento objetivo para facilitar a decisão.</p>
+    <a class="download-link" href="apresentacao-casa-50m2.pdf" download>Baixar apresentação em PDF A4</a>
     <p class="disclaimer">Estudo preliminar. A planta, o memorial, os valores e as condições estão sujeitos à revisão técnica, adequação ao terreno e formalização da proposta.</p>
   </div>
 </section>
