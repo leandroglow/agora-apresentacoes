@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Casa térrea de 50 m² da Ágora Construtora, com dois quartos, um banheiro e memorial de acabamentos.">
+<title>Casa 50 m² | Ágora Construtora</title>
+<style>
+:root{
+  --ink:#090b0a;
+  --ink-2:#111411;
+  --paper:#f1eee6;
+  --muted:#b9b7af;
+  --gold:#c4ad71;
+  --gold-2:#dfca8f;
+  --sage:#879681;
+  --line:rgba(241,238,230,.16);
+  --serif:"Iowan Old Style",Baskerville,"Times New Roman",serif;
+  --sans:"Avenir Next","Segoe UI",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--ink)}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+button,a{font:inherit}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--gold);color:var(--ink)}
+.shell{width:min(1240px,calc(100% - 48px));margin:auto}
+.progress{position:fixed;z-index:120;inset:0 0 auto;height:3px;background:#ffffff12}
+.progress span{display:block;width:0;height:100%;background:var(--gold-2);box-shadow:0 0 18px #dfca8f88}
+header{position:fixed;z-index:100;inset:3px 0 auto;height:78px;background:linear-gradient(#090b0af4,transparent);pointer-events:none}
+header .shell{height:100%;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px;pointer-events:auto}
+.brand-mark{width:38px;height:38px;display:grid;place-items:center;border:1px solid #dfca8f99;border-radius:50%;color:var(--gold-2);font:italic 23px var(--serif)}
+.brand-copy{display:flex;flex-direction:column;line-height:1}
+.brand-copy b{font:500 19px var(--serif);letter-spacing:.22em}
+.brand-copy small{margin-top:6px;color:var(--muted);font-size:.75rem;letter-spacing:.25em}
+.header-links{display:flex;gap:7px;pointer-events:auto}
+.header-links a{padding:10px 12px;border:1px solid transparent;color:#f1eee6a8;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;transition:.25s}
+.header-links a:hover{border-color:var(--gold);color:var(--gold-2)}
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;background:radial-gradient(circle at 16% 24%,#c4ad7127,transparent 26%),linear-gradient(135deg,#101411,#070908 65%)}
+.hero:before{content:"";position:absolute;inset:0;opacity:.14;background-image:linear-gradient(#ffffff1a 1px,transparent 1px),linear-gradient(90deg,#ffffff1a 1px,transparent 1px);background-size:82px 82px;mask-image:linear-gradient(90deg,#000,transparent 80%)}
+.hero-orbit,.hero-orbit:before{position:absolute;border:1px solid #dfca8f22;border-radius:50%}
+.hero-orbit{width:650px;height:650px;left:-280px;bottom:-330px}
+.hero-orbit:before{content:"";inset:70px;border-style:dashed}
+.hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,.72fr) minmax(500px,1.28fr);gap:58px;align-items:center;padding:130px 0 70px}
+.eyebrow{display:flex;align-items:center;gap:12px;margin:0;color:var(--gold-2);font-size:.78rem;font-weight:650;letter-spacing:.19em;text-transform:uppercase}
+.eyebrow:before{content:"";width:35px;height:1px;background:currentColor}
+h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:-.045em}
+h1{margin:27px 0 23px;font-size:clamp(66px,7.7vw,116px);line-height:.82}
+h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
+.hero-lead{max-width:560px;margin:0;color:#f1eee6b2;font-size:1.1rem;line-height:1.7}
+.hero-facts{display:grid;grid-template-columns:repeat(3,1fr);margin-top:42px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.hero-facts div{padding:20px 15px 20px 0;border-right:1px solid var(--line)}
+.hero-facts div+div{padding-left:15px}
+.hero-facts div:last-child{border-right:0}
+.hero-facts b{display:block;font:400 1.75rem var(--serif)}
+.hero-facts span{display:block;margin-top:5px;color:#f1eee684;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+.hero-price{margin-top:30px}
+.hero-price small{display:block;color:#f1eee681;font-size:.75rem;letter-spacing:.13em;text-transform:uppercase}
+.hero-price strong{display:block;margin-top:7px;color:var(--gold-2);font:400 clamp(43px,4.6vw,68px)/1 var(--serif);letter-spacing:-.04em}
+.plan-wrap{position:relative}
+.plan-sheet{position:relative;width:100%;min-height:550px;padding:24px 24px 62px;border:0;background:#e9e7df;box-shadow:0 38px 110px #0008;transform:rotate(-.65deg);cursor:zoom-in;transition:.35s}
+.plan-sheet:hover{transform:rotate(0) translateY(-5px)}
+.plan-sheet img{width:100%;height:500px;object-fit:contain}
+.plan-sheet:after{content:"PLANTA HUMANIZADA · CASA 50 M²";position:absolute;left:24px;right:24px;bottom:20px;padding-top:13px;border-top:1px solid #11161135;color:#454b45;font-size:.75rem;font-weight:650;letter-spacing:.12em;text-align:left}
+.plan-note{position:absolute;right:-14px;top:-18px;padding:13px 16px;background:var(--gold);color:var(--ink);font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transform:rotate(2deg);box-shadow:0 12px 35px #0005}
+.overview{padding:112px 0;background:var(--paper);color:#171a17}
+.overview-grid{display:grid;grid-template-columns:.76fr 1.24fr;gap:90px;align-items:start}
+.overview .eyebrow{color:#806c3f}
+.overview h2{margin:23px 0 0;font-size:clamp(50px,5.3vw,80px);line-height:.95}
+.overview h2 em{color:#8d7440}
+.overview-copy{display:grid;grid-template-columns:1fr 1fr;border-top:2px solid #8d7440}
+.overview-copy div{padding:27px 26px;border-right:1px solid #171a1720;border-bottom:1px solid #171a1720}
+.overview-copy div:nth-child(even){border-right:0}
+.overview-copy span{display:block;color:#806c3f;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.overview-copy b{display:block;margin-top:10px;font:400 1.5rem var(--serif)}
+.specs{position:relative;padding:120px 0;background:var(--ink-2);overflow:hidden}
+.specs:before{content:"50";position:absolute;right:-.03em;top:-.24em;color:#ffffff07;font:400 clamp(300px,38vw,580px)/1 var(--serif)}
+.section-head{position:relative;display:grid;grid-template-columns:.75fr 1.25fr;gap:90px;align-items:end;margin-bottom:50px}
+.section-head h2{margin:22px 0 0;font-size:clamp(52px,5.8vw,86px);line-height:.92}
+.section-head p{margin:0;color:#f1eee6a5;font-size:1.05rem;line-height:1.75}
+.spec-grid{position:relative;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.spec-card{min-height:220px;padding:27px 24px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:#080a0966}
+.spec-card i{display:grid;width:34px;height:34px;place-items:center;border:1px solid #dfca8f70;color:var(--gold-2);font:italic 1.05rem var(--serif)}
+.spec-card h3{margin:27px 0 12px;font-size:1.65rem;line-height:1}
+.spec-card p{margin:0;color:#f1eee69d;font-size:.9rem;line-height:1.65}
+.investment{padding:110px 0;background:radial-gradient(circle at 85% 20%,#c4ad712d,transparent 34%),var(--ink)}
+.investment-card{display:grid;grid-template-columns:1fr .72fr;border-top:3px solid var(--gold);background:#0c0f0de8;box-shadow:0 28px 90px #0005}
+.investment-copy{padding:55px}
+.investment-copy h2{margin:20px 0;font-size:clamp(50px,5.4vw,78px);line-height:.94}
+.investment-copy p{max-width:650px;margin:0;color:#f1eee6a8;font-size:1rem;line-height:1.75}
+.price-panel{display:flex;flex-direction:column;justify-content:center;padding:48px;background:var(--gold);color:var(--ink)}
+.price-panel small{font-size:.78rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+.price-panel strong{display:block;margin-top:14px;font:400 clamp(47px,5vw,72px)/.9 var(--serif);letter-spacing:-.045em}
+.price-panel p{margin:20px 0 0;padding-top:20px;border-top:1px solid #090b0a45;font-size:.82rem;line-height:1.6}
+.closing{padding:100px 0;background:var(--paper);color:#171a17;text-align:center}
+.closing .eyebrow{justify-content:center;color:#806c3f}
+.closing .eyebrow:after{content:"";width:35px;height:1px;background:currentColor}
+.closing h2{max-width:850px;margin:25px auto;font-size:clamp(50px,6vw,88px);line-height:.94}
+.closing h2 em{color:#8d7440}
+.closing p{max-width:680px;margin:auto;color:#565a55;font-size:1rem;line-height:1.75}
+.disclaimer{margin-top:38px!important;padding-top:22px;border-top:1px solid #171a1720;font-size:.78rem!important;color:#777b76!important}
+.lightbox{position:fixed;z-index:220;inset:0;display:none;place-items:center;padding:64px 24px;background:#050706f2;backdrop-filter:blur(18px)}
+.lightbox.open{display:grid}
+.lightbox img{max-width:min(1280px,95vw);max-height:84vh;object-fit:contain;background:#fff;box-shadow:0 30px 100px #000c}
+.lightbox button{position:absolute;right:26px;top:22px;padding:11px 15px;border:1px solid #ffffff38;background:#090b0a;color:var(--paper);cursor:pointer;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase}
+@media(max-width:1000px){
+  .hero-grid{grid-template-columns:1fr;padding-top:135px}
+  .plan-sheet{min-height:510px}
+  .plan-sheet img{height:455px}
+  .overview-grid,.section-head{grid-template-columns:1fr;gap:45px}
+  .spec-grid{grid-template-columns:1fr 1fr}
+  .investment-card{grid-template-columns:1fr}
+}
+@media(max-width:690px){
+  .shell{width:min(100% - 28px,1240px)}
+  header{height:68px}
+  .header-links{display:none}
+  .hero-grid{padding:110px 0 60px;gap:42px}
+  h1{font-size:59px}
+  .hero-facts{grid-template-columns:1fr}
+  .hero-facts div,.hero-facts div+div{padding:15px 0;border-right:0;border-bottom:1px solid var(--line)}
+  .hero-facts div:last-child{border-bottom:0}
+  .plan-sheet{min-height:390px;padding:13px 13px 54px}
+  .plan-sheet img{height:335px}
+  .plan-sheet:after{left:13px;right:13px;font-size:.67rem}
+  .plan-note{right:5px}
+  .overview,.specs,.investment,.closing{padding:78px 0}
+  .overview-copy{grid-template-columns:1fr}
+  .overview-copy div{border-right:0}
+  .spec-grid{grid-template-columns:1fr}
+  .spec-card{min-height:auto}
+  .investment-copy,.price-panel{padding:34px 25px}
+}
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header>
+  <div class="shell">
+    <a class="brand" href="#inicio"><span class="brand-mark">A</span><span class="brand-copy"><b>ÁGORA</b><small>CONSTRUTORA</small></span></a>
+    <nav class="header-links" aria-label="Navegação da página"><a href="#planta">Planta</a><a href="#acabamentos">Acabamentos</a><a href="#investimento">Investimento</a></nav>
+  </div>
+</header>
+<main>
+<section class="hero" id="inicio">
+  <div class="hero-orbit" aria-hidden="true"></div>
+  <div class="shell hero-grid">
+    <div>
+      <p class="eyebrow">Residência térrea compacta</p>
+      <h1>Casa de<em>50 m².</em></h1>
+      <p class="hero-lead">Uma planta funcional com dois quartos, um banheiro e ambientes sociais integrados, pensada para aproveitar bem o terreno e simplificar a rotina.</p>
+      <div class="hero-facts">
+        <div><b>50 m²</b><span>área construída</span></div>
+        <div><b>02</b><span>quartos</span></div>
+        <div><b>01</b><span>banheiro</span></div>
+      </div>
+      <div class="hero-price"><small>Investimento estimado</small><strong>R$ 185.000,00</strong></div>
+    </div>
+    <div class="plan-wrap" id="planta">
+      <span class="plan-note">Clique para ampliar</span>
+      <button class="plan-sheet open-plan" data-image="assets/planta-50m2-colorida.png" aria-label="Ampliar planta humanizada da casa de 50 metros quadrados"><img src="assets/planta-50m2-colorida.png" alt="Planta humanizada de casa térrea com 50 metros quadrados, dois quartos e um banheiro"></button>
+    </div>
+  </div>
+</section>
+<section class="overview">
+  <div class="shell overview-grid">
+    <div><p class="eyebrow">Distribuição objetiva</p><h2>Compacta por fora.<em>Bem resolvida por dentro.</em></h2></div>
+    <div class="overview-copy">
+      <div><span>Área íntima</span><b>2 quartos e 1 banheiro</b></div>
+      <div><span>Área social</span><b>Sala e cozinha integradas</b></div>
+      <div><span>Cozinha</span><b>Bancada com cuba gourmet</b></div>
+      <div><span>Implantação</span><b>Calçada em todo o perímetro</b></div>
+    </div>
+  </div>
+</section>
+<section class="specs" id="acabamentos">
+  <div class="shell">
+    <div class="section-head">
+      <div><p class="eyebrow">Memorial de acabamento</p><h2>O que está previsto<em>nesta configuração.</em></h2></div>
+      <p>Uma seleção essencial de acabamentos e componentes para entregar uma casa funcional, prática de manter e pronta para receber a personalidade dos moradores.</p>
+    </div>
+    <div class="spec-grid">
+      <article class="spec-card"><i>01</i><h3>Pisos 60 × 60</h3><p>Revestimento em formato 60 × 60 cm, com acabamento polido ou acetinado conforme o ambiente.</p></article>
+      <article class="spec-card"><i>02</i><h3>Pintura básica</h3><p>Pintura interna e externa em padrão básico, com cores definidas na proposta final.</p></article>
+      <article class="spec-card"><i>03</i><h3>Box revestido</h3><p>Área do box do banheiro com revestimento próprio para a região molhada.</p></article>
+      <article class="spec-card"><i>04</i><h3>Cuba gourmet</h3><p>Cozinha equipada com cuba gourmet, integrada à bancada prevista para o ambiente.</p></article>
+      <article class="spec-card"><i>05</i><h3>Calçada completa</h3><p>Calçada executada ao redor de toda a casa, protegendo e facilitando a circulação externa.</p></article>
+      <article class="spec-card"><i>06</i><h3>Telha de fibrocimento</h3><p>Cobertura executada com telhas de fibrocimento conforme dimensionamento do projeto.</p></article>
+      <article class="spec-card"><i>07</i><h3>Portas semiocas</h3><p>Portas internas semiocas, adequadas ao uso residencial e ao padrão desta configuração.</p></article>
+      <article class="spec-card"><i>08</i><h3>Torneiras metálicas</h3><p>Torneiras com corpo metálico em todos os pontos previstos no projeto.</p></article>
+    </div>
+  </div>
+</section>
+<section class="investment" id="investimento">
+  <div class="shell">
+    <div class="investment-card">
+      <div class="investment-copy">
+        <p class="eyebrow">Planejamento da obra</p>
+        <h2>Uma casa essencial.<em>Com escolhas claras.</em></h2>
+        <p>O valor reúne a configuração apresentada e funciona como ponto de partida para a proposta. Terreno, fundações, condições locais, escolhas finais de acabamento e eventuais adequações técnicas serão confirmados antes da contratação.</p>
+      </div>
+      <aside class="price-panel">
+        <small>Investimento estimado</small>
+        <strong>R$ 185.000,00</strong>
+        <p>Estimativa preliminar sujeita à análise do terreno, disponibilidade de materiais, detalhamento técnico e data de contratação.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+<section class="closing">
+  <div class="shell">
+    <p class="eyebrow">Ágora Construtora</p>
+    <h2>50 m² para morar bem.<em>Do projeto à construção.</em></h2>
+    <p>Uma solução compacta, com ambientes bem definidos e um memorial de acabamento objetivo para facilitar a decisão.</p>
+    <p class="disclaimer">Estudo preliminar. A planta, o memorial, os valores e as condições estão sujeitos à revisão técnica, adequação ao terreno e formalização da proposta.</p>
+  </div>
+</section>
+</main>
+<div class="lightbox" role="dialog" aria-modal="true" aria-label="Planta ampliada">
+  <button type="button">Fechar ×</button>
+  <img alt="Planta ampliada da casa de 50 metros quadrados">
+</div>
+<script>
+const bar=document.querySelector(".progress span");
+addEventListener("scroll",()=>{const m=document.documentElement.scrollHeight-innerHeight;bar.style.width=(m?scrollY/m*100:0)+"%"});
+const box=document.querySelector(".lightbox"),pic=box.querySelector("img"),open=document.querySelector(".open-plan");
+open.addEventListener("click",()=>{pic.src=open.dataset.image;box.classList.add("open");document.body.style.overflow="hidden"});
+function closeBox(){box.classList.remove("open");pic.src="";document.body.style.overflow=""}
+box.querySelector("button").addEventListener("click",closeBox);
+box.addEventListener("click",e=>{if(e.target===box)closeBox()});
+addEventListener("keydown",e=>{if(e.key==="Escape")closeBox()});
+</script>
+</body>
+</html>
