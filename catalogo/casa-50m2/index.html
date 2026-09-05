@@ -101,6 +101,11 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
 .price-panel{display:flex;flex-direction:column;justify-content:center;padding:48px;background:var(--gold);color:var(--ink)}
 .price-panel small{font-size:.78rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
 .price-panel strong{display:block;margin-top:14px;font:400 clamp(47px,5vw,72px)/.9 var(--serif);letter-spacing:-.045em}
+.proposal-inline{display:block;margin-top:14px;color:#f1eee69a;font-size:.76rem;line-height:1.55;letter-spacing:.035em}
+.proposal-meta{display:grid;gap:9px;margin-top:23px;padding-top:19px;border-top:1px solid #090b0a45}
+.proposal-meta div{display:flex;justify-content:space-between;gap:18px;align-items:baseline}
+.proposal-meta span{font-size:.68rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
+.proposal-meta b{font-size:.78rem;text-align:right}
 .price-panel p{margin:20px 0 0;padding-top:20px;border-top:1px solid #090b0a45;font-size:.82rem;line-height:1.6}
 .closing{padding:100px 0;background:var(--paper);color:#171a17;text-align:center}
 .closing .eyebrow{justify-content:center;color:#806c3f}
@@ -168,7 +173,7 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
         <div><b>02</b><span>quartos</span></div>
         <div><b>01</b><span>banheiro</span></div>
       </div>
-      <div class="hero-price"><small>Investimento estimado</small><strong>R$ 185.000,00</strong></div>
+      <div class="hero-price"><small>Investimento estimado</small><strong>R$ 185.000,00</strong><span class="proposal-inline">Proposta AG-50-20260905-1847 · emitida em 05/09/2026 às 18:47 · válida até 10/09/2026 às 18:47</span></div>
     </div>
     <div class="plan-wrap" id="planta">
       <span class="plan-note">Clique para ampliar</span>
@@ -220,6 +225,11 @@ h1 em,h2 em{display:block;color:var(--gold-2);font-weight:400}
       <aside class="price-panel">
         <small>Investimento estimado</small>
         <strong>R$ 185.000,00</strong>
+        <div class="proposal-meta" aria-label="Identificação e validade da proposta">
+          <div><span>Código</span><b>AG-50-20260905-1847</b></div>
+          <div><span>Emissão</span><b>05/09/2026 às 18:47</b></div>
+          <div><span>Validade</span><b>5 dias · até 10/09/2026 às 18:47</b></div>
+        </div>
         <p>Estimativa preliminar sujeita à análise do terreno, disponibilidade de materiais, detalhamento técnico e data de contratação.</p>
       </aside>
     </div>
