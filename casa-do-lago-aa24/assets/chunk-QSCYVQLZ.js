@@ -1,0 +1,1 @@
+var t;function n(){return t||(t=fetch(new URL("../model/house.json",import.meta.url)).then(async e=>{if(!e.ok)throw Error("Model request failed");let o=await e.json();return{ok:!0,json:async()=>o}}))}export{n as a};
