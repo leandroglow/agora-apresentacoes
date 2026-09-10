@@ -13,7 +13,7 @@ async function request(path,options={}){
  if(!api)throw new Error('A conexão com o computador ainda não foi liberada.');
  const response=await fetch(api+path,{...options,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{}),...options.headers},signal:AbortSignal.timeout(20000)});
  const data=await response.json().catch(()=>({}));
- if(!response.ok){if(response.status===401){enabled=false;token='';sessionStorage.removeItem(storageKey+':token');byId('connect-form').hidden=false;}throw new Error(data.message||'Não foi possível concluir a operação.');}
+ if(!response.ok){if(response.status===401){enabled=false;token='';sessionStorage.removeItem(storageKey+':token');byId('connect-form').hidden=false;}throw Object.assign(new Error(data.message||'Não foi possível concluir a operação.'),{status:response.status});}
  return data;
 }
 function formatCurrencyWhileTyping(input){
@@ -53,12 +53,12 @@ async function poll(){
  try{const state=await request('/simulacoes/'+encodeURIComponent(job));byId('retry-status').hidden=true;
   if(state.status==='completed'){showResult(state.result);return;}
   if(state.status==='otp_required'){progress('Confirme o telefone',state.message||'Informe os seis dígitos enviados pela Caixa.');byId('otp-form').hidden=false;byId('otp').focus();return;}
-  if(['failed','expired','attention_required'].includes(state.status)){progress('Consulta interrompida',state.message);submit.disabled=false;requestId=null;byId('otp-form').hidden=true;notice('Nenhum resultado substituto foi gerado.',true);return;}
+  if(['failed','expired','attention_required'].includes(state.status)){progress('Consulta interrompida',state.message);submit.disabled=false;requestId=null;byId('otp-form').hidden=true;job=null;sessionStorage.removeItem(storageKey+':job');notice('Confira os dados e tente novamente.',true);return;}
   progress('Consultando a Caixa',state.message||'Aguarde a consulta de SAC e Price.');timer=setTimeout(poll,3000);
- }catch(e){progress('Conexão interrompida',e.message);byId('retry-status').hidden=false;notice('Verifique o andamento antes de iniciar outra consulta.',true);}
+ }catch(e){if([404,410].includes(e.status)){job=null;requestId=null;sessionStorage.removeItem(storageKey+':job');submit.disabled=false;byId('otp-form').hidden=true;byId('retry-status').hidden=true;progress('Consulta anterior encerrada','Você pode iniciar uma nova consulta com os dados do formulário.');notice('Computador conectado. Pronto para consultar.');return;}progress('Conexão interrompida',e.message);byId('retry-status').hidden=false;notice('Verifique o andamento antes de iniciar outra consulta.',true);}
 }
 byId('retry-status').addEventListener('click',poll);
-async function loadConfig(){const config=await request('/config');enabled=config.ready===true;if(config.defaultPhone&&!form.phone.value)form.phone.value=formatPhone(config.defaultPhone);byId('connect-form').hidden=enabled;notice(enabled?'Computador conectado. Pronto para o teste da consulta.':'O serviço ainda não está disponível.');if(enabled&&job){submit.disabled=true;poll();}}
+async function loadConfig(){const config=await request('/config');enabled=config.ready===true;if(config.defaultPhone&&!form.phone.value)form.phone.value=formatPhone(config.defaultPhone);byId('connect-form').hidden=enabled;submit.disabled=false;notice(enabled?'Computador conectado. Pronto para consultar.':'O serviço ainda não está disponível.');if(enabled&&job){submit.disabled=true;poll();}}
 byId('connect-form').addEventListener('submit',async e=>{e.preventDefault();const button=byId('connect-button');button.disabled=true;try{const data=await request('/access',{method:'POST',body:JSON.stringify({code:byId('access-code').value})});token=data.token;sessionStorage.setItem(storageKey+':token',token);byId('access-code').value='';await loadConfig();}catch(e){notice(e.message,true);}finally{button.disabled=false;}});
 form.addEventListener('submit',async event=>{
  event.preventDefault();if(!enabled){notice(api?'Conecte-se com o código de acesso para iniciar.':'A página está publicada. Falta liberar a conexão com o computador para fazer o primeiro teste.',true);if(api)byId('connect-form').hidden=false;return;}
