@@ -1,1 +1,1 @@
-window.FINANCING_ENDPOINT = "";
+window.FINANCING_ENDPOINT = "https://word-ppm-again-affordable.trycloudflare.com";

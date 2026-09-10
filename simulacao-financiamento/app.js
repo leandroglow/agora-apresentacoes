@@ -16,8 +16,23 @@ async function request(path,options={}){
  if(!response.ok){if(response.status===401){enabled=false;token='';sessionStorage.removeItem(storageKey+':token');byId('connect-form').hidden=false;}throw new Error(data.message||'Não foi possível concluir a operação.');}
  return data;
 }
+function formatCurrencyWhileTyping(input){
+ const raw=input.value,caret=input.selectionStart??raw.length;
+ const clean=raw.replace(/^R\$\s*/,'').replace(/\s/g,'');
+ if(!/^[\d.,]*$/.test(clean)||clean.split(',').length>2)return;
+ const parts=clean.split(','),whole=parts[0].replace(/\./g,''),fraction=parts[1];
+ if(fraction!==undefined&&!/^\d{0,2}$/.test(fraction))return;
+ const grouped=whole.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+ const formatted=grouped+(fraction!==undefined?','+fraction:'');
+ if(formatted===raw)return;
+ const meaningful=raw.slice(0,caret).replace(/[^\d,]/g,'').length;
+ input.value=formatted;
+ let position=0,count=0;
+ while(position<formatted.length&&count<meaningful){if(/[\d,]/.test(formatted[position]))count++;position++;}
+ input.setSelectionRange(position,position);
+}
 for(const id of ['propertyValue','monthlyIncome']){
- const input=byId(id);input.addEventListener('input',()=>{input.setCustomValidity('');requestId=null;});input.addEventListener('blur',()=>{const value=parseMoney(input.value);if(Number.isFinite(value)&&value>0)input.value=value.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});});
+ const input=byId(id);input.addEventListener('input',()=>{input.setCustomValidity('');formatCurrencyWhileTyping(input);requestId=null;});input.addEventListener('blur',()=>{const value=parseMoney(input.value);if(Number.isFinite(value)&&value>0)input.value=value.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});});
 }
 byId('birthDate').max=new Date().toISOString().slice(0,10);
 byId('phone').addEventListener('input',()=>byId('phone').setCustomValidity(''));
