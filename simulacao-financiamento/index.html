@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090b0a">
+<meta name="description" content="Solicite uma simulação de financiamento habitacional Caixa e compare SAC e Price.">
+<title>Simulação de financiamento Caixa</title>
+<link rel="stylesheet" href="styles.css"><script src="config.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#formulario">Ir para o formulário</a>
+<header><a class="brand" href="../agora/" aria-label="Ágora Construtora"><span class="brand-name">ÁGORA</span><span class="brand-detail">CONSTRUTORA</span></a><span class="header-label">APRESENTAÇÕES <span aria-hidden="true">/</span> FINANCIAMENTO</span></header>
+<main>
+<div class="intro"><p class="eyebrow">SIMULADOR HABITACIONAL</p><h1>Simulação de<br>financiamento <em>Caixa.</em></h1><p>Preencha os dados para consultar SAC e Price com o computador conectado.</p></div>
+<div class="workspace">
+<section class="form-panel" aria-labelledby="form-title">
+<div class="section-head"><span class="step">01</span><h2 id="form-title">Dados da simulação</h2></div>
+<form id="connect-form" hidden><label>Código de acesso ao computador<input id="access-code" type="password" inputmode="numeric" pattern="[0-9]{8}" minlength="8" maxlength="8" required autocomplete="off"></label><p class="quiet">Use o código de acesso fornecido nesta conversa. O código da Caixa será solicitado depois, se necessário.</p><button id="connect-button" type="submit">Conectar computador</button></form><form id="formulario">
+<div class="fields">
+<label>Valor do imóvel <span class="input-money"><span>R$</span><input name="propertyValue" id="propertyValue" inputmode="decimal" autocomplete="off" required aria-describedby="money-help"></span></label>
+<label>Renda bruta mensal <span class="input-money"><span>R$</span><input name="monthlyIncome" id="monthlyIncome" inputmode="decimal" autocomplete="off" required aria-describedby="money-help"></span></label>
+<p id="money-help" class="field-note wide">Considere a renda total dos participantes da compra.</p>
+<label>Data de nascimento<input type="date" id="birthDate" name="birthDate" value="2000-01-01" required></label>
+<label>Cidade<input id="city" name="city" value="Indaiatuba" list="cities" maxlength="100" required autocomplete="address-level2"></label>
+<label class="wide">Telefone para receber o código<input type="tel" id="phone" name="phone" autocomplete="tel-national" inputmode="tel" maxlength="16" required aria-describedby="phone-help"></label><p id="phone-help" class="field-note wide">Você pode trocar o telefone antes de consultar.</p>
+<datalist id="cities"><option value="Indaiatuba"><option value="Salto"><option value="Itu"><option value="Campinas"><option value="Elias Fausto"><option value="Monte Mor"></datalist>
+</div>
+<details><summary>Condições da compra</summary><div class="fields extra">
+<label>Estado<select name="state" id="state"><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option selected>SP</option><option>SE</option><option>TO</option></select></label>
+<label>Imóvel<select name="propertyType" id="propertyType"><option value="new">Residencial novo</option><option value="used">Residencial usado</option></select></label>
+<label class="wide">Três anos ou mais de trabalho com FGTS?<select name="fgts" id="fgts"><option value="true">Sim</option><option value="false">Não</option></select></label>
+<label class="check wide"><input type="checkbox" name="multipleBuyers" id="multipleBuyers"><span>Há mais de um comprador ou dependente.</span></label>
+<label class="check wide"><input type="checkbox" name="previousSubsidy" id="previousSubsidy"><span>Já recebeu subsídio habitacional.</span></label>
+<label class="check wide"><input type="checkbox" name="otherProperty" id="otherProperty"><span>Possui outro imóvel na cidade.</span></label>
+</div></details>
+<p class="saved-note">CPF: usar o dado padrão cadastrado.</p>
+<label class="check consent"><input type="checkbox" id="consent" name="consent" required><span>Autorizo a Caixa a coletar e armazenar os dados para esta simulação e a entrar em contato, inclusive por WhatsApp.</span></label>
+<button type="submit" id="submit">Consultar SAC e Price <span aria-hidden="true">↗</span></button>
+<p class="availability" id="availability" role="status">Verificando disponibilidade da consulta…</p>
+</form></section>
+<aside class="result-panel" aria-labelledby="result-title">
+<div class="section-head"><span class="step">02</span><h2 id="result-title">Resultado</h2></div>
+<div id="empty"><div class="table-preview" aria-hidden="true"><span></span><b>SAC</b><b>PRICE</b><span>Entrada</span><i>—</i><i>—</i><span>Parcela</span><i>—</i><i>—</i></div><h3>As duas modalidades,<br>na mesma consulta.</h3><p>A comparação mostrará a entrada mínima e as parcelas informadas pela Caixa, com o PDF para baixar.</p><p class="quiet">Se a Caixa solicitar uma confirmação, informe aqui o código recebido no telefone cadastrado.</p></div>
+<div id="progress" hidden><h3 id="progress-title">Consultando a Caixa</h3><p id="progress-message" role="status" aria-live="polite"></p></div>
+<button type="button" id="retry-status" hidden>Verificar andamento</button><form id="otp-form" hidden><label>Código de verificação<input id="otp" name="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" minlength="6" required placeholder="000000"></label><button type="submit" id="otp-submit">Confirmar código</button></form>
+<div id="result" hidden><p id="result-context"></p><h3>Comparação com a entrada mínima</h3><div class="table-scroll"><table><thead><tr><th scope="col">Condição</th><th scope="col">SAC / TR</th><th scope="col">Price / TR</th></tr></thead><tbody id="result-rows"></tbody></table></div><a class="button" id="download">Baixar PDF</a><p class="quiet">Simulação sujeita à análise e às condições da Caixa. Seguros e TR podem alterar as prestações, inclusive na Price.</p></div>
+</aside>
+</div>
+<footer><span>Financiamento pela Caixa Econômica Federal.</span><span>Você também pode solicitar a simulação por áudio na conversa.</span></footer>
+</main>
+</body></html>

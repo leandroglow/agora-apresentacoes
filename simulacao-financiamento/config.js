@@ -1,0 +1,1 @@
+window.FINANCING_ENDPOINT = "";
