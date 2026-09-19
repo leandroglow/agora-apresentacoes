@@ -6,7 +6,8 @@
   "packageManager": "pnpm@11.19.0",
   "engines": { "node": ">=20" },
   "scripts": {
-    "check": "node --check api/ask.mjs && node --check api/login.mjs && node --check api/transcribe.mjs && node --check scripts/sync-catalogs.mjs",
+    "check": "node --check api/ask.mjs && node --check api/login.mjs && node --check api/transcribe.mjs && node --check api/_lib/google.mjs && node --check api/_lib/sources.mjs",
+    "test": "node --test",
     "sync:preview": "node scripts/sync-catalogs.mjs",
     "sync:apply": "node scripts/sync-catalogs.mjs --apply"
   },
