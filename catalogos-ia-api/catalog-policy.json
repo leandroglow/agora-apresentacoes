@@ -1,0 +1,25 @@
+{
+  "allowedExtensions": [".pdf", ".txt", ".md", ".json", ".jsonl", ".xlsx"],
+  "excludedPathPatterns": [
+    "(^|/)AGENTS\\.md$",
+    "(^|/)FICHA( |_)PARA( |_)CADASTRO",
+    "(^|/)PEDIDO ",
+    "(^|/)Leandro Salto",
+    "AGORA COMERCIO DE MATERIAIS",
+    "Margirius/Agora Mat ",
+    "Blumenau/Base de consulta 2026\\.02/paginas/",
+    "Blumenau/Base de consulta 2026\\.02/dados/extracao_paginas\\.json$",
+    "Blumenau/Base de consulta 2026\\.02/dados/ocorrencias\\.jsonl$"
+  ],
+  "blumenauAllowed": [
+    "Blumenau/Base de consulta 2026.02/INDICE.md",
+    "Blumenau/Base de consulta 2026.02/GUIA_DE_APLICACAO.md",
+    "Blumenau/Base de consulta 2026.02/DIVERGENCIAS.md",
+    "Blumenau/Base de consulta 2026.02/COBERTURA_E_VALIDACAO.md",
+    "Blumenau/Base de consulta 2026.02/MAPA_DE_PAGINAS.md",
+    "Blumenau/Base de consulta 2026.02/dados/produtos.jsonl",
+    "Blumenau/Base de consulta 2026.02/categorias/",
+    "Blumenau/Base de consulta 2026.02/cadastro/",
+    "Blumenau/Catálogo Blumenau_Germany.pdf"
+  ]
+}

@@ -6,6 +6,7 @@
 <title>Apresentações Sistema · Ágora Construtora</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="catalogos-ia-config.js"></script>
 <style>
 :root {
   --ardosia: #3A4A5A; --ardosia-light: #4E6070;
@@ -456,16 +457,16 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
       <svg class="hub-btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
 
-    <a class="hub-btn hub-btn-catalogos" id="card-catalogos-ia" href="https://chatgpt.com/s/cx_6aad9cf3af7481918c1b9850d0211cc5" target="_blank" rel="noopener noreferrer" aria-label="Abrir Catálogos IA no ChatGPT Work em uma nova aba">
+    <button class="hub-btn hub-btn-catalogos" id="card-catalogos-ia" aria-label="Abrir o assistente de catálogos">
       <div class="hub-btn-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="m13 7 .6 1.4L15 9l-1.4.6L13 11l-.6-1.4L11 9l1.4-.6L13 7z"/></svg>
       </div>
       <div class="hub-btn-text">
         <span class="hub-btn-title">Catálogos IA</span>
-        <span class="hub-btn-desc">Consulte os catálogos por texto ou áudio no ChatGPT Work</span>
+        <span class="hub-btn-desc">Pergunte por texto ou áudio sem sair do sistema</span>
       </div>
-      <svg class="hub-btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-    </a>
+      <svg class="hub-btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
 
     <button class="hub-btn" id="card-360" onclick="abrirSecao('tour360')">
       <div class="hub-btn-icon">
@@ -485,17 +486,6 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
       <div class="hub-btn-text">
         <span class="hub-btn-title">Despesas</span>
         <span class="hub-btn-desc">Fotografe notas e pedidos — IA extrai e salva os dados</span>
-      </div>
-      <svg class="hub-btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-
-    <button class="hub-btn" id="card-assistente">
-      <div class="hub-btn-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      </div>
-      <div class="hub-btn-text">
-        <span class="hub-btn-title">Assistente</span>
-        <span class="hub-btn-desc">Tire dúvidas sobre construção com inteligência artificial</span>
       </div>
       <svg class="hub-btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
@@ -782,9 +772,19 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
 
   <!-- ASSISTENTE -->
   <div id="secao-assistente" style="display:none;flex-direction:column;height:calc(100vh - 56px)">
+    <div class="chat-intro">
+      <div>
+        <strong>Catálogos IA</strong>
+        <span>Consulte produtos, códigos, medidas, preços e promoções do acervo autorizado.</span>
+      </div>
+      <div id="chat-status" class="chat-status">Verificando conexão…</div>
+    </div>
     <div id="chat-msgs" style="flex:1;overflow-y:auto;padding:1rem 1.25rem;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:var(--border) transparent"></div>
-    <div style="border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;align-items:flex-end;background:var(--white);flex-shrink:0">
-      <textarea id="chat-input" rows="1" placeholder="Digite sua dúvida sobre construção..." style="flex:1;resize:none;border:1px solid var(--border-strong);border-radius:8px;padding:10px 12px;font-family:'Montserrat',sans-serif;font-size:13px;line-height:1.5;max-height:100px;overflow-y:auto;outline:none;transition:border-color .15s"></textarea>
+    <div class="chat-composer">
+      <button id="chat-mic" type="button" onclick="chatAlternarGravacao()" aria-label="Gravar pergunta por áudio" title="Gravar pergunta por áudio">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/></svg>
+      </button>
+      <textarea id="chat-input" rows="1" placeholder="Ex.: Qual o preço da parafusadeira Bomvink 12V?" style="flex:1;resize:none;border:1px solid var(--border-strong);border-radius:8px;padding:10px 12px;font-family:'Montserrat',sans-serif;font-size:13px;line-height:1.5;max-height:100px;overflow-y:auto;outline:none;transition:border-color .15s"></textarea>
       <button id="chat-send" onclick="chatEnviar()" style="background:var(--ardosia);color:#fff;border:none;border-radius:8px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .15s">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
@@ -808,6 +808,18 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
 .chat-bubble{ padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;font-family:'Montserrat',sans-serif;white-space:pre-wrap;word-break:break-word }
 .chat-msg-ai .chat-bubble{ background:var(--white);border:1px solid var(--border);border-radius:4px 12px 12px 12px;color:var(--ardosia) }
 .chat-msg-user .chat-bubble{ background:var(--ardosia);color:#fff;border-radius:12px 4px 12px 12px }
+.chat-intro{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 16px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+.chat-intro strong{display:block;font-family:'Cormorant Garamond',serif;font-size:21px;color:var(--ardosia)}
+.chat-intro span{display:block;font-size:10px;color:var(--concreto);margin-top:2px;line-height:1.4}
+.chat-status{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--concreto);white-space:nowrap}
+.chat-status.online{color:#2d6a4f}.chat-status.offline{color:#a93226}
+.chat-composer{border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;align-items:flex-end;background:var(--white);flex-shrink:0}
+#chat-mic{background:var(--argamassa);color:var(--ardosia);border:1px solid var(--border-strong);border-radius:8px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+#chat-mic.recording{background:#a93226;color:#fff;border-color:#a93226;animation:micpulse 1.2s infinite}
+#chat-mic:disabled,#chat-send:disabled{opacity:.45;cursor:not-allowed}
+.chat-sources{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-top:7px;border-top:1px solid var(--border)}
+.chat-source{font-size:9px;line-height:1.3;padding:3px 6px;border-radius:3px;background:var(--argamassa);color:var(--concreto)}
+@keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(169,50,38,.32)}50%{box-shadow:0 0 0 7px rgba(169,50,38,0)}}
 .chat-typing{ display:flex;gap:4px;align-items:center;padding:12px 14px }
 .chat-dot{ width:6px;height:6px;border-radius:50%;background:var(--concreto);animation:dotbounce 1.2s infinite }
 .chat-dot:nth-child(2){ animation-delay:.2s }
@@ -815,6 +827,7 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
 @keyframes dotbounce{ 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
 #chat-input:focus{ border-color:var(--ambar) }
 #chat-send:hover{ background:var(--asfalto) }
+@media(max-width:560px){.chat-intro{align-items:flex-start;flex-direction:column;gap:6px}.chat-msg{max-width:94%}}
 
 /* Despesas */
 .desp-hist-card{ background:var(--white);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.75rem }
@@ -824,7 +837,43 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
 
 <script>
 const OBRAS=['Casa do Lago AC20','Evidencias K21','Salto M14','Chácara Lobo Guará','Milano P4','Milano P3','Di Roma E6','Galpão Smart City Q33 L25'];
-const USUARIOS={'leandro':'download1','wiliam':'wiliam123'};
+const CATALOGOS_API_BASE=(window.CATALOGOS_IA_API_BASE||'').replace(/\/$/,'');
+let catalogosToken=sessionStorage.getItem('agora_catalogos_token')||'';
+let catalogosAuthPromise=null;
+
+function catalogosSetStatus(texto,tipo=''){
+  const el=document.getElementById('chat-status');
+  if(!el)return;
+  el.textContent=texto;
+  el.className='chat-status'+(tipo?' '+tipo:'');
+}
+
+async function catalogosAutenticar(username,password){
+  if(!CATALOGOS_API_BASE){
+    catalogosSetStatus('Aguardando ativação','offline');
+    return false;
+  }
+  catalogosSetStatus('Conectando…');
+  try{
+    const res=await fetch(CATALOGOS_API_BASE+'/api/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username,password})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok||!data.token)throw new Error(data.error||'Falha na autenticação');
+    catalogosToken=data.token;
+    sessionStorage.setItem('agora_catalogos_token',catalogosToken);
+    catalogosSetStatus('Catálogos conectados','online');
+    return true;
+  }catch(e){
+    catalogosToken='';
+    sessionStorage.removeItem('agora_catalogos_token');
+    catalogosSetStatus('Assistente indisponível','offline');
+    console.warn('Catálogos IA:',e.message);
+    return false;
+  }
+}
 
 const PROJETOS_INFO_LOCAL={
   'Galpão Smart City Q33 L25': `# Galpão Smart City Q33 L25
@@ -1084,7 +1133,7 @@ const TIMEOUT_MS=5*60*1000;
 function resetarTimer(){
   clearTimeout(timerInatividade);
   timerInatividade=setTimeout(()=>{
-    usuarioLogado=null; mostrarTela('login');
+    usuarioLogado=null;catalogosToken='';catalogosAuthPromise=null;sessionStorage.removeItem('agora_catalogos_token');mostrarTela('login');
     document.getElementById('login-user').value='';
     document.getElementById('login-senha').value='';
     document.getElementById('login-user').focus();
@@ -1129,7 +1178,7 @@ function abrirSecao(secao){
   if(secao==='projetos'){ projMostrar(1); obraAtual=null; pastaAtual=null; }
   if(secao==='despesas'){ popularSelectDesp(); }
 
-  const tit={diario:'Diário de Obra',relatorio:'Relatórios',projetos:'Projetos',tour360:'Obras 360°',apresentacao:'Apresentação',despesas:'Despesas',assistente:'Assistente'};
+    const tit={diario:'Diário de Obra',relatorio:'Relatórios',projetos:'Projetos',tour360:'Obras 360°',apresentacao:'Apresentação',despesas:'Despesas',assistente:'Catálogos IA'};
   document.getElementById('header-secao-titulo').textContent=tit[secao]||'';
   const hr=document.getElementById('header-right-btns');
   hr.innerHTML='';
@@ -1151,12 +1200,17 @@ function abrirSecao(secao){
 document.getElementById('btn-login').addEventListener('click',fazerLogin);
 document.getElementById('login-senha').addEventListener('keydown',e=>{if(e.key==='Enter')fazerLogin();});
 document.getElementById('login-user').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('login-senha').focus();});
-function fazerLogin(){
+async function fazerLogin(){
   const user=document.getElementById('login-user').value.trim().toLowerCase();
   const senha=document.getElementById('login-senha').value;
   const erro=document.getElementById('login-erro');
-  if(USUARIOS[user]&&USUARIOS[user]===senha){
+  const btn=document.getElementById('btn-login');
+  btn.disabled=true;btn.textContent='Entrando…';
+  const autorizado=await catalogosAutenticar(user,senha);
+  btn.disabled=false;btn.textContent='Entrar';
+  if(autorizado){
     usuarioLogado=user; erro.style.display='none';
+    catalogosAuthPromise=null;
     document.getElementById('hub-username').textContent=user.charAt(0).toUpperCase()+user.slice(1);
     mostrarTela('hub'); resetarTimer();
     if(!appIniciado){iniciarApp();appIniciado=true;}
@@ -1165,7 +1219,10 @@ function fazerLogin(){
       carregarConfigDrive();
       carregarConfigApresentacoes();
     }, 500);
-  }else{erro.style.display='block';document.getElementById('login-senha').value='';document.getElementById('login-senha').focus();}
+  }else{
+    erro.textContent=CATALOGOS_API_BASE?'Usuário ou senha incorretos.':'O acesso seguro ainda não foi ativado.';
+    erro.style.display='block';document.getElementById('login-senha').value='';document.getElementById('login-senha').focus();
+  }
 }
 
 // Hub
@@ -1174,7 +1231,7 @@ document.getElementById('card-relatorio').addEventListener('click',()=>abrirSeca
 document.getElementById('card-projetos').addEventListener('click',()=>abrirSecao('projetos'));
 document.getElementById('card-360').addEventListener('click',()=>abrirSecao('tour360'));
 document.getElementById('card-despesas').addEventListener('click',()=>abrirSecao('despesas'));
-document.getElementById('card-assistente').addEventListener('click',()=>abrirSecao('assistente'));
+document.getElementById('card-catalogos-ia').addEventListener('click',()=>abrirSecao('assistente'));
 document.getElementById('btn-voltar-hub').addEventListener('click',()=>{
   // Para o iframe 360 ao sair
   document.getElementById('iframe-360').src='';
@@ -1185,6 +1242,7 @@ document.getElementById('btn-voltar-hub').addEventListener('click',()=>{
 });
 document.getElementById('btn-logout').addEventListener('click',()=>{
   usuarioLogado=null;appIniciado=false;clearTimeout(timerInatividade);mostrarTela('login');
+  catalogosToken='';catalogosAuthPromise=null;sessionStorage.removeItem('agora_catalogos_token');
   document.getElementById('login-user').value='';document.getElementById('login-senha').value='';
 });
 
@@ -1939,53 +1997,63 @@ window.salvarEdicaoDesp=async function(id){
 };
 
 // ── ASSISTENTE ───────────────────────────────────────────
-let chatIniciado=false, chatHistorico=[], chatContextoProjetos='';
-
-async function carregarContextoProjetos(){
-  try{
-    const res=await fetch(SBASE_URL+'/rest/v1/projetos_info?select=obra,conteudo',{
-      headers:{'apikey':SBASE_ANON,'Authorization':'Bearer '+SBASE_ANON}
-    });
-    const rows=await res.json();
-    const mapa={...PROJETOS_INFO_LOCAL};
-    if(rows&&rows.length){
-      rows.forEach(r=>{
-        if(r.obra&&r.conteudo) mapa[r.obra]=r.conteudo;
-      });
-    }
-    chatContextoProjetos=Object.entries(mapa).map(([obra,conteudo])=>`## ${obra}\n${conteudo}`).join('\n\n---\n\n');
-  }catch(e){
-    console.warn('Contexto projetos:', e.message);
-    chatContextoProjetos=Object.entries(PROJETOS_INFO_LOCAL).map(([obra,conteudo])=>`## ${obra}\n${conteudo}`).join('\n\n---\n\n');
-  }
-}
+let chatIniciado=false, chatHistorico=[];
+let chatRecorder=null,chatAudioChunks=[],chatAudioTimer=null;
 
 function iniciarChat(){
   chatIniciado=true; chatHistorico=[];
   const msgs=document.getElementById('chat-msgs');
   msgs.innerHTML='';
-  chatMsg('ai','Olá! Sou o assistente da Ágora Construtora. Posso ajudar com dúvidas sobre construção, materiais, normas técnicas, gestão de obras e muito mais. Como posso ajudar?');
+  if(CATALOGOS_API_BASE){
+    chatMsg('ai','Olá! Consulte os catálogos da Ágora por texto ou pelo microfone. Eu vou responder usando o acervo autorizado e indicar os arquivos consultados.');
+    catalogosSetStatus(catalogosToken?'Catálogos conectados':'Conectando…',catalogosToken?'online':'');
+  }else{
+    chatMsg('ai','O novo assistente de catálogos está preparado, mas ainda precisa da ativação segura da API para começar a responder.');
+    catalogosSetStatus('Aguardando ativação','offline');
+  }
   const inp=document.getElementById('chat-input');
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatEnviar();}});
   inp.addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,100)+'px';});
-  carregarContextoProjetos();
 }
 
-function chatMsg(role,texto){
+function chatEscape(texto){
+  return String(texto??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+function chatMsg(role,texto,fontes=[]){
   const msgs=document.getElementById('chat-msgs');
   const div=document.createElement('div');
   div.className=`chat-msg chat-msg-${role}`;
   const av=role==='ai'?'Á':(usuarioLogado?usuarioLogado[0].toUpperCase():'U');
-  div.innerHTML=`<div class="chat-avatar">${av}</div><div class="chat-bubble">${texto.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>`;
+  const fontesHtml=fontes.length?`<div class="chat-sources">${fontes.map(f=>`<span class="chat-source">${chatEscape(f.filename||f)}</span>`).join('')}</div>`:'';
+  div.innerHTML=`<div class="chat-avatar">${av}</div><div class="chat-bubble">${chatEscape(texto).replace(/\n/g,'<br>')}${fontesHtml}</div>`;
   msgs.appendChild(div);
   msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function catalogosFetch(path,options={}){
+  if(catalogosAuthPromise)await catalogosAuthPromise;
+  if(!CATALOGOS_API_BASE)throw new Error('O assistente ainda não foi ativado.');
+  if(!catalogosToken)throw new Error('Entre novamente no sistema para liberar o assistente.');
+  const res=await fetch(CATALOGOS_API_BASE+path,{
+    ...options,
+    headers:{'Authorization':'Bearer '+catalogosToken,...(options.headers||{})}
+  });
+  const data=await res.json().catch(()=>({}));
+  if(res.status===401){
+    catalogosToken='';sessionStorage.removeItem('agora_catalogos_token');
+    catalogosSetStatus('Sessão expirada','offline');
+  }
+  if(!res.ok)throw new Error(data.error||'Não foi possível consultar o serviço.');
+  return data;
 }
 
 window.chatEnviar=async function(){
   const inp=document.getElementById('chat-input');
   const txt=inp.value.trim(); if(!txt)return;
+  const historicoAnterior=[...chatHistorico];
   inp.value=''; inp.style.height='auto';
-  document.getElementById('chat-send').disabled=true;
+  document.getElementById('chat-send').disabled=true;document.getElementById('chat-mic').disabled=true;
   chatMsg('user',txt);
   chatHistorico.push({role:'user',content:txt});
   const msgs=document.getElementById('chat-msgs');
@@ -1994,20 +2062,71 @@ window.chatEnviar=async function(){
   typing.innerHTML=`<div class="chat-avatar">Á</div><div class="chat-bubble chat-typing"><div class="chat-dot"></div><div class="chat-dot"></div><div class="chat-dot"></div></div>`;
   msgs.appendChild(typing); msgs.scrollTop=msgs.scrollHeight;
   try{
-    const systemPrompt=chatContextoProjetos
-      ?`Você é um assistente especializado em construção civil para a Ágora Construtora. Responda em português brasileiro de forma clara e prática. Foque em construção, materiais, normas ABNT, gestão de obras e temas relacionados.\n\nInformações dos projetos em andamento:\n\n${chatContextoProjetos}\n\nUse essas informações quando perguntado sobre obras específicas.`
-      :'Você é um assistente especializado em construção civil para a Ágora Construtora. Responda em português brasileiro de forma clara e prática. Foque em construção, materiais, normas ABNT, gestão de obras e temas relacionados.';
-    const resposta=await openaiChat([{role:'system',content:systemPrompt},...chatHistorico]);
-    chatHistorico.push({role:'assistant',content:resposta});
-    if(chatHistorico.length>20) chatHistorico=chatHistorico.slice(-20);
+    catalogosSetStatus('Consultando acervo…');
+    const data=await catalogosFetch('/api/ask',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question:txt,history:historicoAnterior})
+    });
+    chatHistorico.push({role:'assistant',content:data.answer});
+    if(chatHistorico.length>16)chatHistorico=chatHistorico.slice(-16);
     document.getElementById('chat-typing')?.remove();
-    chatMsg('ai',resposta);
+    chatMsg('ai',data.answer,data.sources||[]);
+    catalogosSetStatus('Catálogos conectados','online');
   }catch(e){
     document.getElementById('chat-typing')?.remove();
-    chatMsg('ai','⚠ Erro ao conectar com o assistente. Tente novamente.');
+    chatMsg('ai','⚠ '+e.message);
+    catalogosSetStatus('Assistente indisponível','offline');
   }
-  document.getElementById('chat-send').disabled=false;
+  document.getElementById('chat-send').disabled=false;document.getElementById('chat-mic').disabled=false;
   document.getElementById('chat-input').focus();
+};
+
+window.chatAlternarGravacao=async function(){
+  const mic=document.getElementById('chat-mic');
+  if(chatRecorder&&chatRecorder.state==='recording'){
+    chatRecorder.stop();
+    return;
+  }
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){
+    chatMsg('ai','Este navegador não oferece gravação de áudio. Você ainda pode digitar a pergunta.');
+    return;
+  }
+  try{
+    if(catalogosAuthPromise)await catalogosAuthPromise;
+    if(!CATALOGOS_API_BASE||!catalogosToken)throw new Error('O áudio ficará disponível após a ativação do assistente e um novo login.');
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const mimeTypes=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg'];
+    const mimeType=mimeTypes.find(t=>MediaRecorder.isTypeSupported(t))||'';
+    chatRecorder=new MediaRecorder(stream,mimeType?{mimeType}:undefined);
+    chatAudioChunks=[];
+    chatRecorder.ondataavailable=e=>{if(e.data.size)chatAudioChunks.push(e.data);};
+    chatRecorder.onstop=async()=>{
+      clearTimeout(chatAudioTimer);stream.getTracks().forEach(t=>t.stop());
+      mic.classList.remove('recording');mic.disabled=true;document.getElementById('chat-send').disabled=true;
+      catalogosSetStatus('Transcrevendo áudio…');
+      try{
+        const type=chatRecorder.mimeType||chatAudioChunks[0]?.type||'audio/webm';
+        const blob=new Blob(chatAudioChunks,{type});
+        const ext=type.includes('mp4')?'m4a':type.includes('ogg')?'ogg':'webm';
+        const data=await catalogosFetch('/api/transcribe',{
+          method:'POST',headers:{'Content-Type':type,'X-File-Name':'pergunta.'+ext},body:blob
+        });
+        if(!data.text)throw new Error('Não consegui entender o áudio. Tente novamente.');
+        document.getElementById('chat-input').value=data.text;
+        catalogosSetStatus('Áudio transcrito','online');
+        await chatEnviar();
+      }catch(e){
+        chatMsg('ai','⚠ '+e.message);catalogosSetStatus('Falha no áudio','offline');
+      }finally{
+        mic.disabled=false;document.getElementById('chat-send').disabled=false;chatAudioChunks=[];
+      }
+    };
+    chatRecorder.start();mic.classList.add('recording');catalogosSetStatus('Gravando — toque para enviar');
+    chatAudioTimer=setTimeout(()=>{if(chatRecorder?.state==='recording')chatRecorder.stop();},45000);
+  }catch(e){
+    mic.classList.remove('recording');chatMsg('ai','⚠ '+e.message);catalogosSetStatus('Microfone indisponível','offline');
+  }
 };
 
 renderListaObras();
