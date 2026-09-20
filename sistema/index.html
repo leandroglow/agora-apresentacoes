@@ -837,7 +837,7 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
 
 <script>
 const OBRAS=['Casa do Lago AC20','Evidencias K21','Salto M14','Chácara Lobo Guará','Milano P4','Milano P3','Di Roma E6','Galpão Smart City Q33 L25'];
-const CATALOGOS_API_BASE=(window.CATALOGOS_IA_API_BASE||'').replace(/\/$/,'');
+const CATALOGOS_API_BASE=(window.CATALOGOS_IA_API_BASE||'https://agora-apresentacoes.vercel.app').replace(/\/$/,'');
 let catalogosToken=sessionStorage.getItem('agora_catalogos_token')||'';
 let catalogosAuthPromise=null;
 
