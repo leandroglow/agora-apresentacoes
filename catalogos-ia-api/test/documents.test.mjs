@@ -6,14 +6,24 @@ import { join } from 'node:path';
 import { CatalogDrive } from '../api/_lib/drive.mjs';
 
 const ROOT='catalog_root_123', FILE='document_file_123';
-function documentDrive(name, mimeType, bytes) {
+function documentDrive(name, mimeType, bytes, {chunked = false} = {}) {
+  let downloads = 0;
   const file={id:FILE,name,mimeType,size:String(bytes.length),parents:[ROOT]};
   const root={id:ROOT,name:'Fornecedores',mimeType:'application/vnd.google-apps.folder'};
   const drive=new CatalogDrive({token:'test-only',rootId:ROOT,fetchImpl:async input=>{
     const url=new URL(input);
-    if(url.searchParams.get('alt')==='media')return new Response(bytes);
+    if(url.searchParams.get('alt')==='media'){
+      downloads++;
+      if(!chunked)return new Response(bytes);
+      let offset=0;
+      return new Response(new ReadableStream({pull(controller){
+        if(offset>=bytes.length){controller.close();return;}
+        controller.enqueue(bytes.subarray(offset,offset+65536));offset+=65536;
+      }}));
+    }
     return Response.json(url.pathname.endsWith(ROOT)?root:file);
   }});
+  drive.downloadCount=()=>downloads;
   return drive;
 }
 
@@ -43,6 +53,13 @@ test('extrai PDF com página física e fonte clicável',async()=>{
   assert.equal(drive.opened.size,1);
 });
 
+test('consultas simultâneas ao mesmo PDF fazem um único download e uma extração',async()=>{
+  const drive=documentDrive('catalogo.pdf','application/pdf',smallPdf(),{chunked:true});
+  const results=await Promise.all(['emtop universal','24659','alicate'].map(query=>drive.read(FILE,query)));
+  assert.equal(results.length,3);
+  assert.equal(drive.downloadCount(),1);
+});
+
 test('extrai XLSX com aba, linhas, cabeçalho e códigos textuais',async()=>{
   const book=new ExcelJS.Workbook();const sheet=book.addWorksheet('Preços');
   sheet.addRow(['Código','Descrição','Preço']);sheet.addRow(['0024659','ALICATE UNIVERSAL EMTOP',24.9]);
@@ -64,4 +81,24 @@ test('PDF real do acervo pode ser extraído sem enviar documento inteiro ao mode
   assert.ok(result.totalLines>20);
   assert.match(result.header,/Página física 1/);
   assert.ok(JSON.stringify(result).length<15000);
+});
+
+test('Bomvink 78 MB: três buscas simultâneas preservam orçamento, códigos, preços e páginas', {skip:!process.env.CATALOG_FIXTURES_DIR},async()=>{
+  const bytes=await readFile(join(process.env.CATALOG_FIXTURES_DIR,'Bomvink','(14-09)BOMVINK-Y.pdf'));
+  const drive=documentDrive('(14-09)BOMVINK-Y.pdf','application/pdf',bytes,{chunked:true});
+  const results=await Promise.all(['parafusadeira 12v','BOM-9914','BOM-9965'].map(query=>drive.read(FILE,query)));
+  assert.equal(drive.downloadCount(),1);
+  assert.equal(drive.bytesRead,bytes.length);
+  const text=results.map(r=>r.excerpts.join('\n')).join('\n');
+  assert.match(text,/9914/);assert.match(text,/42,99/);
+  assert.match(text,/9965/);assert.match(text,/99,90/);
+  assert.match(text,/Página física 157/);assert.match(text,/Página física 158/);
+  assert.ok(results.every(r=>JSON.stringify(r).length<15000));
+});
+
+test('falha de extração não fica presa no cache e pode ser tentada novamente',async()=>{
+  const drive=documentDrive('catalogo.pdf','application/pdf',smallPdf());let attempts=0;
+  drive.extractText=async()=>{if(++attempts===1)throw Error('temporary');return {text:'valid',warning:''};};
+  await assert.rejects(()=>drive.text({id:FILE}),/temporary/);
+  assert.equal((await drive.text({id:FILE})).text,'valid');assert.equal(attempts,2);
 });

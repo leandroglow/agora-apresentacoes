@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   const googleDriveConfigured = hasGoogleDriveCredentials();
   let config;
   try { config = modelConfig(); }
-  catch { return json(res, 503, { ok: false, configured: false, code: 'MODEL_CONFIG', version: 'drive-direct-v2' }); }
+  catch { return json(res, 503, { ok: false, configured: false, code: 'MODEL_CONFIG', version: 'drive-direct-v2.1' }); }
   let checks = {};
   if (new URL(req.url, 'https://localhost').searchParams.get('check') === '1') {
     if (!verification || verification.expiresAt < Date.now()) {
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
   return json(res, 200, {
     ok: true,
     source: 'google_drive',
-    version: 'drive-direct-v2',
+    version: 'drive-direct-v2.1',
     model: config.model,
     reasoningEffort: config.reasoning.effort,
     ...checks,

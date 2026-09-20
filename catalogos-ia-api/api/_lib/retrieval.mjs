@@ -39,6 +39,8 @@ export function matchScore(text, query) {
 
 export function excerpts(text, query, { offset = 0, maxChars = 10000, maxHits = 12 } = {}) {
   const lines = String(text).split(/\r?\n/);
+  let page = null;
+  const pages = lines.map(line => { const marker = line.match(/^\[Página física (\d+)\]/); if (marker) page = Number(marker[1]); return page; });
   const wanted = terms(query);
   const head = lines.slice(0, 8).join('\n').slice(0, 1100);
   const scored = wanted.length ? lines.map((line, index) => ({ index, score: matchScore(line, wanted) })).filter(x => x.score > 0).sort((a,b) => b.score - a.score || a.index - b.index) : [];
@@ -52,9 +54,15 @@ export function excerpts(text, query, { offset = 0, maxChars = 10000, maxHits = 
     const start = wanted.length ? Math.max(0, index - 3) : index;
     const end = wanted.length ? Math.min(lines.length, index + 5) : Math.min(lines.length, index + 100);
     const rows = [];
+    let excerptPage = null;
     for (let n = start; n < end && used < maxChars; n++) {
       if (seen.has(n)) continue;
       seen.add(n);
+      if (pages[n] && pages[n] !== excerptPage) {
+        const marker = `[Página física ${pages[n]}]`;
+        rows.push(marker); used += marker.length + 1; excerptPage = pages[n];
+        if (used >= maxChars) { clipped = true; break; }
+      }
       const fullRow = `${n + 1}: ${lines[n]}`;
       const row = fullRow.slice(0, Math.min(2200, maxChars - used));
       if (row.length < fullRow.length) clipped = true;

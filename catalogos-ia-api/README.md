@@ -1,4 +1,4 @@
-# Catálogos IA — consulta direta ao Drive (v2)
+# Catálogos IA — consulta direta ao Drive (v2.1)
 
 O backend navega diretamente pela Drive API v3, usando o OAuth já cadastrado. A OpenAI recebe ferramentas de listar pastas, pesquisar nomes e ler trechos dos documentos. Não usa o conector hospedado `connector_googledrive` nem depende da indexação dele. Os originais permanecem no Drive; os trechos consultados são enviados à OpenAI para produzir a resposta.
 
@@ -34,6 +34,9 @@ O modelo não troca códigos por semelhança. Arquivos/metadados são tratados c
 - Pesquisa de metadados: até 80 requisições/3.000 itens; informa se parcial.
 - Até 24 chamadas de ferramenta e nove rodadas por pergunta, histórico até 10.000 caracteres.
 - Cada leitura retorna cerca de 10.000 caracteres úteis, nunca o arquivo inteiro ao modelo.
+- Buscas simultâneas no mesmo documento compartilham o download e a extração, sem multiplicar seu tamanho no orçamento da consulta. Falhas não ficam presas no cache.
+- Trechos de PDFs conservam a referência à página física. A numeração impressa pode ser diferente.
+- As ferramentas atuais fornecem texto, não visão nem recorte de imagens. Links do Drive aparecem clicáveis; exibição de imagens no chat exige uma implementação adicional.
 - PDF: até 100 MB e 400 páginas com texto, extração total limitada a 8 milhões de caracteres; informa leitura parcial. PDFs escaneados sem texto ainda exigem OCR/base textual.
 - Planilhas são extraídas como linhas com nome da aba; arquivos muito extensos devem usar bases divididas.
 - Limite global de 270 segundos, função Vercel com 300 segundos. Falhas de autorização, ausência, formato e timeout têm mensagens diferentes.
@@ -49,7 +52,7 @@ Os limites restringem custo/tempo e não são garantia de leitura integral de to
 
 O último comando é opcional e usa arquivos locais existentes apenas para regressão de recuperação. Testes unitários usam respostas simuladas para navegação, segurança e fluxo da OpenAI; não validam as credenciais de produção.
 
-Root Directory da Vercel: `catalogos-ia-api`. `GET /api/health` retorna versão `drive-direct-v2`, modelo e esforço configurados, sem segredos. `configured` indica presença de configuração. `GET /api/health?check=1` verifica a listagem real da raiz do Drive e a disponibilidade do modelo, com cache de 60 segundos; retorna apenas indicadores, sem arquivos, IDs ou dados de contas. Esse diagnóstico não gera respostas pagas. A validação ponta a ponta exige entrar no Sistema e executar perguntas reais.
+Root Directory da Vercel: `catalogos-ia-api`. `GET /api/health` retorna versão `drive-direct-v2.1`, modelo e esforço configurados, sem segredos. `configured` indica presença de configuração. `GET /api/health?check=1` verifica a listagem real da raiz do Drive e a disponibilidade do modelo, com cache de 60 segundos; retorna apenas indicadores, sem arquivos, IDs ou dados de contas. Esse diagnóstico não gera respostas pagas. A validação ponta a ponta exige entrar no Sistema e executar perguntas reais.
 
 Casos de aceitação: “spot clean blumenau quais tem?”; “alicate universal Entop na Casa do Lojista, preço”; “e o industrial?”; grafias Bomvick/Bomvink; pergunta sem correspondência; tentativa de ler ID fora do acervo.
 

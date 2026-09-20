@@ -148,7 +148,17 @@ export class CatalogDrive {
   }
 
   async text(file) {
-    if (this.texts.has(file.id)) return this.texts.get(file.id);
+    // Cache the in-flight promise, not only its result. Parallel tool calls may
+    // search different terms in the same large PDF during one agent round.
+    if (!this.texts.has(file.id)) {
+      const pending = this.extractText(file);
+      this.texts.set(file.id, pending);
+      pending.catch(() => { if (this.texts.get(file.id) === pending) this.texts.delete(file.id); });
+    }
+    return this.texts.get(file.id);
+  }
+
+  async extractText(file) {
     let text, warning = '';
     const mime = file.mimeType;
     if (mime === 'application/vnd.google-apps.document') text = (await this.bytes(file, 'text/plain')).toString('utf8');
@@ -183,7 +193,6 @@ export class CatalogDrive {
       catch { text = new TextDecoder('windows-1252').decode(bytes); }
     } else throw new CatalogError('UNSUPPORTED_FORMAT', 'Formato ainda não legível. Procure PDF, TXT, MD, CSV ou XLSX na mesma pasta.');
     const result = { text: text.slice(0, 8_000_000), warning: text.length > 8_000_000 ? 'Extração parcial por limite de tamanho.' : warning };
-    this.texts.set(file.id, result);
     return result;
   }
 

@@ -2,11 +2,20 @@
   'use strict';
   function escape(text){return String(text??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
   function sourceUrl(value){
-    try{const u=new URL(value);return u.protocol==='https:'&&['drive.google.com','docs.google.com'].includes(u.hostname)?u.href:'';}catch{return '';}
+    try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password&&['drive.google.com','docs.google.com'].includes(u.hostname)?u.href:'';}catch{return '';}
   }
-  function inline(text){
+  function styled(text){
     // Escape everything before introducing our own small set of HTML tags.
     return escape(text).replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/`([^`\n]+)`/g,'<code>$1</code>');
+  }
+  function inline(text){
+    const pattern=/\[([^\]\n]+)\]\((https:\/\/[^\s)]+)\)/g;let out='',cursor=0;
+    for(const match of String(text).matchAll(pattern)){
+      out+=styled(text.slice(cursor,match.index));const url=sourceUrl(match[2]);
+      out+=url?'<a target="_blank" rel="noopener noreferrer" href="'+escape(url)+'">'+styled(match[1])+'</a>':styled(match[0]);
+      cursor=match.index+match[0].length;
+    }
+    return out+styled(text.slice(cursor));
   }
   function render(text){
     const lines=String(text??'').split(/\r?\n/);let out='',list='';

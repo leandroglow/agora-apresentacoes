@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     const result = await runCatalogAgent({ client: getOpenAI(), drive, question, history: body.history, signal });
     console.info('catalog_query', JSON.stringify({ requestId: result.requestId, model: result.model, toolCalls: result.toolCalls, sources: result.sources.length, tools: result.traces }));
     const { traces, ...publicResult } = result;
-    return json(res, 200, { ...publicResult, user: session.sub, version: 'drive-direct-v2' });
+    return json(res, 200, { ...publicResult, user: session.sub, version: 'drive-direct-v2.1' });
   } catch (error) {
     // Never log provider payloads, headers, tokens, credentials or catalog contents.
     console.error('ask_error', JSON.stringify({ code: error.code || error.name, status: error.status || 502, requestId: error.request_id }));

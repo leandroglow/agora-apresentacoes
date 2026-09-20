@@ -114,5 +114,8 @@ test('formatação de resposta escapa HTML e bloqueia links de fontes perigosos'
   assert.equal(chat.sourceUrl('https://drive.google.com.evil.example/a'), '');
   assert.equal(chat.sourceUrl('https://drive.google.com/file/d/abc/view'), 'https://drive.google.com/file/d/abc/view');
   assert.match(chat.sources([{filename:'Tabela',url:'https://drive.google.com/file/d/abc/view'}]), /<a class="chat-source"/);
+  assert.match(chat.render('[Página 157](https://drive.google.com/file/d/abc/view#page=157)'), /<a .*href="https:\/\/drive.google.com\/file\/d\/abc\/view#page=157"/);
+  assert.ok(!chat.render('[Clique](https://evil.example/x)').includes('<a '));
+  assert.equal(chat.sourceUrl('https://user:secret@drive.google.com/a'), '');
   assert.match(chat.render('| Código | Preço |\n| --- | --- |\n| 24659 | R$ 24,90 |'),/<table>/);
 });
