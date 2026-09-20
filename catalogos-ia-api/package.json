@@ -6,13 +6,14 @@
   "packageManager": "pnpm@11.19.0",
   "engines": { "node": ">=20" },
   "scripts": {
-    "check": "node --check api/ask.mjs && node --check api/login.mjs && node --check api/transcribe.mjs && node --check api/_lib/google.mjs && node --check api/_lib/sources.mjs",
+    "check": "node --check api/ask.mjs && node --check api/login.mjs && node --check api/transcribe.mjs && node --check api/_lib/google.mjs && node --check api/_lib/drive.mjs && node --check api/_lib/retrieval.mjs && node --check api/_lib/agent.mjs",
     "test": "node --test",
     "sync:preview": "node scripts/sync-catalogs.mjs",
     "sync:apply": "node scripts/sync-catalogs.mjs --apply"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
-    "openai": "^6.0.0"
+    "openai": "^6.0.0",
+    "pdf-parse": "1.1.1"
   }
 }

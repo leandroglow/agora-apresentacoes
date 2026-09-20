@@ -1,75 +1,56 @@
-# Assistente de Catálogos — Ágora
+# Catálogos IA — consulta direta ao Drive (v2)
 
-Backend seguro para o chat de catálogos do Sistema Ágora. Ele consulta o Google Drive sob demanda: procura os documentos relacionados à pergunta, abre somente os resultados necessários e entrega uma resposta com as fontes encontradas.
+O backend navega diretamente pela Drive API v3, usando o OAuth já cadastrado. A OpenAI recebe ferramentas de listar pastas, pesquisar nomes e ler trechos dos documentos. Não usa o conector hospedado `connector_googledrive` nem depende da indexação dele. Os originais permanecem no Drive; os trechos consultados são enviados à OpenAI para produzir a resposta.
 
-Não existe mais uma cópia integral dos catálogos em um Vector Store da OpenAI. Os arquivos originais permanecem no Drive. Durante cada pergunta, o conteúdo necessário para produzir a resposta ainda é processado pela API da OpenAI; portanto, isto evita a indexação antecipada do acervo, mas não transforma a consulta em processamento exclusivamente local.
+## Configuração
 
-## Proteção do acervo
+- `OPENAI_API_KEY`: chave no servidor.
+- `OPENAI_MODEL`: padrão `gpt-5.6-terra`; pode ser alterado para outro modelo Responses com function calling. Um valor existente na Vercel prevalece.
+- `OPENAI_REASONING_EFFORT`: padrão `medium`. Use um esforço aceito pelo modelo escolhido.
+- `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`: OAuth com `drive.readonly`.
+- `GOOGLE_DRIVE_FOLDER_HINT`: link completo da pasta autorizada. Também aceita ID. O nome textual antigo não é suficiente.
+- `GOOGLE_DRIVE_FOLDER_ID`: alternativa opcional com prioridade sobre o link acima.
+- `SESSION_SECRET` e `AGORA_USERS_JSON`: autenticação existente.
+- `ALLOWED_ORIGINS`: domínios autorizados a chamar o backend no navegador.
 
-O escopo OAuth "drive.readonly" permite visualizar os arquivos acessíveis à conta autorizada. A restrição real da pasta deve ser feita por permissão do Google Drive:
+Nenhuma credencial vai no HTML. A pasta precisa estar acessível à conta que autorizou o OAuth. O servidor valida a cadeia de pais antes de listar ou baixar cada arquivo. IDs arbitrários e atalhos para fora da pasta não concedem acesso.
 
-1. crie uma conta Google dedicada ao assistente;
-2. compartilhe com essa conta somente a pasta "2 - AGORA MATERIAIS/Fornecedores";
-3. não compartilhe outras pastas pessoais ou administrativas;
-4. autorize o OAuth usando essa conta dedicada.
+## Comportamento
 
-O nome informado em "GOOGLE_DRIVE_FOLDER_HINT" orienta a busca, mas não substitui as permissões da conta.
+1. Identifica fornecedor e intenção, tolerando acentos, abreviações e erros de voz/grafia.
+2. Navega pelas pastas reais com IDs; pesquisa recursivamente nomes/caminhos quando necessário.
+3. Abre TXT/MD/CSV/JSON/JSONL, XLSX, Google Docs/Sheets ou PDF com texto, filtrando por termos/código no servidor.
+4. Envia cabeçalho e trechos numerados, com sinalização de leitura parcial e continuação por offset.
+5. Cruza modelo, código, preço, unidade e promoção; exige fonte e confirmação quando não existe validade.
+6. Exibe links apenas de documentos efetivamente abertos na requisição.
 
-Textos encontrados em PDFs, planilhas, nomes de arquivo e metadados são tratados como dados não confiáveis. O assistente é instruído a ignorar comandos eventualmente escritos dentro dos catálogos e a não completar respostas com conhecimento geral.
+Casa do Lojista: consultar `tabtxt.txt`, cruzar o código em `promotxt.txt` e usar a revista para identificação quando necessário. Blumenau: priorizar a Base de consulta mais recente e os trechos da categoria, respeitando edição/divergências.
 
-## Endpoints
+O modelo não troca códigos por semelhança. Arquivos/metadados são tratados como dados externos, nunca como instruções. Arquivos AGENTS.md, ferramentas e certos documentos administrativos não entram na consulta.
 
-- "POST /api/login": valida o acesso e entrega uma sessão temporária.
-- "POST /api/ask": pesquisa e abre catálogos diretamente no Google Drive.
-- "POST /api/transcribe": transforma áudio curto em texto.
-- "GET /api/health": informa se OpenAI, sessão e Google Drive estão configurados, sem revelar segredos.
+## Limites explícitos
 
-## Variáveis de ambiente
+- Até 100 itens por página de listagem, com token de continuação.
+- Pesquisa de metadados: até 80 requisições/3.000 itens; informa se parcial.
+- Até 24 chamadas de ferramenta e nove rodadas por pergunta, histórico até 10.000 caracteres.
+- Cada leitura retorna cerca de 10.000 caracteres úteis, nunca o arquivo inteiro ao modelo.
+- PDF: até 100 MB e 400 páginas com texto, extração total limitada a 8 milhões de caracteres; informa leitura parcial. PDFs escaneados sem texto ainda exigem OCR/base textual.
+- Planilhas são extraídas como linhas com nome da aba; arquivos muito extensos devem usar bases divididas.
+- Limite global de 270 segundos, função Vercel com 300 segundos. Falhas de autorização, ausência, formato e timeout têm mensagens diferentes.
 
-- "OPENAI_API_KEY": chave da API da OpenAI.
-- "OPENAI_MODEL": por padrão, "gpt-5.2", compatível com o conector documentado do Google Drive.
-- "GOOGLE_OAUTH_CLIENT_ID": ID do cliente OAuth criado no Google Cloud.
-- "GOOGLE_OAUTH_CLIENT_SECRET": segredo do cliente OAuth.
-- "GOOGLE_OAUTH_REFRESH_TOKEN": autorização renovável da conta Google dedicada.
-- "GOOGLE_DRIVE_FOLDER_HINT": identificação legível da pasta autorizada.
-- "SESSION_SECRET": segredo aleatório com pelo menos 32 caracteres.
-- "AGORA_USERS_JSON": usuários do Sistema Ágora.
-- "ALLOWED_ORIGINS": domínios que podem chamar a API pelo navegador.
+Os limites restringem custo/tempo e não são garantia de leitura integral de todo o acervo. Metadados de modificação não comprovam vigência de preços. Não confundir ausência em um trecho com inexistência de produto/promoção.
 
-"GOOGLE_DRIVE_OAUTH_ACCESS_TOKEN" existe somente para testes curtos. Esse token expira; produção deve usar as três variáveis OAuth e o refresh token.
+## Verificação e publicação
 
-## Preparar o acesso Google
-
-1. No Google Cloud, crie ou selecione um projeto.
-2. Ative a Google Drive API.
-3. Configure a tela de consentimento OAuth e cadastre a conta dedicada como usuária de teste, se o aplicativo ainda estiver em modo de testes.
-4. Crie um cliente OAuth.
-5. Autorize o escopo "https://www.googleapis.com/auth/drive.readonly" pedindo acesso offline para obter um refresh token.
-6. Salve client ID, client secret e refresh token somente nas variáveis protegidas da Vercel. Nunca coloque esses valores no GitHub, no HTML ou em mensagens.
-
-Se o aplicativo OAuth permanecer em modo de testes, o Google pode limitar ou expirar a autorização. Para uso contínuo com várias contas, revise os requisitos de publicação e verificação do Google.
-
-## Publicação na Vercel
-
-1. Use "catalogos-ia-api" como Root Directory.
-2. Cadastre todas as variáveis acima para "Production".
-3. Mantenha "OPENAI_API_KEY" também em "Preview" apenas se realmente quiser testar versões de prévia.
-4. Faça um novo deployment.
-5. Confirme em "/api/health" que "source" é "google_drive", "googleDriveConfigured" é verdadeiro e "configured" é verdadeiro.
-6. Entre pelo Sistema Ágora e teste uma pergunta cujo fornecedor e arquivo sejam conhecidos.
-
-## Desenvolvimento e validação
-
-    pnpm install
+    pnpm install --frozen-lockfile
     pnpm check
-    pnpm test
+    node --test
+    node scripts/check-local-catalogs.mjs "CAMINHO/Fornecedores"
 
-Os scripts "sync:*" e "catalog-policy.json" foram mantidos apenas como alternativa histórica/offline. Eles não são usados pela consulta direta em produção.
+O último comando é opcional e usa arquivos locais existentes apenas para regressão de recuperação. Testes unitários usam respostas simuladas para navegação, segurança e fluxo da OpenAI; não validam as credenciais de produção.
 
-## Cuidados operacionais
+Root Directory da Vercel: `catalogos-ia-api`. `GET /api/health` retorna versão `drive-direct-v2`, modelo e esforço configurados, sem segredos. `configured` indica presença de configuração. `GET /api/health?check=1` verifica a listagem real da raiz do Drive e a disponibilidade do modelo, com cache de 60 segundos; retorna apenas indicadores, sem arquivos, IDs ou dados de contas. Esse diagnóstico não gera respostas pagas. A validação ponta a ponta exige entrar no Sistema e executar perguntas reais.
 
-- aplique limite de requisições e alertas de gasto;
-- revogue imediatamente o OAuth se a conta dedicada deixar de ser usada;
-- troque credenciais que tenham sido exibidas fora da Vercel;
-- preços, promoções e condições devem sempre trazer fornecedor, arquivo e validade;
-- quando a validade não estiver clara, a resposta deve pedir confirmação comercial.
+Casos de aceitação: “spot clean blumenau quais tem?”; “alicate universal Entop na Casa do Lojista, preço”; “e o industrial?”; grafias Bomvick/Bomvink; pergunta sem correspondência; tentativa de ler ID fora do acervo.
+
+Logs incluem request ID, modelo, quantidade de ferramentas/fontes e códigos de erro. Não incluem conteúdo de catálogos, perguntas, senhas ou tokens. O OAuth em modo Testing pode expirar e exigir nova autorização; verifique a configuração do Google para operação contínua.

@@ -1,3 +1,5 @@
+import { CatalogError } from './drive.mjs';
+
 let cachedAccessToken = '';
 let cachedAccessTokenExpiresAt = 0;
 
@@ -15,7 +17,7 @@ export async function getGoogleDriveAccessToken() {
   if (fixedToken) return fixedToken;
 
   if (!hasGoogleDriveCredentials()) {
-    throw new Error('Credenciais OAuth do Google Drive não configuradas.');
+    throw new CatalogError('DRIVE_AUTH_CONFIG', 'Credenciais OAuth do Google Drive não configuradas.', 503);
   }
 
   const now = Date.now();
@@ -33,12 +35,13 @@ export async function getGoogleDriveAccessToken() {
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body
+    body,
+    signal: AbortSignal.timeout(20000)
   });
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || !payload.access_token) {
-    throw new Error(`Falha ao renovar acesso somente leitura ao Google Drive (${response.status}).`);
+    throw new CatalogError('DRIVE_AUTH_EXPIRED', 'A autorização do Google Drive não pôde ser renovada. Reconecte a conta e atualize o refresh token na Vercel.', 503);
   }
 
   cachedAccessToken = payload.access_token;

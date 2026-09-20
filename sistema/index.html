@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="catalogos-ia-config.js"></script>
+<script src="catalogos-chat.js?v=2"></script>
 <style>
 :root {
   --ardosia: #3A4A5A; --ardosia-light: #4E6070;
@@ -818,6 +819,7 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
 #chat-mic.recording{background:#a93226;color:#fff;border-color:#a93226;animation:micpulse 1.2s infinite}
 #chat-mic:disabled,#chat-send:disabled{opacity:.45;cursor:not-allowed}
 .chat-sources{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-top:7px;border-top:1px solid var(--border)}
+.chat-bubble p{margin:0 0 8px}.chat-bubble p:last-child{margin-bottom:0}.chat-bubble h4{margin:12px 0 6px;font-size:14px}.chat-bubble ul,.chat-bubble ol{padding-left:20px;margin:6px 0 10px}.chat-bubble li{margin:4px 0}.chat-bubble code{background:rgba(58,74,90,.07);padding:1px 3px}.chat-table-wrap{overflow-x:auto;max-width:100%}.chat-bubble table{border-collapse:collapse;margin:8px 0;font-size:12px}.chat-bubble th,.chat-bubble td{padding:7px 9px;border:1px solid var(--border);text-align:left}.chat-bubble a.chat-source{text-decoration:underline}
 .chat-source{font-size:9px;line-height:1.3;padding:3px 6px;border-radius:3px;background:var(--argamassa);color:var(--concreto)}
 @keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(169,50,38,.32)}50%{box-shadow:0 0 0 7px rgba(169,50,38,0)}}
 .chat-typing{ display:flex;gap:4px;align-items:center;padding:12px 14px }
@@ -864,7 +866,7 @@ async function catalogosAutenticar(username,password){
     if(!res.ok||!data.token)throw new Error(data.error||'Falha na autenticação');
     catalogosToken=data.token;
     sessionStorage.setItem('agora_catalogos_token',catalogosToken);
-    catalogosSetStatus('Catálogos conectados','online');
+    catalogosSetStatus('Assistente pronto','online');
     return true;
   }catch(e){
     catalogosToken='';
@@ -1998,7 +2000,7 @@ window.salvarEdicaoDesp=async function(id){
 
 // ── ASSISTENTE ───────────────────────────────────────────
 let chatIniciado=false, chatHistorico=[];
-let chatRecorder=null,chatAudioChunks=[],chatAudioTimer=null;
+let chatRecorder=null,chatAudioChunks=[],chatAudioTimer=null,chatConsultando=false;
 
 function iniciarChat(){
   chatIniciado=true; chatHistorico=[];
@@ -2006,7 +2008,7 @@ function iniciarChat(){
   msgs.innerHTML='';
   if(CATALOGOS_API_BASE){
     chatMsg('ai','Olá! Consulte os catálogos da Ágora por texto ou pelo microfone. Eu vou responder usando o acervo autorizado e indicar os arquivos consultados.');
-    catalogosSetStatus(catalogosToken?'Catálogos conectados':'Conectando…',catalogosToken?'online':'');
+    catalogosSetStatus(catalogosToken?'Assistente pronto':'Conectando…',catalogosToken?'online':'');
   }else{
     chatMsg('ai','O novo assistente de catálogos está preparado, mas ainda precisa da ativação segura da API para começar a responder.');
     catalogosSetStatus('Aguardando ativação','offline');
@@ -2025,8 +2027,9 @@ function chatMsg(role,texto,fontes=[]){
   const div=document.createElement('div');
   div.className=`chat-msg chat-msg-${role}`;
   const av=role==='ai'?'Á':(usuarioLogado?usuarioLogado[0].toUpperCase():'U');
-  const fontesHtml=fontes.length?`<div class="chat-sources">${fontes.map(f=>`<span class="chat-source">${chatEscape(f.filename||f)}</span>`).join('')}</div>`:'';
-  div.innerHTML=`<div class="chat-avatar">${av}</div><div class="chat-bubble">${chatEscape(texto).replace(/\n/g,'<br>')}${fontesHtml}</div>`;
+  const fontesHtml=fontes.length?`<div class="chat-sources">${CatalogChat.sources(fontes)}</div>`:'';
+  const corpo=role==='ai'?CatalogChat.render(texto):chatEscape(texto).replace(/\n/g,'<br>');
+  div.innerHTML=`<div class="chat-avatar">${chatEscape(av)}</div><div class="chat-bubble">${corpo}${fontesHtml}</div>`;
   msgs.appendChild(div);
   msgs.scrollTop=msgs.scrollHeight;
 }
@@ -2037,6 +2040,7 @@ async function catalogosFetch(path,options={}){
   if(!catalogosToken)throw new Error('Entre novamente no sistema para liberar o assistente.');
   const res=await fetch(CATALOGOS_API_BASE+path,{
     ...options,
+    signal:options.signal||AbortSignal.timeout(285000),
     headers:{'Authorization':'Bearer '+catalogosToken,...(options.headers||{})}
   });
   const data=await res.json().catch(()=>({}));
@@ -2049,8 +2053,10 @@ async function catalogosFetch(path,options={}){
 }
 
 window.chatEnviar=async function(){
+  if(chatConsultando)return;
   const inp=document.getElementById('chat-input');
   const txt=inp.value.trim(); if(!txt)return;
+  chatConsultando=true;
   const historicoAnterior=[...chatHistorico];
   inp.value=''; inp.style.height='auto';
   document.getElementById('chat-send').disabled=true;document.getElementById('chat-mic').disabled=true;
@@ -2072,13 +2078,14 @@ window.chatEnviar=async function(){
     if(chatHistorico.length>16)chatHistorico=chatHistorico.slice(-16);
     document.getElementById('chat-typing')?.remove();
     chatMsg('ai',data.answer,data.sources||[]);
-    catalogosSetStatus('Catálogos conectados','online');
+    catalogosSetStatus(data.sources?.length?'Acervo consultado':'Consulta concluída sem fontes',data.sources?.length?'online':'');
   }catch(e){
     document.getElementById('chat-typing')?.remove();
     chatMsg('ai','⚠ '+e.message);
-    catalogosSetStatus('Assistente indisponível','offline');
+    catalogosSetStatus(catalogosToken?'Falha nesta consulta — tente novamente':'Sessão expirada',catalogosToken?'':'offline');
   }
   document.getElementById('chat-send').disabled=false;document.getElementById('chat-mic').disabled=false;
+  chatConsultando=false;
   document.getElementById('chat-input').focus();
 };
 
