@@ -12,7 +12,9 @@
     "sync:apply": "node scripts/sync-catalogs.mjs --apply"
   },
   "dependencies": {
+    "@hyzyla/pdfium": "2.1.13",
     "exceljs": "^4.4.0",
+    "jpeg-js": "0.4.4",
     "openai": "^6.0.0",
     "pdf-parse": "1.1.1"
   }

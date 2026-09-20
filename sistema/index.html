@@ -8,6 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="catalogos-ia-config.js"></script>
 <script src="catalogos-chat.js?v=3"></script>
+<script src="catalogos-images.js?v=1"></script>
+<link rel="stylesheet" href="catalogos-images.css?v=1">
 <style>
 :root {
   --ardosia: #3A4A5A; --ardosia-light: #4E6070;
@@ -1135,6 +1137,7 @@ const TIMEOUT_MS=5*60*1000;
 function resetarTimer(){
   clearTimeout(timerInatividade);
   timerInatividade=setTimeout(()=>{
+    limparChatPrivado();
     usuarioLogado=null;catalogosToken='';catalogosAuthPromise=null;sessionStorage.removeItem('agora_catalogos_token');mostrarTela('login');
     document.getElementById('login-user').value='';
     document.getElementById('login-senha').value='';
@@ -1243,6 +1246,7 @@ document.getElementById('btn-voltar-hub').addEventListener('click',()=>{
   mostrarTela('hub');
 });
 document.getElementById('btn-logout').addEventListener('click',()=>{
+  limparChatPrivado();
   usuarioLogado=null;appIniciado=false;clearTimeout(timerInatividade);mostrarTela('login');
   catalogosToken='';catalogosAuthPromise=null;sessionStorage.removeItem('agora_catalogos_token');
   document.getElementById('login-user').value='';document.getElementById('login-senha').value='';
@@ -2001,6 +2005,13 @@ window.salvarEdicaoDesp=async function(id){
 // ── ASSISTENTE ───────────────────────────────────────────
 let chatIniciado=false, chatHistorico=[];
 let chatRecorder=null,chatAudioChunks=[],chatAudioTimer=null,chatConsultando=false;
+let chatSessionGeneration=0;
+
+function limparChatPrivado(){
+  chatSessionGeneration++;chatHistorico=[];chatIniciado=false;
+  CatalogImages.close();
+  document.getElementById('chat-msgs').replaceChildren();
+}
 
 function iniciarChat(){
   chatIniciado=true; chatHistorico=[];
@@ -2014,15 +2025,15 @@ function iniciarChat(){
     catalogosSetStatus('Aguardando ativação','offline');
   }
   const inp=document.getElementById('chat-input');
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatEnviar();}});
-  inp.addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,100)+'px';});
+  inp.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatEnviar();}};
+  inp.oninput=e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,100)+'px';};
 }
 
 function chatEscape(texto){
   return String(texto??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
 
-function chatMsg(role,texto,fontes=[]){
+function chatMsg(role,texto,fontes=[],imagens=[]){
   const msgs=document.getElementById('chat-msgs');
   const div=document.createElement('div');
   div.className=`chat-msg chat-msg-${role}`;
@@ -2031,6 +2042,7 @@ function chatMsg(role,texto,fontes=[]){
   const corpo=role==='ai'?CatalogChat.render(texto):chatEscape(texto).replace(/\n/g,'<br>');
   div.innerHTML=`<div class="chat-avatar">${chatEscape(av)}</div><div class="chat-bubble">${corpo}${fontesHtml}</div>`;
   msgs.appendChild(div);
+  if(role==='ai')CatalogImages.mount(div.querySelector('.chat-bubble'),imagens);
   msgs.scrollTop=msgs.scrollHeight;
 }
 
@@ -2045,6 +2057,7 @@ async function catalogosFetch(path,options={}){
   });
   const data=await res.json().catch(()=>({}));
   if(res.status===401){
+    limparChatPrivado();
     catalogosToken='';sessionStorage.removeItem('agora_catalogos_token');
     catalogosSetStatus('Sessão expirada','offline');
   }
@@ -2057,6 +2070,7 @@ window.chatEnviar=async function(){
   const inp=document.getElementById('chat-input');
   const txt=inp.value.trim(); if(!txt)return;
   chatConsultando=true;
+  const requestGeneration=chatSessionGeneration;
   const historicoAnterior=[...chatHistorico];
   inp.value=''; inp.style.height='auto';
   document.getElementById('chat-send').disabled=true;document.getElementById('chat-mic').disabled=true;
@@ -2074,19 +2088,22 @@ window.chatEnviar=async function(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({question:txt,history:historicoAnterior})
     });
+    if(requestGeneration!==chatSessionGeneration)return;
     chatHistorico.push({role:'assistant',content:data.answer});
     if(chatHistorico.length>16)chatHistorico=chatHistorico.slice(-16);
     document.getElementById('chat-typing')?.remove();
-    chatMsg('ai',data.answer,data.sources||[]);
+    chatMsg('ai',data.answer,data.sources||[],data.images||[]);
     catalogosSetStatus(data.sources?.length?'Acervo consultado':'Consulta concluída sem fontes',data.sources?.length?'online':'');
   }catch(e){
+    if(requestGeneration!==chatSessionGeneration)return;
     document.getElementById('chat-typing')?.remove();
     chatMsg('ai','⚠ '+e.message);
     catalogosSetStatus(catalogosToken?'Falha nesta consulta — tente novamente':'Sessão expirada',catalogosToken?'':'offline');
+  }finally{
+    document.getElementById('chat-send').disabled=false;document.getElementById('chat-mic').disabled=false;
+    chatConsultando=false;
+    if(usuarioLogado)document.getElementById('chat-input').focus();
   }
-  document.getElementById('chat-send').disabled=false;document.getElementById('chat-mic').disabled=false;
-  chatConsultando=false;
-  document.getElementById('chat-input').focus();
 };
 
 window.chatAlternarGravacao=async function(){

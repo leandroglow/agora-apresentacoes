@@ -1,0 +1,17 @@
+.catalog-image-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),320px));gap:14px;margin-top:16px;white-space:normal}
+.catalog-image-card{margin:0;min-width:0;overflow:hidden;border:1px solid #d9dfe5;border-radius:10px;background:#fff}
+.catalog-image-open{display:block;position:relative;width:100%;padding:8px;border:0;background:#f4f6f8;cursor:zoom-in}
+.catalog-image-open img{display:block;width:100%;height:260px;object-fit:contain}
+.catalog-image-zoom{display:block;padding:6px 0 2px;color:#394b5a;font:600 11px 'Montserrat',sans-serif}
+.catalog-image-card figcaption{display:flex;flex-direction:column;gap:6px;padding:11px 12px;font-size:12px}
+.catalog-image-origin{font-size:11px;line-height:1.5;overflow-wrap:anywhere;color:#526575}
+.catalog-image-note{font-size:11px;color:#627381;line-height:1.5;margin-top:10px!important;white-space:normal}
+.catalog-image-open:focus-visible,.catalog-image-close:focus-visible{outline:3px solid #ce8800;outline-offset:-3px}
+.catalog-image-dialog{width:min(1100px,94vw);max-width:94vw;max-height:94dvh;padding:0;border:0;border-radius:12px;color:#394b5a;background:#fff;box-shadow:0 16px 70px #0006}
+.catalog-image-dialog::backdrop{background:#13202ddd}
+.catalog-image-dialog-header{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px;background:#fff;border-bottom:1px solid #d9dfe5;font:600 14px 'Montserrat',sans-serif}
+.catalog-image-close{flex-shrink:0;padding:10px 14px;border:1px solid #b4c0ca;border-radius:6px;background:#fff;color:#394b5a;font:inherit;cursor:pointer}
+.catalog-image-viewport{padding:12px;overflow:auto;max-height:calc(94dvh - 130px);background:#edf1f5}
+.catalog-image-full{display:block;max-width:100%;height:auto;margin:auto}
+.catalog-image-dialog>.catalog-image-origin{padding:0 18px 12px;margin:8px 0 0}
+@media(max-width:600px){.catalog-image-gallery{grid-template-columns:minmax(0,1fr)}.catalog-image-dialog-header{padding:10px;font-size:12px}.catalog-image-dialog{width:96vw;max-width:96vw}.catalog-image-viewport{padding:4px}}

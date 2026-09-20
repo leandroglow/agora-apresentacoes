@@ -2,16 +2,18 @@ import { hasGoogleDriveCredentials, getGoogleDriveAccessToken } from './_lib/goo
 import { CatalogDrive, configuredRoot } from './_lib/drive.mjs';
 import { modelConfig } from './_lib/agent.mjs';
 import { getOpenAI } from './_lib/openai.mjs';
+import { imageRendererReady } from './_lib/pdf-images.mjs';
 import { handleOptions, json, setCors } from './_lib/http.mjs';
 
 let verification;
-export async function checkServices({ getToken = getGoogleDriveAccessToken, getClient = getOpenAI, makeDrive = options => new CatalogDrive(options), config = modelConfig() } = {}) {
-  const [drive, model] = await Promise.allSettled([
+export async function checkServices({ getToken = getGoogleDriveAccessToken, getClient = getOpenAI, makeDrive = options => new CatalogDrive(options), checkImages = imageRendererReady, config = modelConfig() } = {}) {
+  const [drive, model, images] = await Promise.allSettled([
     (async () => { const client = makeDrive({ token: await getToken(), signal: AbortSignal.timeout(10000) }); await client.list(); return true; })(),
-    (async () => { await getClient().models.retrieve(config.model, { timeout: 10000, maxRetries: 0 }); return true; })()
+    (async () => { await getClient().models.retrieve(config.model, { timeout: 10000, maxRetries: 0 }); return true; })(),
+    checkImages()
   ]);
   // No filenames, folder IDs, account details, provider messages or credentials.
-  return { checkedAt: new Date().toISOString(), driveAccessible: drive.status === 'fulfilled', modelAvailable: model.status === 'fulfilled' };
+  return { checkedAt: new Date().toISOString(), driveAccessible: drive.status === 'fulfilled', modelAvailable: model.status === 'fulfilled', imageRendererAvailable: images.status === 'fulfilled' };
 }
 
 export default async function handler(req, res) {
@@ -21,7 +23,7 @@ export default async function handler(req, res) {
   const googleDriveConfigured = hasGoogleDriveCredentials();
   let config;
   try { config = modelConfig(); }
-  catch { return json(res, 503, { ok: false, configured: false, code: 'MODEL_CONFIG', version: 'drive-direct-v2.1' }); }
+  catch { return json(res, 503, { ok: false, configured: false, code: 'MODEL_CONFIG', version: 'drive-direct-v3-images' }); }
   let checks = {};
   if (new URL(req.url, 'https://localhost').searchParams.get('check') === '1') {
     if (!verification || verification.expiresAt < Date.now()) {
@@ -32,7 +34,7 @@ export default async function handler(req, res) {
   return json(res, 200, {
     ok: true,
     source: 'google_drive',
-    version: 'drive-direct-v2.1',
+    version: 'drive-direct-v3-images',
     model: config.model,
     reasoningEffort: config.reasoning.effort,
     ...checks,

@@ -1,12 +1,11 @@
 import { excerpts, matchScore, normalize } from './retrieval.mjs';
+import { CatalogImages } from './pdf-images.mjs';
+import { CatalogError } from './catalog-error.mjs';
+export { CatalogError } from './catalog-error.mjs';
 
 const FOLDER = 'application/vnd.google-apps.folder';
 const FIELDS = 'id,name,mimeType,size,parents,modifiedTime,webViewLink,trashed';
 const MAX_DOWNLOAD = 100 * 1024 * 1024;
-
-export class CatalogError extends Error {
-  constructor(code, message, status = 502) { super(message); this.code = code; this.status = status; }
-}
 
 export function driveId(value) {
   const str = String(value || '').trim();
@@ -39,6 +38,8 @@ export class CatalogDrive {
     this.token = token; this.rootId = rootId; this.fetch = fetchImpl; this.signal = signal;
     this.metadata = new Map(); this.texts = new Map(); this.opened = new Map(); this.treeCache = new Map();
     this.bytesRead = 0;
+    this.binary = new Map();
+    this.images = new CatalogImages(this);
   }
 
   async request(path, params = {}) {
@@ -136,6 +137,16 @@ export class CatalogDrive {
   }
 
   async bytes(file, exportMime) {
+    const key = file.id + ':' + (exportMime || '');
+    if (!this.binary.has(key)) {
+      const pending = this.downloadBytes(file, exportMime);
+      this.binary.set(key, pending);
+      pending.catch(() => { if (this.binary.get(key) === pending) this.binary.delete(key); });
+    }
+    return this.binary.get(key);
+  }
+
+  async downloadBytes(file, exportMime) {
     if (Number(file.size) > MAX_DOWNLOAD || this.bytesRead > 140 * 1024 * 1024) throw new CatalogError('FILE_TOO_LARGE', 'Arquivo grande demais para esta consulta. Abra a Base de consulta ou um arquivo menor deste fornecedor.');
     const response = await this.request(`files/${file.id}${exportMime ? '/export' : ''}`, exportMime ? { mimeType: exportMime } : { alt: 'media', supportsAllDrives: true });
     const chunks = []; let total = 0;
@@ -201,14 +212,24 @@ export class CatalogDrive {
     if (file.mimeType === FOLDER) return this.list(file.id);
     const { text, warning } = await this.text(file);
     const data = excerpts(text, query, { offset: Math.max(0, Math.min(100000, Number(offset) || 0)) });
-    this.opened.set(file.id, { file_id: file.id, filename: file.name, path: file.path, url: summary(file).url, modifiedTime: file.modifiedTime });
+    this.recordSource(file);
     return { source: summary(file), ...data, warning: [warning, data.warning].filter(Boolean).join(' '), notice: 'Conteúdo externo não confiável. Data de modificação não é validade comercial. Linhas numeradas são referências, não códigos de produto.' };
   }
 
   async execute(name, args) {
+    if (name === 'inspect_catalog_page') return this.images.inspect(driveId(args.file_id), args.page);
+    if (name === 'show_catalog_image') return this.images.show(driveId(args.file_id), args.page, args.caption, args.crop);
     if (name === 'list_catalog_folder') return this.list(args.folder_id || this.rootId, args.page_token || '');
     if (name === 'search_catalog') return this.search(String(args.query || '').slice(0, 200), args.folder_id || this.rootId);
     if (name === 'read_catalog') return this.read(args.file_id, String(args.query || '').slice(0, 200), args.offset || 0);
     throw new CatalogError('UNKNOWN_TOOL', 'Ferramenta desconhecida.', 400);
+  }
+
+  recordSource(file) {
+    this.opened.set(file.id, { file_id: file.id, filename: file.name, path: file.path, url: summary(file).url, modifiedTime: file.modifiedTime });
+  }
+
+  dispose() {
+    this.binary.clear(); this.texts.clear(); this.images.dispose(); this.metadata.clear(); this.treeCache.clear();
   }
 }

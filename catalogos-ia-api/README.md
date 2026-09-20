@@ -1,11 +1,11 @@
-# Catálogos IA — consulta direta ao Drive (v2.1)
+# Catálogos IA — consulta direta ao Drive e imagens (v3)
 
-O backend navega diretamente pela Drive API v3, usando o OAuth já cadastrado. A OpenAI recebe ferramentas de listar pastas, pesquisar nomes e ler trechos dos documentos. Não usa o conector hospedado `connector_googledrive` nem depende da indexação dele. Os originais permanecem no Drive; os trechos consultados são enviados à OpenAI para produzir a resposta.
+O backend navega diretamente pela Drive API v3, usando o OAuth já cadastrado. A OpenAI recebe ferramentas de listar pastas, pesquisar nomes, ler trechos e inspecionar imagens de páginas selecionadas. Não usa o conector hospedado `connector_googledrive` nem depende da indexação dele. Os originais permanecem no Drive; os trechos e imagens selecionados são enviados à OpenAI para produzir a resposta. O responsável autorizou a análise visual dos catálogos.
 
 ## Configuração
 
 - `OPENAI_API_KEY`: chave no servidor.
-- `OPENAI_MODEL`: padrão `gpt-5.6-terra`; pode ser alterado para outro modelo Responses com function calling. Um valor existente na Vercel prevalece.
+- `OPENAI_MODEL`: padrão `gpt-5.6-terra`; requer modelo Responses com function calling e entrada de imagens. Um valor existente na Vercel prevalece.
 - `OPENAI_REASONING_EFFORT`: padrão `medium`. Use um esforço aceito pelo modelo escolhido.
 - `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`: OAuth com `drive.readonly`.
 - `GOOGLE_DRIVE_FOLDER_HINT`: link completo da pasta autorizada. Também aceita ID. O nome textual antigo não é suficiente.
@@ -36,8 +36,11 @@ O modelo não troca códigos por semelhança. Arquivos/metadados são tratados c
 - Cada leitura retorna cerca de 10.000 caracteres úteis, nunca o arquivo inteiro ao modelo.
 - Buscas simultâneas no mesmo documento compartilham o download e a extração, sem multiplicar seu tamanho no orçamento da consulta. Falhas não ficam presas no cache.
 - Trechos de PDFs conservam a referência à página física. A numeração impressa pode ser diferente.
-- As ferramentas atuais fornecem texto, não visão nem recorte de imagens. Links do Drive aparecem clicáveis; exibição de imagens no chat exige uma implementação adicional.
-- PDF: até 100 MB e 400 páginas com texto, extração total limitada a 8 milhões de caracteres; informa leitura parcial. PDFs escaneados sem texto ainda exigem OCR/base textual.
+- Imagens: o modelo localiza a página física pelo texto/mapa, recebe uma renderização real por `inspect_catalog_page` e, em rodada posterior, escolhe o retângulo por `show_catalog_image`. Pode exibir a página inteira quando o recorte não for seguro. Não há geração artificial de imagens.
+- Até quatro páginas visuais (lado maior 2.200 px) e seis recortes por pergunta, até 2,6 milhões de caracteres base64 no conjunto de anexos. O PDFium/WASM renderiza localmente no servidor; jpeg-js comprime o recorte. Texto e imagens compartilham o download em memória; documentos do renderizador são liberados após cada página.
+- Anexos são enviados somente na resposta autenticada de `/api/ask`, com `Cache-Control: no-store`. Não existe endereço público de imagem, upload para terceiros, alteração de permissões do Drive ou persistência em disco. Páginas/recortes selecionados são entradas visuais da API OpenAI, usando `store:false`; isso não substitui as políticas de retenção aplicáveis à conta OpenAI.
+- O chat mostra galeria com legenda, arquivo e página física; clique para ampliar e Escape/Fechar para sair. Imagens não entram no histórico textual, localStorage ou sessionStorage e são removidas ao sair/expirar a sessão. Não é possível impedir que um usuário autorizado salve ou capture uma imagem que está vendo.
+- PDF: até 100 MB e 400 páginas com texto, extração total limitada a 8 milhões de caracteres; informa leitura parcial. A análise visual pode ler páginas escaneadas selecionadas, mas não faz OCR nem indexação visual de todo o acervo.
 - Planilhas são extraídas como linhas com nome da aba; arquivos muito extensos devem usar bases divididas.
 - Limite global de 270 segundos, função Vercel com 300 segundos. Falhas de autorização, ausência, formato e timeout têm mensagens diferentes.
 
@@ -52,7 +55,11 @@ Os limites restringem custo/tempo e não são garantia de leitura integral de to
 
 O último comando é opcional e usa arquivos locais existentes apenas para regressão de recuperação. Testes unitários usam respostas simuladas para navegação, segurança e fluxo da OpenAI; não validam as credenciais de produção.
 
-Root Directory da Vercel: `catalogos-ia-api`. `GET /api/health` retorna versão `drive-direct-v2.1`, modelo e esforço configurados, sem segredos. `configured` indica presença de configuração. `GET /api/health?check=1` verifica a listagem real da raiz do Drive e a disponibilidade do modelo, com cache de 60 segundos; retorna apenas indicadores, sem arquivos, IDs ou dados de contas. Esse diagnóstico não gera respostas pagas. A validação ponta a ponta exige entrar no Sistema e executar perguntas reais.
+Root Directory da Vercel: `catalogos-ia-api`. `GET /api/health` retorna versão `drive-direct-v3-images`, modelo e esforço configurados, sem segredos. `configured` indica presença de configuração. `GET /api/health?check=1` verifica a listagem real da raiz do Drive, a disponibilidade do modelo e o carregamento do renderizador/WASM (`imageRendererAvailable`), com cache de 60 segundos; retorna apenas indicadores, sem arquivos, IDs ou dados de contas. Esse diagnóstico não gera respostas pagas nem lê imagens de catálogo. A validação ponta a ponta exige entrar no Sistema e executar perguntas reais.
+
+Regressões de imagem: `node --test` valida pixels/cores, coordenadas, autorização, limite concorrente, entradas multimodais e anexos. Com `CATALOG_FIXTURES_DIR` apontando ao acervo local, também verifica duas páginas e recortes do PDF Bomvink de 78 MB; `CATALOG_IMAGE_QA_DIR` opcional salva resultados exclusivamente na pasta local de QA. Não publique esses arquivos.
+
+Teste visual isolado (Playwright instalado no ambiente): `node scripts/check-images-ui.mjs CAMINHO_QA/images.json CAMINHO_QA`. `PLAYWRIGHT_MODULE` e `CHROME_EXECUTABLE` permitem usar o runtime/navegador já instalado. Nunca utiliza o perfil ou login de um usuário; bloqueia rede externa e verifica desktop, celular, modal, foco e HTML malicioso.
 
 Casos de aceitação: “spot clean blumenau quais tem?”; “alicate universal Entop na Casa do Lojista, preço”; “e o industrial?”; grafias Bomvick/Bomvink; pergunta sem correspondência; tentativa de ler ID fora do acervo.
 

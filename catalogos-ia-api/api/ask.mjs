@@ -8,6 +8,7 @@ import { runCatalogAgent } from './_lib/agent.mjs';
 export default async function handler(req, res) {
   setCors(req, res);
   if (handleOptions(req, res) || !requireMethod(req, res, 'POST')) return;
+  let drive;
   try {
     const session = requireAuth(req, res);
     if (!session) return;
@@ -15,11 +16,11 @@ export default async function handler(req, res) {
     const question = String(body.question || '').trim();
     if (!question || question.length > 2000) return json(res, 400, { error: 'Envie uma pergunta com até 2.000 caracteres.' });
     const signal = AbortSignal.timeout(270000);
-    const drive = new CatalogDrive({ token: await getGoogleDriveAccessToken(), signal });
+    drive = new CatalogDrive({ token: await getGoogleDriveAccessToken(), signal });
     const result = await runCatalogAgent({ client: getOpenAI(), drive, question, history: body.history, signal });
     console.info('catalog_query', JSON.stringify({ requestId: result.requestId, model: result.model, toolCalls: result.toolCalls, sources: result.sources.length, tools: result.traces }));
     const { traces, ...publicResult } = result;
-    return json(res, 200, { ...publicResult, user: session.sub, version: 'drive-direct-v2.1' });
+    return json(res, 200, { ...publicResult, user: session.sub, version: 'drive-direct-v3-images' });
   } catch (error) {
     // Never log provider payloads, headers, tokens, credentials or catalog contents.
     console.error('ask_error', JSON.stringify({ code: error.code || error.name, status: error.status || 502, requestId: error.request_id }));
@@ -30,5 +31,5 @@ export default async function handler(req, res) {
     else if (error.status === 429) message = 'O serviço atingiu um limite de uso. Aguarde um pouco e confira o saldo da API se persistir.';
     else if (/timeout|abort/i.test(error.name || '')) message = 'A consulta demorou além do limite. Tente restringir o fornecedor ou o produto.';
     return json(res, error instanceof CatalogError ? error.status : 502, { error: message, code: error.code || 'CATALOG_ERROR' });
-  }
+  } finally { drive?.dispose(); }
 }
