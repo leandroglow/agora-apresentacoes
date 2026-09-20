@@ -61,6 +61,8 @@ Regressões de imagem: `node --test` valida pixels/cores, coordenadas, autoriza�
 
 Teste visual isolado (Playwright instalado no ambiente): `node scripts/check-images-ui.mjs CAMINHO_QA/images.json CAMINHO_QA`. `PLAYWRIGHT_MODULE` e `CHROME_EXECUTABLE` permitem usar o runtime/navegador já instalado. Nunca utiliza o perfil ou login de um usuário; bloqueia rede externa e verifica desktop, celular, modal, foco e HTML malicioso.
 
+Empacotamento: o WASM é rastreado por `require.resolve('@hyzyla/pdfium/pdfium.wasm')`. Não adicionar o caminho `node_modules/@hyzyla/pdfium/...` a `includeFiles`: no pnpm ele está sob um link simbólico e duplicá-lo invalida o pacote da função. O teste opcional `node scripts/check-vercel-package.mjs` usa o empacotador oficial `@vercel/node` instalado no ambiente (ou `VERCEL_BUILDER_MODULE`), verifica as quatro funções e rejeita conflitos entre arquivos e links/pastas. Não faz login nem publica.
+
 Casos de aceitação: “spot clean blumenau quais tem?”; “alicate universal Entop na Casa do Lojista, preço”; “e o industrial?”; grafias Bomvick/Bomvink; pergunta sem correspondência; tentativa de ler ID fora do acervo.
 
 Logs incluem request ID, modelo, quantidade de ferramentas/fontes e códigos de erro. Não incluem conteúdo de catálogos, perguntas, senhas ou tokens. O OAuth em modo Testing pode expirar e exigir nova autorização; verifique a configuração do Google para operação contínua.

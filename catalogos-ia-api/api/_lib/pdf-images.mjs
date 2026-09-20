@@ -10,6 +10,8 @@ const MAX_JPEG_BYTES = 420000;
 let libraryPromise, renderQueue = Promise.resolve();
 
 // Explicit resolution lets the serverless bundler trace the local WASM asset.
+// Do not also include the node_modules alias with includeFiles: pnpm makes that
+// directory a symlink, and files nested under a packaged symlink are invalid.
 // No CDN, remote renderer, public storage, or executable PDF scripts.
 export async function imageRendererReady() {
   if (!libraryPromise) {
