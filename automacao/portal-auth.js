@@ -28,6 +28,7 @@ window.AgoraAuth = (() => {
     clerk = window.Clerk;
     await clerk.load({
       ui:{ClerkUI:window.__internal_ClerkUICtor},
+      signInForceRedirectUrl:'https://apresentacoes.agoracons.com.br/automacao/',
       localization:{
         locale:'pt-BR',
         backButton:'Voltar',
@@ -56,5 +57,6 @@ window.AgoraAuth = (() => {
     async signOut() { await ready; await clerk.signOut(); }
   };
 })();
+
 
 
