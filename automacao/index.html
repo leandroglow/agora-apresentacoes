@@ -1,13 +1,42 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0; url=https://project-pyfyj.vercel.app/">
-  <title>ÁGORA Automação</title>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#090B0A"><meta name="robots" content="noindex"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="ÁGORA Casa"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/app-icon-192.png">
+  <title>ÁGORA · Controle</title>
+  <link rel="icon" href="assets/monograma.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css"><script defer src="capabilities.js"></script><script defer src="visual.js"></script><script defer src="portal-config.js"></script><script defer src="portal-auth.js"></script><script defer src="app.js"></script>
 </head>
-<body>
-  <p>Abrindo o painel ÁGORA Automação...</p>
-  <p><a href="https://project-pyfyj.vercel.app/">Abrir o painel</a></p>
-</body>
-</html>
+<body class="control-app">
+  <a class="skip-link" href="#controls" hidden>Ir para os comandos</a>
+  <div class="ambient-house" aria-hidden="true"><img id="houseModel" src="assets/casa-agora.png" width="1672" height="941" alt="" fetchpriority="high"></div>
+  <section id="loginGate" class="login-gate" aria-labelledby="loginTitle">
+    <div class="login-shell">
+      <div class="login-brand"><span class="mark">Á</span><span>ÁGORA<small>CONSTRUTORA</small></span></div>
+      <h1 id="loginTitle">Acesse seus controles</h1>
+      <p>Entre com seu usuário e senha.</p>
+      <div id="signInMount" class="login-form"></div>
+      <p id="loginNotice" class="notice" role="status" hidden></p>
+    </div>
+  </section>
+  <header class="masthead" hidden>
+    <a class="brand" href="./" aria-label="Ágora Construtora — início"><span class="mark">Á</span><span>ÁGORA<small>CONSTRUTORA</small></span></a>
+    <nav class="main-nav" aria-label="Navegação principal"><a href="./" aria-current="page">Controle</a><a id="manageButton" href="admin.html" hidden>Dispositivos</a></nav>
+    <button id="accessButton" class="access-button"><span id="accessLabel">Entrar</span></button>
+  </header>
+  <main class="page" hidden>
+    <section class="residence" aria-labelledby="locationTitle">
+      <div class="residence-heading">
+        <h1 id="locationTitle">Controle</h1>
+        <label class="location-picker"><span class="eyebrow">Seu local</span><select id="locationSelect" aria-label="Selecionar local"><option>Carregando…</option></select></label>
+      </div>
+    </section>
+    <section id="controls" class="controls" aria-labelledby="controlsTitle">
+      <div class="section-heading"><h2 id="controlsTitle">Controle por ambiente</h2><button id="refresh" class="quiet" aria-label="Atualizar estados" title="Atualizar estados"><span class="refresh-symbol" aria-hidden="true">↻</span></button></div>
+      <div class="control-toolbar"><div id="environmentFilters" class="filter-list" role="group" aria-label="Filtrar por ambiente"></div></div>
+      <p id="notice" class="notice" role="status" hidden></p>
+      <div id="deviceGrid" class="device-grid"></div>
+    </section>
+  </main>
+</body></html>
+
