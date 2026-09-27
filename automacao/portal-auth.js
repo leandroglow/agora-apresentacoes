@@ -26,7 +26,22 @@ window.AgoraAuth = (() => {
     await loadScript(base + '@clerk/ui@1/dist/ui.browser.js');
     await loadScript(base + '@clerk/clerk-js@6/dist/clerk.browser.js', {'data-clerk-publishable-key':config.clerkPublishableKey});
     clerk = window.Clerk;
-    await clerk.load({ui:{ClerkUI:window.__internal_ClerkUICtor}});
+    await clerk.load({
+      ui:{ClerkUI:window.__internal_ClerkUICtor},
+      localization:{
+        locale:'pt-BR',
+        backButton:'Voltar',
+        formButtonPrimary:'Continuar',
+        formFieldLabel__username:'Usuário',
+        formFieldInputPlaceholder__username:'Digite seu usuário',
+        formFieldLabel__password:'Senha',
+        formFieldInputPlaceholder__password:'Digite sua senha',
+        signIn:{
+          start:{title:'Entrar na ÁGORA Automação',subtitle:'Digite seu usuário para continuar'},
+          password:{title:'Digite sua senha',subtitle:'Use a senha da sua conta'}
+        }
+      }
+    });
     clerk.addListener(() => window.dispatchEvent(new Event('agora-auth-changed')));
     return clerk;
   })();
@@ -41,4 +56,5 @@ window.AgoraAuth = (() => {
     async signOut() { await ready; await clerk.signOut(); }
   };
 })();
+
 
