@@ -54,9 +54,10 @@ window.AgoraAuth = (() => {
     async signIn() { await ready; clerk.openSignIn(); },
     async mountSignIn(element) { await ready; clerk.mountSignIn(element); },
     async unmountSignIn(element) { await ready; clerk.unmountSignIn(element); },
-    async signOut() { await ready; await clerk.signOut(); }
+    async signOut() { await ready; await clerk.signOut({redirectUrl:'https://apresentacoes.agoracons.com.br/automacao/'}); }
   };
 })();
+
 
 
 
