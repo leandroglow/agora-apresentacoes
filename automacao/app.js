@@ -56,13 +56,13 @@ function reconcilePending(){
       message((current?.label||'Dispositivo')+': comando enviado, mas o novo estado não foi confirmado.','error');
     }
   }
-  if(pending.size)scheduleConfirmation();
+  if([...pending.values()].some(item=>item.accepted))scheduleConfirmation();
 }
 function scheduleConfirmation(){
   if(confirmationTimer)return;
   confirmationTimer=setTimeout(async()=>{
     confirmationTimer=null;
-    if(!authenticated||!pending.size)return;
+    if(!authenticated||![...pending.values()].some(item=>item.accepted))return;
     await refresh();
     reconcilePending();
   },1500);
@@ -232,7 +232,11 @@ async function refresh(){
   try{
     const data=await api('status');
     if(epoch!==sessionEpoch)return;
-    if(revision===serial){adopt(data);if(!pending.size)message(data.warning||'',data.warning?'error':'');}
+    if(revision===serial){
+      const hadPending=pending.size>0;
+      adopt(data);
+      if(!hadPending&&!pending.size)message(data.warning||'',data.warning?'error':'');
+    }
   }catch(error){if(epoch===sessionEpoch)handleError(error);}
   finally{if(epoch===sessionEpoch){working=false;render();}}
 }
