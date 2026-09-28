@@ -104,3 +104,13 @@ body{min-height:100dvh;overflow-x:clip;padding-left:env(safe-area-inset-left);pa
 .login-form{min-height:180px}
 .login-shell .notice{margin-top:18px}
 .login-brand{margin-bottom:24px}
+.login-brand{margin-bottom:12px}
+.login-shell .login-section-label{margin:0 0 24px 50px;color:var(--gold);font-size:10px;font-weight:600;letter-spacing:.24em}
+.control-app .main-nav button{color:var(--muted);font-size:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap;min-height:44px;padding:0}
+.control-app .main-nav button:hover{color:var(--text)}
+.password-dialog{width:min(440px,calc(100% - 32px));border-radius:20px;background:var(--surface)}
+.password-dialog h2{font-size:36px}
+.password-dialog form{margin-top:20px}
+.password-status{font-size:12px;color:var(--light-gold);line-height:1.5}
+.password-status.success{color:var(--sage)}
+@media(max-width:760px){.control-app .main-nav{gap:18px;font-size:9px}.login-shell .login-section-label{margin-left:50px}}

@@ -38,7 +38,7 @@ window.AgoraAuth = (() => {
         formFieldLabel__password:'Senha',
         formFieldInputPlaceholder__password:'Digite sua senha',
         signIn:{
-          start:{title:'Entrar na ÁGORA Automação',subtitle:'Digite seu usuário para continuar'},
+          start:{title:'Entrar',subtitle:'Digite seu usuário para continuar'},
           password:{title:'Digite sua senha',subtitle:'Use a senha da sua conta'}
         }
       }
@@ -52,6 +52,11 @@ window.AgoraAuth = (() => {
     apiBase:config.apiBase,
     async token() { await ready; return clerk.session?.getToken() || null; },
     async signIn() { await ready; clerk.openSignIn(); },
+    async updatePassword(currentPassword, newPassword) {
+      await ready;
+      if (!clerk.user) throw new Error('Entre novamente para alterar sua senha.');
+      return clerk.user.updatePassword({currentPassword,newPassword,signOutOfOtherSessions:true});
+    },
     async mountSignIn(element) { await ready; clerk.mountSignIn(element); },
     async unmountSignIn(element) { await ready; clerk.unmountSignIn(element); },
     async signOut() { await ready; await clerk.signOut({redirectUrl:'https://apresentacoes.agoracons.com.br/automacao/'}); }

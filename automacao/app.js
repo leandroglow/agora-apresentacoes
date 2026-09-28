@@ -274,6 +274,31 @@ $('locationSelect').addEventListener('change',()=>{selectedLocationId=$('locatio
 $('refresh').addEventListener('click',refresh);
 setInterval(()=>{if(document.visibilityState==='visible')refresh();},12000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh();});
+const passwordDialog=$('passwordDialog'),passwordForm=$('passwordForm'),passwordStatus=$('passwordStatus');
+$('passwordButton').addEventListener('click',()=>{
+  if(!authenticated)return;
+  passwordForm.reset();passwordStatus.hidden=true;passwordStatus.className='password-status';
+  $('passwordSubmit').disabled=false;
+  passwordDialog.showModal();$('currentPassword').focus();
+});
+$('passwordClose').addEventListener('click',()=>passwordDialog.close());
+passwordDialog.addEventListener('close',()=>passwordForm.reset());
+passwordForm.addEventListener('submit',async event=>{
+  event.preventDefault();
+  const current=$('currentPassword').value,next=$('newPassword').value,confirm=$('confirmPassword').value;
+  passwordStatus.hidden=false;passwordStatus.className='password-status';
+  if(next.length<15){passwordStatus.textContent='Use pelo menos 15 caracteres na nova senha.';return;}
+  if(next!==confirm){passwordStatus.textContent='A confirmação não corresponde à nova senha.';return;}
+  $('passwordSubmit').disabled=true;passwordStatus.textContent='Salvando a nova senha…';
+  try{
+    await window.AgoraAuth.updatePassword(current,next);
+    passwordForm.reset();passwordStatus.textContent='Senha alterada. Use a nova senha no próximo acesso.';
+    passwordStatus.classList.add('success');
+  }catch{
+    passwordStatus.textContent='Não foi possível alterar a senha. Confira a senha atual e tente outra senha forte.';
+    $('passwordSubmit').disabled=false;
+  }
+});
 $('accessButton').addEventListener('click',async()=>{
   if(!authenticated){window.AgoraAuth.signIn();return;}
   $('accessButton').disabled=true;
