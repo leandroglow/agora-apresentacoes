@@ -2,9 +2,10 @@
 const $ = id => document.getElementById(id);
 let authenticated = false, master = false, channels = [], locations = [], environments = [];
 let loginMounted = false;
-let selectedLocationId = '', selectedEnvironmentId = '', working = false;
+let selectedLocationId = '', selectedEnvironmentId = '', working = false, statusLoaded = false;
 let queue = Promise.resolve(), serial = 0, sessionEpoch = 0;
 const pending = new Map(), drafts = new Map(), expandedModules = new Set();
+let confirmationTimer = null;
 const Cap = window.TuyaCapabilities;
 
 function message(text, type = '') { for (const id of ['notice','loginNotice']) { const notice=$(id); notice.textContent=text; notice.hidden=!text; notice.className='notice '+(type==='error'?'error':'announcement-only'); } }
@@ -26,8 +27,12 @@ async function api(action, body) {
 function adopt(data) {
   if(typeof data.authenticated==='boolean')authenticated=data.authenticated;
   if(typeof data.master==='boolean')master=data.master;
-  // A command accepted without a status read is not an empty house.
-  if(Array.isArray(data.channels) && !(data.command && !data.channels.length)) channels=data.channels;
+  // Bootstrap reports no channels by design; only a real status read replaces them.
+  if(Array.isArray(data.channels) && Array.isArray(data.locations)){
+    channels=data.channels;
+    statusLoaded=true;
+    reconcilePending();
+  }
   if(Array.isArray(data.locations))locations=data.locations;
   if(Array.isArray(data.environments))environments=data.environments;
   if(!locations.some(l=>l.id===selectedLocationId)){
@@ -38,6 +43,30 @@ function adopt(data) {
 function locationChannels(){return channels.filter(c=>c.locationId===selectedLocationId);}
 function currentEnvironments(){return environments.filter(e=>e.locationId===selectedLocationId);}
 function displayedValue(c){return pending.has(c.id)?pending.get(c.id).value:c.value;}
+function reconcilePending(){
+  const now=Date.now();
+  for(const [id,item] of pending){
+    if(!item.accepted)continue;
+    const current=channels.find(channel=>channel.id===id);
+    if(current && current.value===item.value){
+      pending.delete(id);
+      message(current.label+': '+Cap.format(current,item.value)+', confirmado.','live');
+    }else if(now>=item.expires){
+      pending.delete(id);
+      message((current?.label||'Dispositivo')+': comando enviado, mas o novo estado não foi confirmado.','error');
+    }
+  }
+  if(pending.size)scheduleConfirmation();
+}
+function scheduleConfirmation(){
+  if(confirmationTimer)return;
+  confirmationTimer=setTimeout(async()=>{
+    confirmationTimer=null;
+    if(!authenticated||!pending.size)return;
+    await refresh();
+    reconcilePending();
+  },1500);
+}
 function renderLocations(){
   const select=$('locationSelect');select.replaceChildren();
   const list=locations.length?locations:[{id:'',label:authenticated?'Cadastre um local':'Entre para selecionar'}];
@@ -58,8 +87,8 @@ function renderFilters(){
 }
 function renderEmpty(grid){
   const empty=element('div','empty-devices'),detail=element('div');
-  detail.append(element('h3','',authenticated?'Nenhum dispositivo':'Entrar no painel'));
-  detail.append(element('p','',authenticated?'Não há dispositivos neste ambiente.':'Acesse seus locais e controles.'));
+  detail.append(element('h3','',authenticated?(statusLoaded?'Nenhum dispositivo':'Carregando dispositivos…'):'Entrar no painel'));
+  detail.append(element('p','',authenticated?(statusLoaded?'Não há dispositivos neste ambiente.':'Consultando o estado dos seus dispositivos.'):'Acesse seus locais e controles.'));
   empty.append(detail);
   if(master){const button=element('a','quiet','Dispositivos');button.href='admin.html';empty.append(button);}
   else if(!authenticated){const button=element('button','quiet','Entrar');button.addEventListener('click',()=>window.AgoraAuth.signIn());empty.append(button);}
@@ -183,53 +212,64 @@ function render(){
   $('accessLabel').textContent=authenticated?'Sair':'Entrar';
   $('accessButton').title=authenticated?'Encerrar sessão':'Entrar';
   $('manageButton').hidden=!master;
-  $('refresh').disabled=!authenticated||working||pending.size>0;
+  $('refresh').disabled=!authenticated||working;
   $('refresh').classList.toggle('is-refreshing',working);
   $('refresh').setAttribute('aria-busy',String(working));
   renderLocations();renderFilters();renderDevices();
 }
 
 function clearSession(){
-  sessionEpoch++;authenticated=false;master=false;channels=[];locations=[];environments=[];pending.clear();drafts.clear();expandedModules.clear();working=false;
+  sessionEpoch++;authenticated=false;master=false;channels=[];locations=[];environments=[];pending.clear();drafts.clear();expandedModules.clear();working=false;statusLoaded=false;
+  if(confirmationTimer){clearTimeout(confirmationTimer);confirmationTimer=null;}
 }
 function handleError(error){
   if(error.status===401)clearSession();
   message(error.message||'A operação não foi concluída.','error');
 }
 async function refresh(){
-  if(!authenticated||working||pending.size)return;
+  if(!authenticated||working)return;
   const epoch=sessionEpoch,revision=serial;working=true;render();
   try{
     const data=await api('status');
     if(epoch!==sessionEpoch)return;
-    if(revision===serial){adopt(data);message(data.warning||'',data.warning?'error':'');}
+    if(revision===serial){adopt(data);if(!pending.size)message(data.warning||'',data.warning?'error':'');}
   }catch(error){if(epoch===sessionEpoch)handleError(error);}
   finally{if(epoch===sessionEpoch){working=false;render();}}
 }
 function queueCommand(output,value){
   if(!authenticated){window.AgoraAuth.signIn();return;}
   const id=++serial,epoch=sessionEpoch;
-  pending.set(output.id,{id,value});message(output.label+': aguardando confirmação.','live');render();
+  pending.set(output.id,{id,value,accepted:false,expires:0});message(output.label+': enviando comando…','live');render();
   const run=async()=>{
     if(epoch!==sessionEpoch||!authenticated)return;
     try{
       const data=await api('command',{outputId:output.id,value});
       if(epoch!==sessionEpoch)return;
       adopt(data);
-      if(!data.channels?.length){const c=channels.find(c=>c.id===output.id);if(c)c.value=null;}
-      message(data.command?.matched?output.label+': '+Cap.format(output,value)+', confirmado.':output.label+': '+(data.warning||'comando enviado; consulte o estado.'),data.command?.matched?'live':'error');
+      const item=pending.get(output.id);
+      if(item?.id===id){
+        item.accepted=true;
+        item.expires=Date.now()+15000;
+        reconcilePending();
+        if(pending.get(output.id)?.id===id){
+          message(output.label+': comando enviado, aguardando o dispositivo atualizar.','live');
+          scheduleConfirmation();
+        }
+      }
     }catch(error){
       if(epoch!==sessionEpoch)return;
-      const c=channels.find(c=>c.id===output.id);if(c)c.value=null;
+      if(pending.get(output.id)?.id===id)pending.delete(output.id);
       handleError(error);
     }finally{
-      if(epoch===sessionEpoch){if(pending.get(output.id)?.id===id)pending.delete(output.id);render();}
+      if(epoch===sessionEpoch)render();
     }
   };
   queue=queue.catch(()=>{}).then(run);
 }
 $('locationSelect').addEventListener('change',()=>{selectedLocationId=$('locationSelect').value;selectedEnvironmentId='';preference(selectedLocationId);render();});
 $('refresh').addEventListener('click',refresh);
+setInterval(()=>{if(document.visibilityState==='visible')refresh();},12000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh();});
 $('accessButton').addEventListener('click',async()=>{
   if(!authenticated){window.AgoraAuth.signIn();return;}
   $('accessButton').disabled=true;
