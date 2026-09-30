@@ -41,7 +41,10 @@ export async function getGoogleDriveAccessToken() {
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || !payload.access_token) {
-    throw new CatalogError('DRIVE_AUTH_EXPIRED', 'A autorização do Google Drive não pôde ser renovada. Reconecte a conta e atualize o refresh token na Vercel.', 503);
+    const error = new CatalogError('DRIVE_AUTH_EXPIRED', 'A autorização do Google Drive não pôde ser renovada. Reconecte a conta e atualize o refresh token na Vercel.', 503);
+    // Only fixed categories may reach diagnostics; never provider descriptions.
+    error.oauthReason = ['invalid_grant', 'invalid_client', 'invalid_request'].includes(payload.error) ? payload.error : 'refresh_failed';
+    throw error;
   }
 
   cachedAccessToken = payload.access_token;

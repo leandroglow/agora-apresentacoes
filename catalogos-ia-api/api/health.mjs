@@ -13,7 +13,12 @@ export async function checkServices({ getToken = getGoogleDriveAccessToken, getC
     checkImages()
   ]);
   // No filenames, folder IDs, account details, provider messages or credentials.
-  return { checkedAt: new Date().toISOString(), driveAccessible: drive.status === 'fulfilled', modelAvailable: model.status === 'fulfilled', imageRendererAvailable: images.status === 'fulfilled' };
+  const driveCodes = ['DRIVE_AUTH_CONFIG', 'DRIVE_AUTH_EXPIRED', 'DRIVE_AUTH', 'DRIVE_FOLDER_CONFIG', 'DRIVE_NOT_FOUND'];
+  const oauthCodes = ['invalid_grant', 'invalid_client', 'invalid_request', 'refresh_failed'];
+  const driveIssue = drive.status === 'fulfilled' ? null :
+    oauthCodes.includes(drive.reason?.oauthReason) ? drive.reason.oauthReason :
+    driveCodes.includes(drive.reason?.code) ? drive.reason.code : 'DRIVE_UNAVAILABLE';
+  return { checkedAt: new Date().toISOString(), driveAccessible: drive.status === 'fulfilled', driveIssue, modelAvailable: model.status === 'fulfilled', imageRendererAvailable: images.status === 'fulfilled' };
 }
 
 export default async function handler(req, res) {
