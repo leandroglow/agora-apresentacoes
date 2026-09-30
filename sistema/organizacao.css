@@ -1,0 +1,18 @@
+.organizacao-page{max-width:960px;margin:0 auto;padding:44px 24px 60px}
+.organizacao-intro{margin-bottom:28px}
+.organizacao-intro p{font-size:10px;font-weight:700;letter-spacing:.15em;color:var(--ambar);margin-bottom:8px}
+.organizacao-intro h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:40px;font-weight:500;line-height:1.15;margin-bottom:10px}
+.organizacao-intro>span{font-size:13px;line-height:1.7;color:var(--g600)}
+.organizacao-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.organizacao-card{border:1px solid var(--border);border-radius:10px;background:var(--white);padding:27px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:12px;color:var(--ardosia);font-family:inherit;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.organizacao-card:hover{border-color:var(--ambar);box-shadow:0 6px 22px rgba(58,74,90,.07)}
+.organizacao-card:focus-visible{outline:3px solid var(--ambar);outline-offset:4px}
+.organizacao-symbol{font-size:29px;line-height:1;color:var(--ambar)}
+.organizacao-card-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:29px;line-height:1.2;font-weight:600}
+.organizacao-card-description{font-size:12px;line-height:1.75;color:var(--g600)}
+.organizacao-card-action{margin-top:auto;padding-top:15px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:space-between;width:100%;color:#945e07}
+.organizacao-card-action span{font-size:20px}
+#iframe-estrutura-ia{width:100%;height:calc(100dvh - 65px);min-height:400px;display:block;border:0;background:#f6f5f0}
+@media(max-width:600px){.organizacao-page{padding:28px 18px 40px}.organizacao-grid{grid-template-columns:1fr;gap:14px}.organizacao-card{padding:22px}.organizacao-intro h1{font-size:35px}.header-center{font-size:8px;letter-spacing:.03em}.header-right{flex-wrap:wrap;justify-content:flex-end}.btn-hdr{padding:6px 8px;font-size:8px}#iframe-estrutura-ia{height:calc(100dvh - 76px)}}
+@media(prefers-reduced-motion:reduce){.organizacao-card{transition:none}}
+@media print{#secao-organizacao,#secao-estrutura-ia{display:none!important}}

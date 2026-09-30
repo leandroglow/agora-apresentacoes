@@ -11,6 +11,7 @@
 <script src="catalogos-chat.js?v=3"></script>
 <script src="catalogos-images.js?v=1"></script>
 <link rel="stylesheet" href="catalogos-images.css?v=1">
+<link rel="stylesheet" href="organizacao.css?v=1">
 <style>
 :root {
   --ardosia: #3A4A5A; --ardosia-light: #4E6070;
@@ -459,15 +460,15 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
       <svg class="hub-btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
 
-    <button class="hub-btn hub-btn-catalogos" id="card-catalogos-ia" aria-label="Abrir o assistente de catálogos">
-      <div class="hub-btn-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="m13 7 .6 1.4L15 9l-1.4.6L13 11l-.6-1.4L11 9l1.4-.6L13 7z"/></svg>
+    <button class="hub-btn hub-btn-catalogos" id="card-organizacao" aria-label="Abrir Organização">
+      <div class="hub-btn-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="1.8"><rect x="8" y="2" width="8" height="6" rx="1"/><path d="M12 8v5M5 17v-4h14v4"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/></svg>
       </div>
       <div class="hub-btn-text">
-        <span class="hub-btn-title">Catálogos IA</span>
-        <span class="hub-btn-desc">Pergunte por texto ou áudio sem sair do sistema</span>
+        <span class="hub-btn-title">Organização</span>
+        <span class="hub-btn-desc">Catálogo de IA e estrutura de agentes, skills e projetos</span>
       </div>
-      <svg class="hub-btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <svg class="hub-btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
 
     <button class="hub-btn" id="card-360" onclick="abrirSecao('tour360')">
@@ -508,6 +509,28 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
     <span class="header-center" id="header-secao-titulo"></span>
     <div class="header-right" id="header-right-btns"></div>
   </div>
+
+  <!-- ORGANIZAÇÃO -->
+  <section id="secao-organizacao" class="organizacao-page" style="display:none" aria-labelledby="organizacao-title">
+    <div class="organizacao-intro"><p>ÁGORA CONSTRUTORA</p><h1 id="organizacao-title">Organização</h1><span>Recursos de IA e a estrutura que apoia o trabalho da empresa.</span></div>
+    <div class="organizacao-grid">
+      <button type="button" class="organizacao-card" id="card-catalogos-ia">
+        <span class="organizacao-symbol" aria-hidden="true">✦</span>
+        <span class="organizacao-card-title">Catálogo de IA</span>
+        <span class="organizacao-card-description">Consulte os catálogos de produtos por texto ou áudio, com as fontes do acervo autorizado.</span>
+        <span class="organizacao-card-action">Abrir catálogo <span aria-hidden="true">→</span></span>
+      </button>
+      <button type="button" class="organizacao-card" id="card-estrutura-ia">
+        <span class="organizacao-symbol" aria-hidden="true">◎</span>
+        <span class="organizacao-card-title">Estrutura de IA</span>
+        <span class="organizacao-card-description">Explore o mapa interativo. Clique nos blocos para conhecer agentes, skills, projetos e arquivos de memória.</span>
+        <span class="organizacao-card-action">Explorar estrutura <span aria-hidden="true">→</span></span>
+      </button>
+    </div>
+  </section>
+  <section id="secao-estrutura-ia" style="display:none" aria-label="Estrutura de IA">
+    <iframe id="iframe-estrutura-ia" title="Mapa interativo da estrutura de IA da Ágora" src="about:blank" referrerpolicy="same-origin"></iframe>
+  </section>
 
   <!-- DIÁRIO -->
   <div id="secao-diario">
@@ -776,7 +799,7 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
   <div id="secao-assistente" style="display:none;flex-direction:column;height:calc(100vh - 56px)">
     <div class="chat-intro">
       <div>
-        <strong>Catálogos IA</strong>
+        <strong>Catálogo de IA</strong>
         <span>Consulte produtos, códigos, medidas, preços e promoções do acervo autorizado.</span>
       </div>
       <div id="chat-status" class="chat-status">Verificando conexão…</div>
@@ -1116,6 +1139,10 @@ function resetarTimer(){
   },TIMEOUT_MS);
 }
 ['click','keydown','mousemove','touchstart'].forEach(ev=>document.addEventListener(ev,resetarTimer,{passive:true}));
+window.addEventListener('message',event=>{
+  const mapa=document.getElementById('iframe-estrutura-ia');
+  if(event.origin===location.origin&&event.source===mapa?.contentWindow&&event.data?.type==='agora-estrutura-activity')resetarTimer();
+});
 
 function mostrarTela(t){
   document.getElementById('tela-login').style.display=t==='login'?'flex':'none';
@@ -1128,7 +1155,7 @@ let obraAtual=null, pastaAtual=null, apresentacaoAtualUrl='';
 
 function abrirSecao(secao){
   mostrarTela('app');
-  ['diario','relatorio','projetos','despesas'].forEach(s=>{
+  ['diario','relatorio','projetos','despesas','organizacao','estrutura-ia'].forEach(s=>{
     document.getElementById('secao-'+s).style.display=s===secao?'block':'none';
   });
   // Seções que usam flex
@@ -1150,10 +1177,14 @@ function abrirSecao(secao){
     if(!chatIniciado) iniciarChat();
   } else { tAss.classList.remove('active'); }
 
+  if(secao==='estrutura-ia'){
+    const mapa=document.getElementById('iframe-estrutura-ia');
+    if(mapa.getAttribute('src')==='about:blank')mapa.src='estrutura-ia.html?v=1';
+  }
   if(secao==='projetos'){ projMostrar(1); obraAtual=null; pastaAtual=null; }
   if(secao==='despesas'){ popularSelectDesp(); }
 
-    const tit={diario:'Diário de Obra',relatorio:'Relatórios',projetos:'Projetos',tour360:'Obras 360°',apresentacao:'Apresentação',despesas:'Despesas',assistente:'Catálogos IA'};
+    const tit={diario:'Diário de Obra',relatorio:'Relatórios',projetos:'Projetos',tour360:'Obras 360°',apresentacao:'Apresentação',despesas:'Despesas',assistente:'Catálogo de IA',organizacao:'Organização','estrutura-ia':'Estrutura de IA'};
   document.getElementById('header-secao-titulo').textContent=tit[secao]||'';
   const hr=document.getElementById('header-right-btns');
   hr.innerHTML='';
@@ -1161,6 +1192,11 @@ function abrirSecao(secao){
   bi.className='btn-hdr';
   bi.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 9 12 2 21 9 21 20 3 20"/></svg> Início';
   bi.onclick=()=>mostrarTela('hub');
+  if(secao==='assistente'||secao==='estrutura-ia'){
+    const bo=document.createElement('button');
+    bo.type='button';bo.className='btn-hdr';bo.textContent='← Organização';
+    bo.onclick=()=>abrirSecao('organizacao');hr.appendChild(bo);
+  }
   hr.appendChild(bi);
   if(secao==='relatorio'){
     const bp=document.createElement('button');
@@ -1195,6 +1231,8 @@ async function atualizarLoginClerk(){
     erro.style.display='none';
     document.getElementById('hub-username').textContent=usuarioLogado;
     mostrarTela('hub');resetarTimer();
+    const destino=new URLSearchParams(location.search).get('area');
+    if(['organizacao','estrutura-ia','assistente'].includes(destino))abrirSecao(destino);
     if(!appIniciado){iniciarApp();appIniciado=true;}
     setTimeout(()=>{carregarConfigDrive();carregarConfigApresentacoes();},500);
   }catch(e){
@@ -1217,7 +1255,9 @@ document.getElementById('card-relatorio').addEventListener('click',()=>abrirSeca
 document.getElementById('card-projetos').addEventListener('click',()=>abrirSecao('projetos'));
 document.getElementById('card-360').addEventListener('click',()=>abrirSecao('tour360'));
 document.getElementById('card-despesas').addEventListener('click',()=>abrirSecao('despesas'));
+document.getElementById('card-organizacao').addEventListener('click',()=>abrirSecao('organizacao'));
 document.getElementById('card-catalogos-ia').addEventListener('click',()=>abrirSecao('assistente'));
+document.getElementById('card-estrutura-ia').addEventListener('click',()=>abrirSecao('estrutura-ia'));
 document.getElementById('btn-voltar-hub').addEventListener('click',()=>{
   // Para o iframe 360 ao sair
   document.getElementById('iframe-360').src='';
