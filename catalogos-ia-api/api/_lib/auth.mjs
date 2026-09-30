@@ -1,53 +1,46 @@
-import crypto from 'node:crypto';
+import { createClerkClient } from '@clerk/backend';
 
-const TOKEN_TTL_SECONDS = 8 * 60 * 60;
+// Public key of the Ágora Automação Clerk application. Never put a secret here.
+const AUTOMACAO_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuYXByZXNlbnRhY29lcy5hZ29yYWNvbnMuY29tLmJyJA';
+const SITE_ORIGIN = 'https://apresentacoes.agoracons.com.br';
+let clerk;
 
-function base64url(value) { return Buffer.from(value).toString('base64url'); }
-
-function sign(value) {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret || secret.length < 32) throw new Error('SESSION_SECRET ausente ou curto demais.');
-  return crypto.createHmac('sha256', secret).update(value).digest('base64url');
+function client() {
+  const jwtKey = process.env.CLERK_JWT_KEY;
+  const secretKey = process.env.CLERK_SECRET_KEY;
+  if ((!jwtKey && !secretKey) || process.env.CLERK_PUBLISHABLE_KEY !== AUTOMACAO_PUBLISHABLE_KEY) {
+    throw new Error('Clerk da Ágora não configurado nesta API.');
+  }
+  if (!clerk) clerk = createClerkClient({
+    ...(jwtKey ? { jwtKey } : { secretKey }),
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY
+  });
+  return clerk;
 }
 
-function safeEqual(left, right) {
-  const a = Buffer.from(String(left));
-  const b = Buffer.from(String(right));
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
+export async function authenticateClerkRequest(req, clerkClient = client(), siteOrigin = SITE_ORIGIN) {
+  const authorization = String(req.headers.authorization || '');
+  if (!/^Bearer [^\s]+$/.test(authorization) || req.headers.origin !== siteOrigin) return null;
+  const request = new Request(new URL(req.url || '/api/ask', 'https://agora-apresentacoes.vercel.app'), {
+    method: req.method,
+    headers: { authorization, origin: req.headers.origin }
+  });
+  const state = await clerkClient.authenticateRequest(request, {
+    authorizedParties: [siteOrigin],
+    acceptsToken: 'session_token'
+  });
+  if (!state.isAuthenticated) return null;
+  const userId = state.toAuth().userId;
+  return userId ? { sub: userId } : null;
 }
 
-export function validateCredentials(username, password) {
-  let users;
-  try { users = JSON.parse(process.env.AGORA_USERS_JSON || '{}'); }
-  catch { throw new Error('AGORA_USERS_JSON inválido.'); }
-  const expected = users[String(username || '').trim().toLowerCase()];
-  return typeof expected === 'string' && safeEqual(expected, password || '');
-}
-
-export function issueToken(username) {
-  const now = Math.floor(Date.now() / 1000);
-  const payload = base64url(JSON.stringify({ sub: username, iat: now, exp: now + TOKEN_TTL_SECONDS }));
-  return `${payload}.${sign(payload)}`;
-}
-
-export function verifyToken(token) {
-  if (!token || !token.includes('.')) return null;
-  const [payload, signature] = token.split('.');
-  if (!safeEqual(sign(payload), signature)) return null;
-  let parsed;
-  try { parsed = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')); }
-  catch { return null; }
-  if (!parsed.sub || !parsed.exp || parsed.exp < Math.floor(Date.now() / 1000)) return null;
-  return parsed;
-}
-
-export function requireAuth(req, res) {
-  const header = req.headers.authorization || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-  const session = verifyToken(token);
-  if (!session) {
-    res.status(401).json({ error: 'Sessão inválida ou expirada.' });
+export async function requireAuth(req, res) {
+  let session;
+  try { session = await authenticateClerkRequest(req); }
+  catch {
+    res.status(503).json({ error: 'Login da Ágora temporariamente indisponível.' });
     return null;
   }
+  if (!session) res.status(401).json({ error: 'Sessão Clerk inválida ou expirada.' });
   return session;
 }

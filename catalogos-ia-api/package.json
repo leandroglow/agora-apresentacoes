@@ -6,12 +6,13 @@
   "packageManager": "pnpm@11.19.0",
   "engines": { "node": ">=20" },
   "scripts": {
-    "check": "node --check api/ask.mjs && node --check api/login.mjs && node --check api/transcribe.mjs && node --check api/_lib/google.mjs && node --check api/_lib/drive.mjs && node --check api/_lib/retrieval.mjs && node --check api/_lib/agent.mjs",
+    "check": "node --check api/ask.mjs && node --check api/login.mjs && node --check api/transcribe.mjs && node --check api/_lib/auth.mjs && node --check api/_lib/google.mjs && node --check api/_lib/drive.mjs && node --check api/_lib/retrieval.mjs && node --check api/_lib/agent.mjs",
     "test": "node --test",
     "sync:preview": "node scripts/sync-catalogs.mjs",
     "sync:apply": "node scripts/sync-catalogs.mjs --apply"
   },
   "dependencies": {
+    "@clerk/backend": "^3.20.1",
     "@hyzyla/pdfium": "2.1.13",
     "exceljs": "^4.4.0",
     "jpeg-js": "0.4.4",

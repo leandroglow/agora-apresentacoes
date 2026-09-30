@@ -42,8 +42,8 @@ export default async function handler(req, res) {
     googleDriveConfigured,
     configured: Boolean(
       process.env.OPENAI_API_KEY &&
-      process.env.SESSION_SECRET &&
-      process.env.AGORA_USERS_JSON &&
+      (process.env.CLERK_JWT_KEY || process.env.CLERK_SECRET_KEY) &&
+      process.env.CLERK_PUBLISHABLE_KEY === 'pk_live_Y2xlcmsuYXByZXNlbnRhY29lcy5hZ29yYWNvbnMuY29tLmJyJA' &&
       googleDriveConfigured && configuredRoot()
     )
   });

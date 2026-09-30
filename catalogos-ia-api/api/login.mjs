@@ -1,18 +1,10 @@
-import { handleOptions, json, readJsonBody, requireMethod, setCors } from './_lib/http.mjs';
-import { issueToken, validateCredentials } from './_lib/auth.mjs';
+import { handleOptions, json, setCors } from './_lib/http.mjs';
 
+// The old password-based login is intentionally disabled. Clerk is the only
+// supported identity provider for Sistema and Catálogos IA.
 export default async function handler(req, res) {
   setCors(req, res);
-  if (handleOptions(req, res) || !requireMethod(req, res, 'POST')) return;
-  try {
-    const { username, password } = readJsonBody(req);
-    if (!validateCredentials(username, password)) {
-      return json(res, 401, { error: 'Usuário ou senha incorretos.' });
-    }
-    const normalized = String(username).trim().toLowerCase();
-    return json(res, 200, { token: issueToken(normalized), user: normalized, expiresIn: 28800 });
-  } catch (error) {
-    console.error('login_error', error.message);
-    return json(res, 500, { error: 'Não foi possível iniciar a sessão.' });
-  }
+  if (handleOptions(req, res)) return;
+  res.setHeader('Allow', 'OPTIONS');
+  return json(res, 410, { error: 'Login antigo desativado. Entre com sua conta Ágora.' });
 }

@@ -10,8 +10,12 @@ O backend navega diretamente pela Drive API v3, usando o OAuth já cadastrado. A
 - `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`: OAuth com `drive.readonly`.
 - `GOOGLE_DRIVE_FOLDER_HINT`: link completo da pasta autorizada. Também aceita ID. O nome textual antigo não é suficiente.
 - `GOOGLE_DRIVE_FOLDER_ID`: alternativa opcional com prioridade sobre o link acima.
-- `SESSION_SECRET` e `AGORA_USERS_JSON`: autenticação existente.
+ `CLERK_PUBLISHABLE_KEY` e `CLERK_JWT_KEY` (chave pública PEM de assinatura): **a mesma instância Clerk da Ágora Automação**. A chave publicável deve corresponder à usada em `sistema/clerk-auth.js`. `CLERK_SECRET_KEY` pode ser usada no lugar de `CLERK_JWT_KEY`, mas não é necessária para esta API.
 - `ALLOWED_ORIGINS`: domínios autorizados a chamar o backend no navegador.
+
+O login antigo de `/api/login` responde 410 e não valida mais `AGORA_USERS_JSON` nem emite tokens próprios. `/api/ask` e `/api/transcribe` validam o token de sessão Clerk, inclusive a origem autorizada. Nesta etapa **todo usuário autenticado nessa instância Clerk** acessa Catálogos IA; permissões por área ficam para uma etapa futura.
+
+O Sistema ainda acessa algumas tabelas, fotos e funções do Supabase diretamente pelo navegador. O login Clerk da página é uma barreira de interface, **não** uma regra de autorização desses dados. Não considerar o conteúdo protegido contra chamadas diretas até revisar as políticas RLS, Storage e Edge Functions. O rollout precisa configurar as variáveis Clerk nesta API antes de trocar o frontend, testar com Master e William e só então retirar as variáveis legadas do ambiente.
 
 Nenhuma credencial vai no HTML. A pasta precisa estar acessível à conta que autorizou o OAuth. O servidor valida a cadeia de pais antes de listar ou baixar cada arquivo. IDs arbitrários e atalhos para fora da pasta não concedem acesso.
 
@@ -61,7 +65,7 @@ Regressões de imagem: `node --test` valida pixels/cores, coordenadas, autoriza�
 
 Teste visual isolado (Playwright instalado no ambiente): `node scripts/check-images-ui.mjs CAMINHO_QA/images.json CAMINHO_QA`. `PLAYWRIGHT_MODULE` e `CHROME_EXECUTABLE` permitem usar o runtime/navegador já instalado. Nunca utiliza o perfil ou login de um usuário; bloqueia rede externa e verifica desktop, celular, modal, foco e HTML malicioso.
 
-Empacotamento: o WASM é rastreado por `require.resolve('@hyzyla/pdfium/pdfium.wasm')`. Não adicionar o caminho `node_modules/@hyzyla/pdfium/...` a `includeFiles`: no pnpm ele está sob um link simbólico e duplicá-lo invalida o pacote da função. O teste opcional `node scripts/check-vercel-package.mjs` usa o empacotador oficial `@vercel/node` instalado no ambiente (ou `VERCEL_BUILDER_MODULE`), verifica as quatro funções e rejeita conflitos entre arquivos e links/pastas. Não faz login nem publica.
+Empacotamento: o WASM é rastreado por `require.resolve('@hyzyla/pdfium/pdfium.wasm')`. Não adicionar o caminho `node_modules/@hyzyla/pdfium/...` a `includeFiles`: no pnpm ele está sob um link simbólico e duplicá-lo invalida o pacote da função. O teste opcional `node scripts/check-vercel-package.mjs` usa o empacotador oficial `@vercel/node` instalado no ambiente (ou `VERCEL_BUILDER_MODULE`), verifica as funções e rejeita conflitos entre arquivos e links/pastas. Não faz login nem publica.
 
 Casos de aceitação: “spot clean blumenau quais tem?”; “alicate universal Entop na Casa do Lojista, preço”; “e o industrial?”; grafias Bomvick/Bomvink; pergunta sem correspondência; tentativa de ler ID fora do acervo.
 

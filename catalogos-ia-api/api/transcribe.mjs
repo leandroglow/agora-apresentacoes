@@ -12,7 +12,7 @@ const ALLOWED_AUDIO = new Set([
 export default async function handler(req, res) {
   setCors(req, res);
   if (handleOptions(req, res) || !requireMethod(req, res, 'POST')) return;
-  if (!requireAuth(req, res)) return;
+  if (!await requireAuth(req, res)) return;
   try {
     const contentType = String(req.headers['content-type'] || '').split(';')[0].toLowerCase();
     if (!ALLOWED_AUDIO.has(contentType)) return json(res, 415, { error: 'Formato de áudio não aceito.' });

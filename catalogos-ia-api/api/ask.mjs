@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   if (handleOptions(req, res) || !requireMethod(req, res, 'POST')) return;
   let drive;
   try {
-    const session = requireAuth(req, res);
+    const session = await requireAuth(req, res);
     if (!session) return;
     const body = readJsonBody(req);
     const question = String(body.question || '').trim();
