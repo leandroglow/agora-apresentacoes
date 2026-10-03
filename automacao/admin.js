@@ -2,6 +2,7 @@
 const $=id=>document.getElementById(id);
 let locations=[],environments=[],modules=[],structureLocationId='',environmentId='',editingModuleId='';
 let entityAction=null,deleteAction=null;
+let cameras=[],editingCameraId='';
 const editIcon='<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m12 4 4 4M3 17l4-1L17 6a2.8 2.8 0 0 0-4-4L3 12v5Z" stroke="currentColor" stroke-linejoin="round"/></svg>';
 const deleteIcon='<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 5h14M8 2h4M5 5l1 12h8l1-12M8 8v6M12 8v6" stroke="currentColor" stroke-linecap="round"/></svg>';
 function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;}
@@ -19,6 +20,7 @@ async function api(action,body){
   return data;
 }
 function adopt(data){
+  cameras=data.cameras||[];
   locations=data.locations||[];environments=data.environments||[];modules=data.modules||[];
   if(!locations.some(l=>l.id===structureLocationId)){
     const saved=preference();structureLocationId=locations.some(l=>l.id===saved)?saved:(locations[0]?.id||'');
@@ -35,6 +37,7 @@ function fillEnvironments(select,locationId,selected){fill(select,envs(locationI
 function activeLocation(){return locations.find(l=>l.id===structureLocationId);}
 function button(text,cls,fn){const b=el('button',cls,text);b.type='button';b.addEventListener('click',fn);return b;}
 function render(){
+  renderCameras();
   fill($('structureLocation'),locations,structureLocationId,'Crie seu primeiro local');
   $('editLocationButton').disabled=!structureLocationId;$('deleteLocation').disabled=!structureLocationId;
   $('newEnvironment').disabled=!structureLocationId;$('newModule').disabled=!envs(structureLocationId).length;
@@ -173,3 +176,22 @@ $('inspectDevice').addEventListener('click',async()=>{
   finally{$('inspectDevice').disabled=false;}
 });
 $('syncResources').addEventListener('click',()=>save('editDialog','editModuleError',{action:'syncModule',moduleId:editingModuleId}));
+
+function renderCameras(){
+  const host=$('cameraList');host.replaceChildren();
+  const list=cameras.filter(c=>c.locationId===structureLocationId);
+  if(!list.length)host.append(el('p','empty-note','Nenhuma câmera conectada neste local.'));
+  list.forEach(camera=>{
+    const card=el('article','module-card');card.append(el('p','eyebrow','Câmera'),el('h3','',camera.label));
+    card.append(button('Editar câmera','quiet',()=>{
+      editingCameraId=camera.id;$('cameraEditLabel').value=camera.label;
+      fill($('cameraEditLocation'),locations,camera.locationId,'Nenhum local');
+      $('cameraEditError').hidden=true;$('cameraEditDialog').showModal();
+    }));host.append(card);
+  });
+}
+$('cameraEditForm').addEventListener('submit',event=>{
+  event.preventDefault();save('cameraEditDialog','cameraEditError',{action:'updateCamera',cameraId:editingCameraId,label:$('cameraEditLabel').value,locationId:$('cameraEditLocation').value},()=>{
+    structureLocationId=$('cameraEditLocation').value;preference(structureLocationId);
+  });
+});
