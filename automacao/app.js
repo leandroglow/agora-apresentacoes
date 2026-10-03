@@ -2,6 +2,7 @@
 const $ = id => document.getElementById(id);
 let authenticated = false, master = false, channels = [], locations = [], environments = [];
 let loginMounted = false;
+let cameras = [];
 let selectedLocationId = '', selectedEnvironmentId = '', working = false, statusLoaded = false;
 let queue = Promise.resolve(), serial = 0, sessionEpoch = 0;
 const pending = new Map(), drafts = new Map(), expandedModules = new Set();
@@ -25,6 +26,7 @@ async function api(action, body) {
   return data;
 }
 function adopt(data) {
+  if(Array.isArray(data.cameras))cameras=data.cameras;
   if(typeof data.authenticated==='boolean')authenticated=data.authenticated;
   if(typeof data.master==='boolean')master=data.master;
   // Bootstrap reports no channels by design; only a real status read replaces them.
@@ -217,9 +219,11 @@ function render(){
   $('refresh').classList.toggle('is-refreshing',working);
   $('refresh').setAttribute('aria-busy',String(working));
   renderLocations();renderFilters();renderDevices();
+  window.AgoraCameras?.render({authenticated,locationId:selectedLocationId,cameras}, api);
 }
 
 function clearSession(){
+  cameras=[];window.AgoraCameras?.stop();
   sessionEpoch++;authenticated=false;master=false;channels=[];locations=[];environments=[];pending.clear();drafts.clear();expandedModules.clear();working=false;statusLoaded=false;
   if(confirmationTimer){clearTimeout(confirmationTimer);confirmationTimer=null;}
 }

@@ -1,0 +1,9 @@
+.camera-section{padding:0 0 36px}
+.camera-section-title{font:500 13px/1.4 var(--sans);color:var(--muted);letter-spacing:.015em;margin:0 0 16px}
+.camera-card{max-width:780px;background:rgba(17,20,17,.82);border:1px solid var(--line);border-radius:18px;padding:20px;overflow:hidden}
+.camera-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.camera-heading h3{font:500 17px/1.4 var(--sans);letter-spacing:0}
+.camera-heading button{border:1px solid var(--gold);color:var(--gold);border-radius:12px;min-height:44px;padding:10px 16px}
+.camera-status{color:var(--muted);font-size:12px;margin:12px 0 0}
+.camera-video{display:block;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;margin-top:16px;object-fit:contain}
+@media(max-width:600px){.camera-card{padding:16px}.camera-heading h3{font-size:16px}}
