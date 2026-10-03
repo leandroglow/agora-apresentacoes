@@ -17,18 +17,36 @@ window.AgoraLiveVideo = class {
     if(epoch!==this.epoch) return;
     let reader;
     try {
-      if(!window.MediaSource) throw new Error('Este navegador não suporta este modo de vídeo ao vivo.');
+      const MediaSourceClass=window.ManagedMediaSource || window.MediaSource;
+      if(!MediaSourceClass) {
+        this.status.textContent='Este modo de câmera requer iOS 17.1 ou posterior no iPhone. Atualize o iOS e abra novamente.';
+        return;
+      }
+      // Required by WebKit to enable ManagedMediaSource without an AirPlay source.
+      this.video.disableRemotePlayback=true;
+      this.video.muted=true; this.video.playsInline=true; this.video.controls=true;
       this.status.textContent='Conectando…'; this.abort=new AbortController();
       const source=await this.getSource();
       if(epoch!==this.epoch) return;
       const response=await fetch(source.url,{signal:this.abort.signal,cache:'no-store',credentials:'omit'});
       if(!response.ok || !response.body) throw new Error('A câmera não respondeu.');
       const mime=source.mime || 'video/mp4; codecs="avc1.4d0016"';
-      if(!MediaSource.isTypeSupported(mime)) throw new Error('Codec de vídeo não suportado.');
-      const media=new MediaSource();
+      if(!MediaSourceClass.isTypeSupported(mime)) {
+        this.status.textContent='Este navegador não suporta o formato da câmera.';
+        this.abort.abort(); return;
+      }
+      const media=new MediaSourceClass();
       if(this.objectUrl) URL.revokeObjectURL(this.objectUrl);
-      this.objectUrl=URL.createObjectURL(media); this.video.src=this.objectUrl;
-      await new Promise(resolve=>media.addEventListener('sourceopen',resolve,{once:true}));
+      const opened=new Promise((resolve,reject)=>{
+        const timer=setTimeout(()=>{cleanup();reject(new Error('O player não iniciou.'));},10000);
+        const done=()=>{cleanup();resolve();};
+        const canceled=()=>{cleanup();reject(new Error('Reprodução encerrada.'));};
+        const cleanup=()=>{clearTimeout(timer);media.removeEventListener('sourceopen',done);this.abort.signal.removeEventListener('abort',canceled);};
+        media.addEventListener('sourceopen',done,{once:true});
+        this.abort.signal.addEventListener('abort',canceled,{once:true});
+      });
+      this.objectUrl=URL.createObjectURL(media); this.video.src=this.objectUrl; this.video.load();
+      await opened;
       if(epoch!==this.epoch) return;
       const buffer=media.addSourceBuffer(mime);
       const updated=()=>new Promise((resolve,reject)=>{
@@ -51,8 +69,8 @@ window.AgoraLiveVideo = class {
           if(end-this.video.currentTime>5) this.video.currentTime=Math.max(buffer.buffered.start(0),end-1.5);
           const cutoff=this.video.currentTime-15;
           if(cutoff>buffer.buffered.start(0)+2) { const trimmed=updated();buffer.remove(0,cutoff);await trimmed; }
-          if(this.video.paused) this.video.play().catch(()=>{});
-          this.status.textContent='Ao vivo'; this.failures=0;
+          if(this.video.paused) this.video.play().catch(()=>{if(epoch===this.epoch)this.status.textContent='Toque no botão ▶ do vídeo para iniciar.';});
+          this.status.textContent=this.video.paused?'Toque no botão ▶ do vídeo para iniciar.':'Ao vivo'; this.failures=0;
         }
       }
     } catch(error) {
