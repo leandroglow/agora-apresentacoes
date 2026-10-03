@@ -76,7 +76,9 @@ function renderLocations(){
   select.value=selectedLocationId;select.disabled=!locations.length;
 }
 function renderFilters(){
-  const host=$('environmentFilters');host.replaceChildren();
+  const host=$('environmentFilters'),scroll=host.scrollLeft;
+  const focused=host.contains(document.activeElement)?document.activeElement.textContent:null;
+  host.replaceChildren();
   if(!selectedLocationId)return;
   [{id:'',label:'Todos'},...currentEnvironments()].forEach(env=>{
     const count=new Set(locationChannels().filter(c=>!env.id||c.environmentId===env.id).map(c=>c.moduleId)).size;
@@ -86,6 +88,8 @@ function renderFilters(){
     button.addEventListener('click',()=>{selectedEnvironmentId=env.id;render();});
     host.append(button);
   });
+  host.scrollLeft=scroll;
+  if(focused)[...host.children].find(button=>button.textContent===focused)?.focus({preventScroll:true});
 }
 function renderEmpty(grid){
   const empty=element('div','empty-devices'),detail=element('div');
@@ -182,7 +186,7 @@ function renderDevices(){
     card.dataset.moduleId=module.id;
     const head=element('div','device-card-head'),title=element('div');
     title.append(element('p','',module.room),element('h3','',module.label));
-    head.append(title);card.append(head);
+    const icon=element('span','device-symbol');icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24"><path d="M9 18h6M9.5 21h5M8 14a6 6 0 1 1 8 0c-1 .8-1.5 1.5-1.5 3h-5c0-1.5-.5-2.2-1.5-3Z"/></svg>';head.append(title,icon);card.append(head);
     const failure=module.outputs.find(c=>c.error);
     if(failure)card.append(element('p','resource-warning',failure.error));
     const primary=simple?window.AgoraControlLayout.visibleOutputs(module.outputs):module.outputs.filter(c=>!Cap.isSetting(c)),settings=simple?[]:module.outputs.filter(c=>Cap.isSetting(c));
@@ -220,6 +224,12 @@ function render(){
   $('refresh').setAttribute('aria-busy',String(working));
   renderLocations();renderFilters();renderDevices();
   window.AgoraCameras?.render({authenticated,locationId:selectedLocationId,cameras}, api);
+  const visible=locationChannels();
+  $('moduleTotal').textContent=statusLoaded?new Set(visible.map(c=>c.moduleId)).size:'—';
+  $('powerTotal').textContent=statusLoaded?visible.filter(c=>Cap.isPower(c)&&c.value===true).length:'—';
+  $('roomTotal').textContent=statusLoaded?currentEnvironments().length:'—';
+  $('cameraEmpty').hidden=cameras.some(c=>c.locationId===selectedLocationId);
+  if(!authenticated)window.AgoraShell?.select(0);
 }
 
 function clearSession(){

@@ -5,7 +5,7 @@ window.AgoraCameras = (() => {
   const timers = new Set();
   const players = new Set();
   function stop() {
-    generation++;
+    generation++; context = "";
     for(const player of players) player.stop();
     players.clear();
     for (const timer of timers) clearTimeout(timer);
@@ -29,7 +29,7 @@ window.AgoraCameras = (() => {
     const visible = authenticated ? cameras.filter(c => c.locationId === locationId) : [];
     const next = JSON.stringify([authenticated, locationId, visible.map(c => [c.id, c.label])]);
     if (context === next) return;
-    context = next; stop();
+    stop(); context = next;
     if (!visible.length) return;
     host.hidden = false;
     host.append(node('h2', 'camera-section-title', 'Câmeras'));
@@ -71,5 +71,16 @@ window.AgoraCameras = (() => {
   document.addEventListener('visibilitychange',()=>{if(document.hidden){
     for(const player of players) {player.stop();player.status.textContent='Vídeo pausado. Toque em Ver câmera para continuar.';}
   }});
-  return {render, stop};
+  function pause() {
+    generation++;
+    for(const player of players) {
+      player.stop();
+      player.status.textContent='Vídeo pausado. Toque em Ver câmera para continuar.';
+    }
+    if(host) {
+      host.querySelectorAll('video').forEach(video=>video.hidden=true);
+      host.querySelectorAll('button').forEach(button=>button.disabled=false);
+    }
+  }
+  return {render, stop, pause};
 })();

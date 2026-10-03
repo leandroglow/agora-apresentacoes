@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090B0A"><meta name="robots" content="noindex"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="ÁGORA Construtora"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/app-icon-192.png">
   <title>ÁGORA Construtora · Automação</title>
   <link rel="icon" href="assets/monograma.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css"><script defer src="capabilities.js"></script><script defer src="visual.js"></script><script defer src="portal-config.js"></script><script defer src="portal-auth.js"></script><script defer src="control-layout.js?v=2"></script><link rel="stylesheet" href="camera-player.css?v=1"><script defer src="live-video.js?v=iphone-2"></script><script defer src="camera-player.js?v=1"></script><script defer src="app.js?v=camera-1"></script>
+  <link rel="stylesheet" href="style.css"><script defer src="capabilities.js"></script><script defer src="visual.js"></script><script defer src="portal-config.js"></script><script defer src="portal-auth.js"></script><script defer src="control-layout.js?v=2"></script><link rel="stylesheet" href="camera-player.css?v=1"><script defer src="live-video.js?v=iphone-2"></script><script defer src="camera-player.js?v=glass-1"></script><script defer src="app.js?v=glass-1"></script>
+<link rel="stylesheet" href="app-glass.css?v=1"><script defer src="app-shell.js?v=1"></script>
 </head>
 <body class="control-app">
   <a class="skip-link" href="#controls" hidden>Ir para os comandos</a>
@@ -18,25 +19,49 @@
       <p id="loginNotice" class="notice" role="status" hidden></p>
     </div>
   </section>
-  <header class="masthead" hidden>
+  <header class="masthead app-rail" hidden>
     <a class="brand" href="./" aria-label="Ágora Construtora — início"><span class="mark">Á</span><span>ÁGORA<small>CONSTRUTORA</small></span></a>
-    <nav class="main-nav" aria-label="Navegação principal"><a href="./" aria-current="page">Controle</a><a id="manageButton" href="admin.html" hidden>Dispositivos</a><button id="passwordButton" type="button">Alterar senha</button></nav>
-    <button id="accessButton" class="access-button"><span id="accessLabel">Entrar</span></button>
+    <span class="rail-label">AUTOMAÇÃO</span>
+    <nav class="app-tabs" role="tablist" aria-label="Navegação do aplicativo" aria-orientation="vertical">
+      <button id="tab-controls" class="app-tab active" role="tab" aria-selected="true" aria-controls="controlsView" data-view="0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Controle</span></button>
+      <button id="tab-cameras" class="app-tab" role="tab" aria-selected="false" aria-controls="camerasView" data-view="1" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="14" height="12" rx="3"/><path d="m17 10 4-3v10l-4-3"/></svg><span>Câmeras</span></button>
+      <button id="tab-account" class="app-tab" role="tab" aria-selected="false" aria-controls="accountView" data-view="2" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg><span>Conta</span></button>
+    </nav>
+    <div class="rail-footer"><span class="rail-line"></span><p>Seus espaços.<br>Ao seu alcance.</p><small>ÁGORA · SMART LIVING</small></div>
   </header>
-  <main class="page" hidden>
+  <main class="page app-workspace" hidden>
     <section class="residence" aria-labelledby="locationTitle">
       <div class="residence-heading">
-        <h1 id="locationTitle">Controle</h1>
-        <label class="location-picker"><span class="eyebrow">Seu local</span><select id="locationSelect" aria-label="Selecionar local"><option>Carregando…</option></select></label>
+        <div class="location-heading"><span class="eyebrow">MEUS ESPAÇOS</span><h1 id="locationTitle">Controle</h1></div>
+        <label class="location-picker"><span class="eyebrow">Trocar local</span><select id="locationSelect" aria-label="Selecionar local"><option>Carregando…</option></select></label>
       </div>
     </section>
-    <section id="controls" class="controls" aria-labelledby="controlsTitle">
-      <div class="section-heading"><h2 id="controlsTitle">Controle por ambiente</h2><button id="refresh" class="quiet" aria-label="Atualizar estados" title="Atualizar estados"><span class="refresh-symbol" aria-hidden="true">↻</span></button></div>
-      <div class="control-toolbar"><div id="environmentFilters" class="filter-list" role="group" aria-label="Filtrar por ambiente"></div></div>
-      <p id="notice" class="notice" role="status" hidden></p>
-      <div id="deviceGrid" class="device-grid"></div>
-    </section>
-    <section id="cameras" class="camera-section" aria-label="Câmeras do local" hidden></section>
+    <div class="view-viewport" id="viewViewport">
+      <div class="view-track" id="viewTrack">
+        <section class="app-view" id="controlsView" role="tabpanel" aria-labelledby="tab-controls" tabindex="0">
+          <div class="space-hero">
+            <div class="hero-copy"><span class="eyebrow">ÁGORA AUTOMAÇÃO</span><h2>Seu espaço,<br>no seu ritmo.</h2><p>Luz, conforto e controle. Em um toque.</p></div>
+            <div class="space-summary" aria-label="Resumo do local"><div><strong id="moduleTotal">—</strong><span>Módulos</span></div><div><strong id="powerTotal">—</strong><span>Saídas ligadas</span></div><div><strong id="roomTotal">—</strong><span>Ambientes</span></div></div>
+          </div>
+          <section id="controls" class="controls" aria-labelledby="controlsTitle">
+            <div class="section-heading"><div><span class="section-kicker">DO SEU JEITO</span><h2 id="controlsTitle">Ambientes</h2></div><button id="refresh" class="quiet" aria-label="Atualizar estados" title="Atualizar estados"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.3 8a7.5 7.5 0 0 1 12.3-3L20 8M4 16l2.4 3A7.5 7.5 0 0 0 18.7 16"/></svg></button></div>
+            <div class="control-toolbar"><div id="environmentFilters" class="filter-list" role="group" aria-label="Filtrar por ambiente"></div></div>
+            <p id="notice" class="notice" role="status" hidden></p>
+            <div id="deviceGrid" class="device-grid"></div>
+          </section>
+        </section>
+        <section class="app-view" id="camerasView" role="tabpanel" aria-labelledby="tab-cameras" tabindex="0" inert aria-hidden="true">
+          <div class="view-heading"><span class="eyebrow">UM OLHAR POR PERTO</span><h2>Câmeras</h2><p>Acompanhe os espaços deste local.</p></div>
+          <section id="cameras" class="camera-section" aria-label="Câmeras do local" hidden></section>
+          <div id="cameraEmpty" class="glass-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="14" height="12" rx="3"/><path d="m17 10 4-3v10l-4-3"/></svg><h3>Nenhuma câmera neste local</h3><p>As câmeras disponíveis aparecem aqui.</p></div>
+        </section>
+        <section class="app-view" id="accountView" role="tabpanel" aria-labelledby="tab-account" tabindex="0" inert aria-hidden="true">
+          <div class="view-heading"><span class="eyebrow">SEU APLICATIVO</span><h2>Minha conta</h2><p>Seu acesso e a organização dos seus dispositivos.</p></div>
+          <div class="account-card"><div class="account-emblem">Á</div><h3>Ágora Automação</h3><p>Seus locais, em um só lugar.</p><div class="account-actions"><a id="manageButton" href="admin.html" hidden><span>Dispositivos<small>Organizar locais, ambientes e módulos</small></span><span aria-hidden="true">↗</span></a><button id="passwordButton" type="button"><span>Alterar senha<small>Atualizar sua senha de acesso</small></span><span aria-hidden="true">›</span></button><button id="accessButton" class="access-button"><span id="accessLabel">Sair</span><span aria-hidden="true">↗</span></button></div></div>
+        </section>
+      </div>
+    </div>
+    <div class="page-indicator" aria-hidden="true"><span class="active"></span><span></span><span></span></div>
   </main>
   <dialog id="passwordDialog" class="dialog password-dialog" aria-labelledby="passwordTitle">
     <button id="passwordClose" class="dialog-close" type="button" aria-label="Fechar">×</button>
