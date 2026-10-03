@@ -17,6 +17,28 @@
    if(!homes.length)result.append(el('p','notice','Não foi possível confirmar uma casa Tuya contendo o dispositivo já cadastrado. Nenhum equipamento foi adicionado.'));
    for(const home of homes){
     result.append(el('h3','','Casa Tuya: '+home.name),el('p','micro','Vínculo confirmado pela presença de um dispositivo já cadastrado neste local.'));
+    const missing=home.devices.filter(d=>!modules.some(m=>m.deviceId===d.id));
+    if(missing.length){
+     const progress=el('p','micro');progress.setAttribute('role','status');
+     const batch=button('Cadastrar '+missing.length+' dispositivos faltantes desta casa','primary',async()=>{
+      if(selected!==structureLocationId){message('O local selecionado mudou. Consulte novamente.','error');return;}
+      const plan=missing.map(item=>{const rooms=home.rooms.filter(r=>r.deviceIds.includes(item.id));const name=rooms.length===1?rooms[0].name:rooms.length===0?'Sem ambiente na Tuya':'';const target=envs(selected).find(e=>e.label===name);return {item,target,name};});
+      const unresolved=plan.filter(p=>!p.target);
+      if(unresolved.length){progress.textContent='Crie ou confirme os ambientes antes do lote: '+[...new Set(unresolved.map(p=>p.name||'dispositivo em mais de um ambiente'))].join(', ')+'. Nenhum cadastro executado.';return;}
+      batch.disabled=true;scan.disabled=true;$('structureLocation').disabled=true;
+      let completed=0;const failures=[];
+      try{
+       for(let index=0;index<plan.length;index++){
+        const {item,target}=plan[index];progress.textContent=(index+1)+'/'+plan.length+' · Conferindo e cadastrando '+item.name+'…';
+        if(modules.some(m=>m.deviceId===item.id))continue;
+        try{adopt(await api('admin',{action:'register',environmentId:target.id,label:(item.name||'Dispositivo Tuya').slice(0,80),deviceId:item.id}));completed++;}
+        catch(error){failures.push(item.name+': '+error.message);}
+       }
+       render();progress.textContent=completed+' cadastrado(s). '+failures.length+' pendente(s). '+failures.join(' | ');message('Cadastro do lote concluído. Confira as pendências abaixo.','live');
+      }finally{scan.disabled=false;$('structureLocation').disabled=false;}
+     });
+     result.append(el('p','micro','Destino: '+activeLocation().label+'. Usa os ambientes identificados na Tuya e mantém os nomes existentes. Equipamentos sem recursos disponíveis poderão ficar pendentes.'),batch,progress);
+    }
     for(const item of home.devices){
      const row=el('article','module-card');const existing=modules.find(m=>m.deviceId===item.id);
      const room=home.rooms.find(r=>r.deviceIds.includes(item.id));
