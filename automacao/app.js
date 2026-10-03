@@ -40,7 +40,7 @@ function adopt(data) {
   }
   if(!environments.some(e=>e.id===selectedEnvironmentId && e.locationId===selectedLocationId))selectedEnvironmentId='';
 }
-function locationChannels(){return channels.filter(c=>c.locationId===selectedLocationId);}
+function locationChannels(){return window.AgoraControlLayout.controlChannels(channels).filter(c=>c.locationId===selectedLocationId);}
 function currentEnvironments(){return environments.filter(e=>e.locationId===selectedLocationId);}
 function displayedValue(c){return pending.has(c.id)?pending.get(c.id).value:c.value;}
 function reconcilePending(){
