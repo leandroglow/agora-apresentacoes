@@ -179,13 +179,15 @@ $('syncResources').addEventListener('click',()=>save('editDialog','editModuleErr
 
 function renderCameras(){
   const host=$('cameraList');host.replaceChildren();
-  const list=cameras.filter(c=>c.locationId===structureLocationId);
+  const list=cameras.filter(c=>!c.locationId||c.locationId===structureLocationId);
   if(!list.length)host.append(el('p','empty-note','Nenhuma câmera conectada neste local.'));
   list.forEach(camera=>{
     const card=el('article','module-card');card.append(el('p','eyebrow','Câmera'),el('h3','',camera.label));
+    if(!camera.locationId)card.append(el('p','micro','Conectada · escolha o local em Editar câmera.'));
     card.append(button('Editar câmera','quiet',()=>{
       editingCameraId=camera.id;$('cameraEditLabel').value=camera.label;
       fill($('cameraEditLocation'),locations,camera.locationId,'Nenhum local');
+      if(!camera.locationId){const option=el('option','','Selecione o local');option.value='';option.disabled=true;option.selected=true;$('cameraEditLocation').prepend(option);}
       $('cameraEditError').hidden=true;$('cameraEditDialog').showModal();
     }));host.append(card);
   });
