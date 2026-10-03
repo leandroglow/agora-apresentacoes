@@ -175,6 +175,7 @@ function renderDevices(){
   });
   if(!grouped.size){renderEmpty(grid);return;}
   grouped.forEach(module=>{
+    const simple=window.AgoraControlLayout.simpleRelay(module.outputs);
     const card=element('article','device-card'+(module.outputs.some(c=>Cap.isPower(c)&&displayedValue(c)===true)?' has-light':''));
     card.dataset.moduleId=module.id;
     const head=element('div','device-card-head'),title=element('div');
@@ -182,8 +183,8 @@ function renderDevices(){
     head.append(title);card.append(head);
     const failure=module.outputs.find(c=>c.error);
     if(failure)card.append(element('p','resource-warning',failure.error));
-    const primary=module.outputs.filter(c=>!Cap.isSetting(c)),settings=module.outputs.filter(c=>Cap.isSetting(c));
-    primary.sort((a,b)=>Number(Cap.isPower(b))-Number(Cap.isPower(a))).forEach(c=>card.append(renderControl(c)));
+    const primary=simple?window.AgoraControlLayout.visibleOutputs(module.outputs):module.outputs.filter(c=>!Cap.isSetting(c)),settings=simple?[]:module.outputs.filter(c=>Cap.isSetting(c));
+    primary.sort((a,b)=>Number(Cap.isPower(b))-Number(Cap.isPower(a))).forEach(c=>card.append(renderControl(simple?{...c,label:window.AgoraControlLayout.outputLabel(c)}:c)));
     if(settings.length){
       const details=element('details','device-settings');details.open=expandedModules.has(module.id);
       details.append(element('summary','','Ajustes do equipamento · '+settings.length));
