@@ -287,7 +287,7 @@ function queueCommand(output,value){
 }
 $('locationSelect').addEventListener('change',()=>{selectedLocationId=$('locationSelect').value;selectedEnvironmentId='';preference(selectedLocationId);render();});
 $('refresh').addEventListener('click',refresh);
-setInterval(()=>{if(document.visibilityState==='visible')refresh();},12000);
+setInterval(()=>{if(document.visibilityState==='visible')refresh();},60000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh();});
 const passwordDialog=$('passwordDialog'),passwordForm=$('passwordForm'),passwordStatus=$('passwordStatus');
 $('passwordButton').addEventListener('click',()=>{
