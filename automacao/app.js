@@ -226,7 +226,8 @@ function render(){
   window.AgoraCameras?.render({authenticated,locationId:selectedLocationId,cameras}, api);
   const visible=locationChannels();
   $('moduleTotal').textContent=statusLoaded?new Set(visible.map(c=>c.moduleId)).size:'—';
-  $('powerTotal').textContent=statusLoaded?visible.filter(c=>Cap.isPower(c)&&c.value===true).length:'—';
+  const powerChannels=visible.filter(c=>Cap.isPower(c));
+  $('powerTotal').textContent=statusLoaded&&powerChannels.some(c=>typeof c.value==='boolean')?powerChannels.filter(c=>c.value===true).length:'—';
   $('roomTotal').textContent=statusLoaded?currentEnvironments().length:'—';
   $('cameraEmpty').hidden=cameras.some(c=>c.locationId===selectedLocationId);
   if(!authenticated)window.AgoraShell?.select(0);
