@@ -8,4 +8,34 @@ mode.addEventListener('change',render);['show-old','show-new','alpha-old','alpha
 function expand(){expanded=!expanded;viewer.classList.toggle('expanded',expanded);document.body.classList.toggle('focused',expanded);$('expand').textContent=expanded?'Fechar tela':'Ampliar tela';$('expand').setAttribute('aria-expanded',String(expanded));if(expanded){viewer.setAttribute('role','dialog');viewer.setAttribute('aria-modal','true');}else{viewer.removeAttribute('role');viewer.removeAttribute('aria-modal');}setZoom(zoom);$('expand').focus();}
 $('expand').onclick=expand;document.addEventListener('keydown',e=>{if(e.key==='Escape'&&expanded)expand();if(e.key==='Tab'&&expanded){const a=[...viewer.querySelectorAll('button,a[href],select,input,[tabindex="0"]')].filter(el=>!el.disabled&&el.getClientRects().length);if(e.shiftKey&&document.activeElement===a[0]){e.preventDefault();a.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===a.at(-1)){e.preventDefault();a[0].focus();}}});
 viewport.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0)return;drag={x:e.clientX,y:e.clientY,left:viewport.scrollLeft,top:viewport.scrollTop};viewport.setPointerCapture(e.pointerId);viewport.classList.add('dragging');});viewport.addEventListener('pointermove',e=>{if(!drag)return;viewport.scrollLeft=drag.left-(e.clientX-drag.x);viewport.scrollTop=drag.top-(e.clientY-drag.y);});function end(){drag=null;viewport.classList.remove('dragging');}viewport.addEventListener('pointerup',end);viewport.addEventListener('pointercancel',end);window.addEventListener('resize',()=>setZoom(zoom));render();setZoom(1,true);
+// Pinch gestures stay inside the drawing; page scrolling outside it is preserved.
+let touchGesture=null;
+function touchesState(touches){
+ const r=viewport.getBoundingClientRect();
+ const pts=Array.from(touches).slice(0,2).map(t=>({x:t.clientX-r.left-viewport.clientLeft,y:t.clientY-r.top-viewport.clientTop}));
+ const x=pts.reduce((v,p)=>v+p.x,0)/pts.length,y=pts.reduce((v,p)=>v+p.y,0)/pts.length;
+ return {x,y,count:pts.length,distance:pts.length===2?Math.hypot(pts[1].x-pts[0].x,pts[1].y-pts[0].y):0};
+}
+function startTouch(e){
+ if(!e.touches.length){touchGesture=null;return;}
+ const p=touchesState(e.touches),w=stage.clientWidth;
+ touchGesture={...p,zoom,left:viewport.scrollLeft,top:viewport.scrollTop,anchorX:(viewport.scrollLeft+p.x)/w,anchorY:(viewport.scrollTop+p.y)/w};
+}
+viewport.addEventListener('touchstart',e=>{e.preventDefault();startTouch(e);},{passive:false});
+viewport.addEventListener('touchmove',e=>{
+ e.preventDefault();if(!touchGesture)return;
+ const p=touchesState(e.touches),g=touchGesture;
+ if(p.count!==g.count){startTouch(e);return;}
+ if(p.count===2&&g.distance>0){
+  setZoom(g.zoom*p.distance/g.distance);
+  viewport.scrollLeft=g.anchorX*stage.clientWidth-p.x;
+  viewport.scrollTop=g.anchorY*stage.clientWidth-p.y;
+ }else{viewport.scrollLeft=g.left+g.x-p.x;viewport.scrollTop=g.top+g.y-p.y;}
+},{passive:false});
+viewport.addEventListener('touchend',startTouch,{passive:true});
+viewport.addEventListener('touchcancel',()=>{touchGesture=null;},{passive:true});
+// Safari ignores user-scalable on some versions: cancel its page pinch explicitly.
+['gesturestart','gesturechange','gestureend'].forEach(type=>document.addEventListener(type,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
 })();
+
