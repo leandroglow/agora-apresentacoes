@@ -1555,7 +1555,7 @@ document.getElementById('btn-apresentacao-voltar').addEventListener('click',()=>
 });
 
 // ── OPENAI CONFIG ────────────────────────────────────────
-const OPENAI_PROXY='https://project-pyfyj.vercel.app/api/analyze-receipt';
+const OPENAI_PROXY='https://project-pyfyj.vercel.app/api/analyze-receipt?v=20261008-2039';
 const GDRIVE_DESP_FOLDER='1665zvQOtbulPR59zjFLr37mflu9n31Yo';
 
 async function openaiChat(messages, max_tokens=800){
@@ -1563,6 +1563,7 @@ async function openaiChat(messages, max_tokens=800){
   if(!clerkToken) throw new Error('Sessão expirada. Entre novamente no sistema.');
   const resp=await fetch(OPENAI_PROXY,{
     method:'POST',
+    cache:'no-store',
     headers:{
       'Content-Type':'application/json',
       'Authorization':'Bearer '+clerkToken
