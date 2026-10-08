@@ -482,17 +482,6 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
       <svg class="hub-btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
 
-    <button class="hub-btn" id="card-despesas">
-      <div class="hub-btn-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-      </div>
-      <div class="hub-btn-text">
-        <span class="hub-btn-title">Despesas</span>
-        <span class="hub-btn-desc">Fotografe notas e pedidos — IA extrai e salva os dados</span>
-      </div>
-      <svg class="hub-btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-
   </div>
   <div class="hub-footer">
     <button class="btn-logout" id="btn-logout">Sair</button>
@@ -525,6 +514,12 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
         <span class="organizacao-card-title">Estrutura de IA</span>
         <span class="organizacao-card-description">Explore o mapa interativo. Clique nos blocos para conhecer agentes, skills, projetos e arquivos de memória.</span>
         <span class="organizacao-card-action">Explorar estrutura <span aria-hidden="true">→</span></span>
+      </button>
+      <button type="button" class="organizacao-card" id="card-organizacao-despesas">
+        <span class="organizacao-symbol" aria-hidden="true">▣</span>
+        <span class="organizacao-card-title">Despesas</span>
+        <span class="organizacao-card-description">Registre comprovantes, combustível e custos de obras com fotos armazenadas no Drive.</span>
+        <span class="organizacao-card-action">Abrir despesas <span aria-hidden="true">→</span></span>
       </button>
     </div>
   </section>
@@ -1254,10 +1249,10 @@ document.getElementById('card-diario').addEventListener('click',()=>abrirSecao('
 document.getElementById('card-relatorio').addEventListener('click',()=>abrirSecao('relatorio'));
 document.getElementById('card-projetos').addEventListener('click',()=>abrirSecao('projetos'));
 document.getElementById('card-360').addEventListener('click',()=>abrirSecao('tour360'));
-document.getElementById('card-despesas').addEventListener('click',()=>abrirSecao('despesas'));
 document.getElementById('card-organizacao').addEventListener('click',()=>abrirSecao('organizacao'));
 document.getElementById('card-catalogos-ia').addEventListener('click',()=>abrirSecao('assistente'));
 document.getElementById('card-estrutura-ia').addEventListener('click',()=>abrirSecao('estrutura-ia'));
+document.getElementById('card-organizacao-despesas').addEventListener('click',()=>abrirSecao('despesas'));
 document.getElementById('btn-voltar-hub').addEventListener('click',()=>{
   // Para o iframe 360 ao sair
   document.getElementById('iframe-360').src='';
