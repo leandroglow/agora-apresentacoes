@@ -743,7 +743,7 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
               <div class="btn-secondary desp-input-card">🖼️ Escolher da galeria</div>
               <input type="file" id="desp-input-galeria" accept="image/*" style="display:none" />
             </label>
-            <button id="desp-btn-analisar" class="btn-primary" style="display:none" onclick="analisarDespesa()">✦ Analisar com IA</button>
+            <button type="button" id="desp-btn-analisar" class="btn-primary" style="display:none">✦ Analisar com IA</button>
           </div>
         </div>
         <div id="desp-resultado" style="display:none">
@@ -857,7 +857,7 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
 </style>
 
 <script>
-const OBRAS=['Casa do Lago AC20','Evidencias K21','Salto M14','Chácara Lobo Guará','Milano P4','Milano P3','Di Roma E6','Galpão Smart City Q33 L25'];
+const OBRAS=['Casa do Lago AC20','Evidencias K21','Salto M14','Chácara Lobo Guará','Milano P4','Milano P3','Di Roma E6','Galpão Smart City Q33 L25','Helvetia Park 2 B11','SMI — Smart City Indaiatuba, quadra 33, lote 25','SMS G13 — Smart City Salto, quadra G, lote 13'];
 const CATALOGOS_API_BASE=(window.CATALOGOS_IA_API_BASE||'https://agora-apresentacoes.vercel.app').replace(/\/$/,'');
 let catalogosToken='';
 
@@ -1567,7 +1567,7 @@ async function openaiChat(messages, max_tokens=800){
     },
     body:JSON.stringify({model:'gpt-4o', max_tokens, messages})
   });
-  if(!resp.ok) throw new Error('Proxy erro: '+resp.status);
+  if(!resp.ok) throw new Error('O serviço de IA retornou HTTP '+resp.status+'. Verifique a conexão e tente novamente.');
   const data=await resp.json();
   if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
   return data.choices?.[0]?.message?.content||'';
@@ -1760,10 +1760,13 @@ window.analisarDespesa=async function(){
     renderItensDesp();
     st.className='sok'; st.textContent='✓ Dados extraídos — revise e salve';
   }catch(e){
-    st.className='serr'; st.textContent='⚠ Erro: '+e.message;
+    st.className='serr'; st.textContent='⚠ Não foi possível analisar: '+e.message;
   }
   btn.disabled=false; btn.textContent='✦ Analisar com IA';
 };
+
+// Vincula o botão também por JavaScript, evitando bloqueios de handlers inline em navegadores móveis.
+document.getElementById('desp-btn-analisar').addEventListener('click',()=>window.analisarDespesa());
 
 function renderItensDesp(){
   const lista=document.getElementById('desp-itens-lista');
@@ -1818,7 +1821,7 @@ window.salvarDespesa=async function(){
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+SBASE_ANON},
         body:JSON.stringify({
-          fileName:`desp_${despId}.${ext}`,
+          fileName:`${(obra||'geral').replace(/[^a-z0-9]+/gi,'_').replace(/^_|_$/g,'')}_desp_${despId}.${ext}`,
           fileBase64:b64,
           mimeType:despFotoFile.type||'image/jpeg',
           folderId:GDRIVE_DESP_FOLDER
