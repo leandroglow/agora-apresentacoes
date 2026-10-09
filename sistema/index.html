@@ -1897,7 +1897,9 @@ window.salvarDespesa=async function(){
           fileBase64:b64,
           mimeType:despFotoFile.type||'image/jpeg',
           folderId:GDRIVE_DESP_FOLDER,
-          googleAccessToken:gdriveSharedServerAuth?'':await garantirGoogleDrive()
+          // O Drive das despesas usa a credencial compartilhada do servidor.
+          // Não abrir o OAuth do Google no navegador de usuários finais.
+          googleAccessToken:''
         })
       });
       const upData=await upResp.json();
