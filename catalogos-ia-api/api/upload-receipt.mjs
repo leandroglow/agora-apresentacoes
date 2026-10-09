@@ -1,5 +1,6 @@
 import { getGoogleDriveAccessToken } from './_lib/google.mjs';
 import { requireAuth } from './_lib/auth.mjs';
+import { driveId } from './_lib/drive.mjs';
 import { handleOptions, json, readJsonBody, requireMethod, setCors } from './_lib/http.mjs';
 
 const DEFAULT_FOLDER = '1665zvQOtbulPR59zjFLr37mflu9n31Yo';
@@ -14,7 +15,8 @@ export default async function handler(req, res) {
     if (!base64 || base64.length > 15_000_000) return json(res, 400, { error: 'Imagem ausente ou maior que o limite permitido.' });
     const mimeType = String(body.mimeType || 'image/jpeg').split(';')[0];
     const fileName = String(body.fileName || `despesa_${Date.now()}.jpg`).replace(/[^a-zA-Z0-9._-]/g, '_');
-    const folderId = String(body.folderId || process.env.GOOGLE_DRIVE_EXPENSE_FOLDER_ID || DEFAULT_FOLDER);
+    const folderHint = body.folderId || process.env.GOOGLE_DRIVE_EXPENSE_FOLDER_ID || process.env.GOOGLE_DRIVE_FOLDER_HINT || DEFAULT_FOLDER;
+    const folderId = driveId(folderHint) || String(folderHint);
     const token = await getGoogleDriveAccessToken();
     const boundary = `agora_${Date.now()}`;
     const metadata = JSON.stringify({ name: fileName, parents: [folderId], mimeType });

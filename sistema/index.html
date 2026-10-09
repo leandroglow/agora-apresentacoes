@@ -779,6 +779,10 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
               <label class="label">Itens</label>
               <div id="desp-itens-lista" style="margin-top:8px;display:flex;flex-direction:column;gap:6px"></div>
             </div>
+            <div style="margin-top:14px">
+              <label class="label">Observações</label>
+              <textarea id="desp-observacoes" rows="3" placeholder="Placa, quilometragem, finalidade ou outras informações do comprovante"></textarea>
+            </div>
           </div>
           <div style="display:flex;gap:10px;justify-content:flex-end;padding-bottom:1.5rem">
             <button class="btn-secondary" onclick="limparFotoDesp()">Cancelar</button>
@@ -1700,6 +1704,7 @@ function normalizeDespesaIA(parsed){
     fornecedor: String(parsed?.fornecedor||'').trim(),
     data: normalizeDateBR(parsed?.data) || new Date().toISOString().split('T')[0],
     valor_total: parseMoneyBR(parsed?.valor_total),
+    observacoes: String(parsed?.observacoes||'').trim(),
     itens: itens.map(it=>({
       descricao: String(it?.descricao||'').trim(),
       quantidade: parseMoneyBR(it?.quantidade),
@@ -1737,6 +1742,7 @@ window.limparFotoDesp=function(){
   document.getElementById('desp-foto-preview').style.display='none';
   document.getElementById('desp-btn-analisar').style.display='none';
   document.getElementById('desp-resultado').style.display='none';
+  document.getElementById('desp-observacoes').value='';
 };
 
 window.analisarDespesa=async function(){
@@ -1752,7 +1758,7 @@ window.analisarDespesa=async function(){
       {role:'system',content:'Você extrai dados de documentos brasileiros de compra. Responda somente JSON válido, sem markdown, sem comentários e sem texto extra. Não invente campos. Preserve a descrição dos itens o mais completa possível. Se a foto estiver girada, considere o documento na orientação correta antes de ler. Classifique o tipo pelo conteúdo principal do documento: nota fiscal => nota_fiscal; cupom fiscal/ECF/PDV => cupom; pedido, orçamento, proposta comercial ou orçamento válido por 1 dia => pedido.'},
       {role:'user',content:[
       {type:'image_url',image_url:{url:`data:${despFotoFile.type};base64,${b64}`,detail:'high'}},
-      {type:'text',text:`Analise este documento (nota fiscal, cupom, pedido, orçamento ou proposta de material de construção) e retorne SOMENTE um JSON válido sem markdown com este formato:\n{"tipo":"nota_fiscal|pedido|cupom|outro","fornecedor":"","data":"YYYY-MM-DD","valor_total":null,"itens":[{"descricao":"","quantidade":null,"unidade":"","valor_unitario":null}]}\nRegras:\n- use null quando não conseguir confirmar um valor;\n- mantenha a descrição do item o mais completa possível;\n- quantidade e valor_unitario devem refletir o documento, sem inventar;\n- para unidade, priorize unidades comuns de obra: m, m2, m3, un, kg, sc, cx, rl, pct;\n- quando aparecer MT, metro, metros ou metro linear, normalize como m;\n- quando aparecer unidade, und, unid, peça ou peças, normalize como un;\n- se houver vários itens, liste todos os que conseguir ler;\n- a data deve ser a data principal do documento; se estiver em formato DD/MM/AA, converta para 20AA;\n- se houver desconto, valor à vista, valor líquido, total com desconto ou valor final a pagar, em valor_total use o valor final após desconto;\n- se aparecerem preço bruto e preço com desconto, priorize o valor final efetivamente pagável;\n- se o documento estiver identificado como ORÇAMENTO, PEDIDO, PROPOSTA ou similar, não classifique como outro;\n- hoje é 2026-05-01, então datas com ano de dois dígitos como 26 normalmente significam 2026.`}
+      {type:'text',text:`Analise este documento (nota fiscal, cupom, pedido, orçamento ou proposta de material de construção) e retorne SOMENTE um JSON válido sem markdown com este formato:\n{"tipo":"nota_fiscal|pedido|cupom|outro","fornecedor":"","data":"YYYY-MM-DD","valor_total":null,"observacoes":"","itens":[{"descricao":"","quantidade":null,"unidade":"","valor_unitario":null}]}\nRegras:\n- use null quando não conseguir confirmar um valor;\n- mantenha a descrição dos itens o mais completa possível;\n- quantidade e valor_unitario devem refletir o documento, sem inventar;\n- para unidade, priorize unidades comuns de obra: m, m2, m3, un, kg, sc, cx, rl, pct;\n- quando aparecer MT, metro, metros ou metro linear, normalize como m;\n- quando aparecer unidade, und, unid, peça ou peças, normalize como un;\n- se houver vários itens, liste todos os que conseguir ler;\n- a data deve ser a data principal do documento; se estiver em formato DD/MM/AA, converta para 20AA;\n- se houver desconto, valor à vista, valor líquido, total com desconto ou valor final a pagar, em valor_total use o valor final após desconto;\n- se aparecerem preço bruto e preço com desconto, priorize o valor final efetivamente pagável;\n- se o comprovante for de combustível, procure placa do veículo e quilometragem/KM e registre ambos em observacoes; não invente se não estiverem legíveis;\n- se o documento estiver identificado como ORÇAMENTO, PEDIDO, PROPOSTA ou similar, não classifique como outro;\n- hoje é 2026-10-08, então datas com ano de dois dígitos como 26 normalmente significam 2026.`}
     ]}], 1400);
     const cleaned=txt.replace(/```json|```/g,'').trim();
     const jsonText=(cleaned.match(/\{[\s\S]*\}/)||[])[0]||cleaned;
@@ -1761,6 +1767,7 @@ window.analisarDespesa=async function(){
     document.getElementById('desp-fornecedor').value=parsed.fornecedor||'';
     document.getElementById('desp-data').value=parsed.data||new Date().toISOString().split('T')[0];
     document.getElementById('desp-valor').value=parsed.valor_total??'';
+    document.getElementById('desp-observacoes').value=parsed.observacoes||'';
     despItens=parsed.itens||[];
     renderItensDesp();
     st.className='sok'; st.textContent='✓ Dados extraídos — revise e salve';
@@ -1851,7 +1858,7 @@ window.salvarDespesa=async function(){
     const SURL='https://pderpmbmurtagpdsvzjg.supabase.co';
     const SKEY='sb_publishable_E_fFSYpICmFlbto06qOi4A_07x-69nj';
     const H2={'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=representation'};
-    const desp={id:despId,obra,data:document.getElementById('desp-data').value||new Date().toISOString().split('T')[0],tipo:document.getElementById('desp-tipo').value,fornecedor:document.getElementById('desp-fornecedor').value.trim(),valor_total:parseFloat(document.getElementById('desp-valor').value)||0,itens:despItens,foto_drive_id:fotoDriveId};
+    const desp={id:despId,obra,data:document.getElementById('desp-data').value||new Date().toISOString().split('T')[0],tipo:document.getElementById('desp-tipo').value,fornecedor:document.getElementById('desp-fornecedor').value.trim(),valor_total:parseFloat(document.getElementById('desp-valor').value)||0,itens:despItens,observacoes:document.getElementById('desp-observacoes').value.trim(),foto_drive_id:fotoDriveId};
     let bancoOk=true;
     try {
       const dr=await fetch(SURL+'/rest/v1/despesas',{method:'POST',headers:H2,body:JSON.stringify(desp)});
