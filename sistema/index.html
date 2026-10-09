@@ -1862,6 +1862,12 @@ function renderItensDesp(){
   });
 }
 
+async function despesasApi(body){
+ const token=await AgoraSistemaAuth.token();
+ if(!token) throw new Error('Entre novamente no sistema Ágora.');
+ const r=await fetch('https://agora-apresentacoes.vercel.app/api/expenses',{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+ const data=await r.json(); if(!r.ok) throw new Error(data.error||'Falha ao acessar despesas.'); return data;
+}
 window.salvarDespesa=async function(){
   const obra=document.getElementById('desp-obra').value;
   if(!obra){alert('Selecione a obra.');return;}
@@ -1870,16 +1876,6 @@ window.salvarDespesa=async function(){
   const st=document.getElementById('desp-status');
   st.className='sload'; st.textContent='⏳ Salvando...';
   try{
-    // Consulta o modo do servidor antes do upload. Em modo compartilhado,
-    // nenhum usuário final precisa autorizar o Google Drive.
-    if(!gdriveSharedServerAuth){
-      try{
-        const tk=await AgoraSistemaAuth.token();
-        const cr=await fetch('https://agora-apresentacoes.vercel.app/api/drive-config',{headers:{Authorization:'Bearer '+tk}});
-        const cd=await cr.json().catch(()=>({}));
-        gdriveSharedServerAuth=cd.sharedServerAuth===true;
-      }catch(e){}
-    }
     const despId=Date.now();
     // Upload foto via Edge Function
     let fotoDriveId=null;
@@ -1906,13 +1902,13 @@ window.salvarDespesa=async function(){
       const uploadError=getUploadErrorMessage(upData);
       if(!upResp.ok || uploadError){
         const msg=uploadError==='DRIVE_AUTH_EXPIRED'
-          ? 'A autorização do Google Drive expirou. É preciso reconectar o Drive.'
+          ? 'A conexão central do Drive precisa ser regularizada pelo administrador. Não é necessário entrar no Google.'
           : uploadError==='DRIVE_PERMISSION_DENIED'
             ? 'A conta do Drive não tem permissão de gravação nessa pasta.'
             : uploadError==='DRIVE_FOLDER_NOT_FOUND'
               ? 'A pasta de despesas do Drive não foi encontrada.'
               : (uploadError || `Falha no upload da foto (${upResp.status}).`);
-        if(uploadError==='DRIVE_AUTH_EXPIRED') mostrarBotaoReconectarDrive();
+
         throw new Error(msg);
       }
       fotoDriveId=extractDriveId(upData);
@@ -1921,29 +1917,15 @@ window.salvarDespesa=async function(){
         throw new Error('A foto foi enviada, mas o Drive não retornou um identificador reconhecível. A despesa não foi salva para evitar histórico sem foto.');
       }
     }
-    st.textContent='⏳ Salvando no banco...';
-    const SURL='https://pderpmbmurtagpdsvzjg.supabase.co';
-    const SKEY='sb_publishable_E_fFSYpICmFlbto06qOi4A_07x-69nj';
-    const H2={'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=representation'};
     const desp={id:despId,obra,data:document.getElementById('desp-data').value||new Date().toISOString().split('T')[0],tipo:document.getElementById('desp-tipo').value,fornecedor:document.getElementById('desp-fornecedor').value.trim(),valor_total:parseFloat(document.getElementById('desp-valor').value)||0,itens:despItens,observacoes:document.getElementById('desp-observacoes').value.trim(),foto_drive_id:fotoDriveId};
-    let bancoOk=true;
-    try {
-      const dr=await fetch(SURL+'/rest/v1/despesas',{method:'POST',headers:H2,body:JSON.stringify(desp)});
-      if(!dr.ok) throw new Error(await dr.text());
-      if(despItens.length){
-        const itD=despItens.filter(it=>it.descricao).map(it=>({despesa_id:despId,descricao:it.descricao,quantidade:it.quantidade||0,unidade:it.unidade||'',valor_unitario:it.valor_unitario||0}));
-        if(itD.length) await fetch(SURL+'/rest/v1/despesas_itens',{method:'POST',headers:H2,body:JSON.stringify(itD)});
-      }
-    } catch (dbError) {
-      bancoOk=false;
+    try { await despesasApi({action:'save',record:desp}); }
+    catch(error){
       const locais=JSON.parse(localStorage.getItem('agora_despesas_pendentes')||'[]');
-      locais.unshift({...desp,pendente_sincronizacao:true});
-      localStorage.setItem('agora_despesas_pendentes',JSON.stringify(locais.slice(0,100)));
+      locais.unshift(desp); localStorage.setItem('agora_despesas_pendentes',JSON.stringify(locais)); throw error;
     }
-    st.className='sok';
-    st.textContent='✓ Despesa salva!'+(fotoDriveId?' Foto no Drive.':'')+(bancoOk?'':' Registro local pendente de sincronização.');
+    st.className='sok'; st.textContent='✓ Despesa e comprovante salvos. Disponíveis no histórico.';
     setTimeout(limparFotoDesp,2000);
-  }catch(e){st.className='serr';st.textContent='⚠ Erro: '+e.message; if(String(e.message||'').includes('autorização do Google Drive')) mostrarBotaoReconectarDrive();}
+  }catch(e){st.className='serr';st.textContent='⚠ Erro: '+e.message;}
   btn.disabled=false; btn.textContent='💾 Salvar Despesa';
 };
 
@@ -1965,10 +1947,12 @@ async function carregarHistDesp(){
   const cont=document.getElementById('desp-hist-conteudo');
   cont.innerHTML='<div class="proj-empty"><div class="big-spinner"></div><p>Carregando...</p></div>';
   try{
-    const SURL='https://pderpmbmurtagpdsvzjg.supabase.co',SKEY='sb_publishable_E_fFSYpICmFlbto06qOi4A_07x-69nj';
-    const H2={'apikey':SKEY,'Authorization':'Bearer '+SKEY};
-    const res=await fetch(SURL+'/rest/v1/despesas?select=*&order=criado_em.desc&limit=50',{headers:H2});
-    const despesas=await res.json();
+    const pendentes=JSON.parse(localStorage.getItem('agora_despesas_pendentes')||'[]');
+    for(const record of pendentes){
+      await despesasApi({action:'save',record});
+      localStorage.setItem('agora_despesas_pendentes',JSON.stringify(JSON.parse(localStorage.getItem('agora_despesas_pendentes')||'[]').filter(d=>d.id!==record.id)));
+    }
+    const despesas=await despesasApi();
     if(!despesas.length){cont.innerHTML='<div class="proj-empty"><div class="proj-empty-icon">📭</div><p>Nenhuma despesa registrada</p></div>';return;}
     const tipos={nota_fiscal:'Nota Fiscal',pedido:'Pedido',cupom:'Cupom',outro:'Outro'};
 
@@ -2000,8 +1984,8 @@ async function carregarHistDesp(){
         <div class="desp-hist-head">
           <div>
             <span class="desp-hist-badge">${tipos[d.tipo]||d.tipo}</span>
-            <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--ardosia);margin-top:3px">${d.fornecedor||'—'}</div>
-            <div style="font-size:11px;color:var(--concreto);margin-top:2px">${d.obra||''} · ${d.data?d.data.split('-').reverse().join('/'):'—'}</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--ardosia);margin-top:3px">${escAttr(d.fornecedor||'—')}</div>
+            <div style="font-size:11px;color:var(--concreto);margin-top:2px">${escAttr(d.obra||'')} · ${d.data?d.data.split('-').reverse().join('/'):'—'}</div>
           </div>
           <div style="text-align:right">
             <div class="desp-hist-valor">R$ ${(d.valor_total||0).toFixed(2).replace('.',',')}</div>
@@ -2056,24 +2040,15 @@ window.toggleEditDesp=function(id){
 };
 
 window.verFotoDesp=async function(driveId){
-  // O upload já foi autenticado pelo Drive; abrir diretamente pelo visualizador
-  // evita depender do refresh token do proxy para a prévia do histórico.
-  const url=`https://drive.google.com/uc?export=view&id=${driveId}`;
-  const thumb=`https://drive.google.com/thumbnail?id=${driveId}&sz=w400`;
-  window.lbAbrir([{id:null,driveId,name:'Foto da despesa',url,thumb}],0,'foto');
+ try{ const {url}=await despesasApi({action:'photo',fileId:driveId}); window.lbAbrir([{id:null,name:'Foto da despesa',url,thumb:url}],0,'foto'); }
+ catch(e){alert(e.message);}
 };
-
 window.editarDesp=function(id){ toggleEditDesp(id); };
 
 window.excluirDesp=async function(id){
   if(!confirm('Tem certeza que deseja excluir esta despesa? Esta ação não poderá ser desfeita.')) return;
-  const SURL='https://pderpmbmurtagpdsvzjg.supabase.co',SKEY='sb_publishable_E_fFSYpICmFlbto06qOi4A_07x-69nj';
-  const H2={'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json'};
   try{
-    const delItens=await fetch(SURL+'/rest/v1/despesas_itens?despesa_id=eq.'+id,{method:'DELETE',headers:H2});
-    if(!delItens.ok && delItens.status!==404) throw new Error(await delItens.text());
-    const delDesp=await fetch(SURL+'/rest/v1/despesas?id=eq.'+id,{method:'DELETE',headers:H2});
-    if(!delDesp.ok) throw new Error(await delDesp.text());
+    await despesasApi({action:'delete',id});
     carregarHistDesp();
   }catch(e){
     alert('Erro ao excluir despesa: '+e.message);
@@ -2081,8 +2056,6 @@ window.excluirDesp=async function(id){
 };
 
 window.salvarEdicaoDesp=async function(id){
-  const SURL='https://pderpmbmurtagpdsvzjg.supabase.co',SKEY='sb_publishable_E_fFSYpICmFlbto06qOi4A_07x-69nj';
-  const H2={'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json'};
   try{
     // Coleta itens editados do DOM
     const itensEl=document.getElementById('ef-itens-'+id);
@@ -2105,8 +2078,7 @@ window.salvarEdicaoDesp=async function(id){
     };
     if(itensNovos!==null) patch.itens=itensNovos;
 
-    const r=await fetch(SURL+'/rest/v1/despesas?id=eq.'+id,{method:'PATCH',headers:H2,body:JSON.stringify(patch)});
-    if(!r.ok)throw new Error(await r.text());
+    await despesasApi({action:'update',id,record:patch});
     carregarHistDesp();
   }catch(e){alert('Erro ao salvar: '+e.message);}
 };
