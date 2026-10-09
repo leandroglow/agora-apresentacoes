@@ -1562,6 +1562,7 @@ document.getElementById('btn-apresentacao-voltar').addEventListener('click',()=>
 const OPENAI_PROXY='https://agora-apresentacoes.vercel.app/api/analyze-receipt?v=20261009-0025';
 const GDRIVE_DESP_FOLDER='1665zvQOtbulPR59zjFLr37mflu9n31Yo';
 let gdriveBrowserAccessToken='';
+let gdriveSharedServerAuth=false;
 
 async function reconectarGoogleDrive(silencioso=false){
   const clerkToken=await AgoraSistemaAuth.token();
@@ -1577,6 +1578,7 @@ async function reconectarGoogleDrive(silencioso=false){
   const cfgResp=await fetch('https://agora-apresentacoes.vercel.app/api/drive-config',{headers:{Authorization:'Bearer '+clerkToken}});
   const cfg=await cfgResp.json().catch(()=>({}));
   if(!cfgResp.ok || !cfg.clientId) throw new Error('A reconexão do Google Drive não está configurada.');
+  gdriveSharedServerAuth=cfg.sharedServerAuth===true;
   return await new Promise((resolve,reject)=>{
     const client=google.accounts.oauth2.initTokenClient({
       client_id:cfg.clientId,
@@ -1868,6 +1870,16 @@ window.salvarDespesa=async function(){
   const st=document.getElementById('desp-status');
   st.className='sload'; st.textContent='⏳ Salvando...';
   try{
+    // Consulta o modo do servidor antes do upload. Em modo compartilhado,
+    // nenhum usuário final precisa autorizar o Google Drive.
+    if(!gdriveSharedServerAuth){
+      try{
+        const tk=await AgoraSistemaAuth.token();
+        const cr=await fetch('https://agora-apresentacoes.vercel.app/api/drive-config',{headers:{Authorization:'Bearer '+tk}});
+        const cd=await cr.json().catch(()=>({}));
+        gdriveSharedServerAuth=cd.sharedServerAuth===true;
+      }catch(e){}
+    }
     const despId=Date.now();
     // Upload foto via Edge Function
     let fotoDriveId=null;
@@ -1885,7 +1897,7 @@ window.salvarDespesa=async function(){
           fileBase64:b64,
           mimeType:despFotoFile.type||'image/jpeg',
           folderId:GDRIVE_DESP_FOLDER,
-          googleAccessToken:await garantirGoogleDrive()
+          googleAccessToken:gdriveSharedServerAuth?'':await garantirGoogleDrive()
         })
       });
       const upData=await upResp.json();

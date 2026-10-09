@@ -10,6 +10,7 @@ export default async function handler(req, res) {
   return json(res, 200, {
     clientId,
     scope: 'https://www.googleapis.com/auth/drive',
-    origin: 'https://apresentacoes.agoracons.com.br'
+    origin: 'https://apresentacoes.agoracons.com.br',
+    sharedServerAuth: String(process.env.GOOGLE_DRIVE_SHARED_MODE || '').toLowerCase() === 'true'
   });
 }
