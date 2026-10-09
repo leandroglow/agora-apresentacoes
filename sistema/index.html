@@ -2034,11 +2034,11 @@ window.toggleEditDesp=function(id){
 };
 
 window.verFotoDesp=async function(driveId){
-  // Cria uma Edge Function de acesso à foto autenticada
-  // Usa URL de exportação do Drive que funciona com compartilhamento público
+  // O upload já foi autenticado pelo Drive; abrir diretamente pelo visualizador
+  // evita depender do refresh token do proxy para a prévia do histórico.
   const url=`https://drive.google.com/uc?export=view&id=${driveId}`;
   const thumb=`https://drive.google.com/thumbnail?id=${driveId}&sz=w400`;
-  window.lbAbrir([{id:driveId,name:'Foto da despesa',url,thumb}],0,'foto');
+  window.lbAbrir([{id:null,driveId,name:'Foto da despesa',url,thumb}],0,'foto');
 };
 
 window.editarDesp=function(id){ toggleEditDesp(id); };
