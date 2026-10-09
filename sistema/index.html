@@ -1844,9 +1844,14 @@ window.salvarDespesa=async function(){
       const upData=await upResp.json();
       const uploadError=getUploadErrorMessage(upData);
       if(!upResp.ok || uploadError){
-        throw new Error(uploadError && /expired|revoked|invalid_grant/i.test(uploadError)
-          ? 'A integração com o Google Drive expirou. A foto não foi anexada. É preciso renovar a conexão do Drive antes de salvar despesas com foto.'
-          : (uploadError || `Falha no upload da foto (${upResp.status}).`));
+        const msg=uploadError==='DRIVE_AUTH_EXPIRED'
+          ? 'A autorização do Google Drive expirou. É preciso reconectar o Drive.'
+          : uploadError==='DRIVE_PERMISSION_DENIED'
+            ? 'A conta do Drive não tem permissão de gravação nessa pasta.'
+            : uploadError==='DRIVE_FOLDER_NOT_FOUND'
+              ? 'A pasta de despesas do Drive não foi encontrada.'
+              : (uploadError || `Falha no upload da foto (${upResp.status}).`);
+        throw new Error(msg);
       }
       fotoDriveId=extractDriveId(upData);
       if(!fotoDriveId){
