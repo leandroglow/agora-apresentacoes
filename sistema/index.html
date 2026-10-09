@@ -1555,7 +1555,7 @@ document.getElementById('btn-apresentacao-voltar').addEventListener('click',()=>
 });
 
 // ── OPENAI CONFIG ────────────────────────────────────────
-const OPENAI_PROXY='https://project-pyfyj.vercel.app/api/analyze-receipt?v=20261008-2039';
+const OPENAI_PROXY='https://agora-apresentacoes.vercel.app/api/analyze-receipt?v=20261009-0025';
 const GDRIVE_DESP_FOLDER='1665zvQOtbulPR59zjFLr37mflu9n31Yo';
 
 async function openaiChat(messages, max_tokens=800){
@@ -1571,7 +1571,7 @@ async function openaiChat(messages, max_tokens=800){
     body:JSON.stringify({model:'gpt-4o', max_tokens, messages})
   };
   let resp=await fetch(OPENAI_PROXY,requestOptions);
-  if(resp.status===404) resp=await fetch('https://project-pyfyj.vercel.app/api/analyze-receipt',requestOptions);
+  if(resp.status===404) resp=await fetch('https://agora-apresentacoes.vercel.app/api/analyze-receipt',requestOptions);
   if(!resp.ok) throw new Error('O serviço de IA retornou HTTP '+resp.status+'. Verifique a conexão e tente novamente.');
   const data=await resp.json();
   if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
@@ -1824,7 +1824,7 @@ window.salvarDespesa=async function(){
       if(!clerkToken) throw new Error('Sessão expirada. Entre novamente no sistema.');
       const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(despFotoFile);});
       const ext=(despFotoFile.name && despFotoFile.name.includes('.')) ? despFotoFile.name.split('.').pop() : ((despFotoFile.type||'image/jpeg').split('/')[1]||'jpg');
-      const upResp=await fetch('https://project-pyfyj.vercel.app/api/upload-receipt',{
+      const upResp=await fetch('https://agora-apresentacoes.vercel.app/api/upload-receipt',{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+clerkToken},
         body:JSON.stringify({
