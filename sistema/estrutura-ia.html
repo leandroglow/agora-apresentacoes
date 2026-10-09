@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Mapa da coordenação Ágora: skills, perfis de agentes, projetos e arquivos de memória.">
+<meta name="description" content="Mapa da coordenação Ágora: skills, perfis de agentes, projetos, despesas e arquivos de memória.">
 <title>Estrutura de IA · Ágora</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231b3939'/%3E%3Cpath d='M15 47L32 15l17 32M23 34h18' fill='none' stroke='%23e8d4a4' stroke-width='5'/%3E%3C/svg%3E">
 <style>
@@ -19,7 +19,7 @@
 </head>
 <body>
 <script>if(window.top===window.self)location.replace("./?area=estrutura-ia");</script>
-<header><div class="header-inner"><div><div class="brand">ÁGORA <span>CENTRAL DE AGENTES</span></div><h1>Estrutura de IA</h1><p class="intro">Quem executa, qual método usa e onde fica a memória. Selecione um bloco para ver sua composição.</p></div><div class="stamp"><strong>30 de setembro de 2026</strong>Estrutura consultada nesta data</div></div></header>
+<header><div class="header-inner"><div><div class="brand">ÁGORA <span>CENTRAL DE AGENTES</span></div><h1>Estrutura de IA</h1><p class="intro">Quem executa, qual método usa e onde fica a memória. Selecione um bloco para ver sua composição.</p></div><div class="stamp"><strong>9 de outubro de 2026</strong>Estrutura compatibilizada com o Sistema de Despesas</div></div></header>
 <main>
 <div class="legend" aria-label="Legenda dos tipos">
 <div class="legend-item"><span class="badge skill">SKILL</span><span class="meaning">Método reutilizável</span></div>
@@ -30,7 +30,7 @@
 <div class="legend-item"><span class="badge data">JSON · CADASTRO</span></div>
 </div>
 <p class="clarifier"><strong>“MD” é o formato do arquivo.</strong> <b>SKILL.md</b> define uma skill; <b>AGENTS.md</b> contém instruções; <b>STATUS.md</b> registra informações. Uma especialidade pode reunir os três.</p>
-<div class="scope"><span><strong>5 skills próprias</strong> · <strong>9 perfis salvos</strong> · <strong>15 projetos e áreas</strong></span><span>Perfis acionados por tarefa · contagem não representa agentes em execução</span></div>
+<div class="scope"><span><strong>6 frentes documentadas</strong> · <strong>9 perfis salvos</strong> · <strong>15 projetos e áreas</strong></span><span>Perfis acionados por tarefa · contagem não representa agentes em execução</span></div>
 <noscript><p class="noscript">Ative o JavaScript para explorar o mapa e os detalhes. Este HTML usa apenas os dados incluídos no próprio arquivo.</p></noscript>
 <section class="map" aria-label="Mapa mental da coordenação Ágora">
 <div class="root-stack"><button class="human" data-detail="leandro"><span class="badge person">PESSOA</span><strong>Leandro</strong><span class="arrow" aria-hidden="true">↗</span></button><div class="stem"><span>define objetivos e prioridades</span></div><button class="coordinator" data-detail="coordinator"><strong>Coordenador Ágora</strong><small>Organiza · delega · integra · verifica</small><span class="badges"><span class="badge skill">SKILL</span><span class="badge agent">PERFIL DE AGENTE</span></span></button></div>
@@ -71,6 +71,7 @@ const roleData=[
 ];
 roleData.forEach(r=>{register(r.id,{title:r.name,category:'Perfil geral',types:['agent'],description:r.desc,components:[agentComponent(r.profile,r.short)],note:r.note});document.getElementById('roles').append(node(r.id,r.name,['agent'],r.short));});
 const specInfo={
+'sistema-despesas':{name:'Sistema de Despesas',desc:'Registra comprovantes e custos com Clerk para os usuários e autorização central do Drive no servidor. Mantém histórico e fotos disponíveis sem login Google.',summary:'API + Clerk + Drive compartilhado.',base:'SISTEMA-DESPESAS-DRIVE-CLERK.md',baseType:'instruction',note:'Esta é a implementação validada em 09/10/2026. A credencial OAuth fica somente na hospedagem; usuários passam apenas pela sessão Clerk.'},
 'automacao-agora':{name:'Automação',desc:'Reutiliza o conhecimento técnico de automação da Ágora em diferentes imóveis. Cada instalação conserva seu cadastro, implementação e contexto próprios.',summary:'Skill + perfil + base em Engenharia.',base:'00-LEIA-ME.md e base de Automação',baseType:'memory',note:'Automação é uma especialidade compartilhada, não apenas um item do projeto CDL AC20.'},
 'editor-de-video':{name:'Edição de vídeo',desc:'Aplica o método de edição à marca e à produção escolhidas. Consulta a base em Engenharia, o método em Marketing e os registros do canal.',summary:'Skill + perfil + manuais e produções.',base:'00-LEIA-ME.md e referências audiovisuais',baseType:'memory',note:'A skill ensina o método; o perfil define o editor; os documentos guardam marca, versões e aprendizado.'},
 'marketing-marcas-campanhas':{name:'Marketing e campanhas',desc:'Coordena marcas, briefings, conteúdo e memória das campanhas. O perfil usa as instruções e os índices de Marketing.',summary:'Perfil + documentos; sem skill própria.',base:'AGENTS.md de Marketing',baseType:'instruction',note:'Nenhuma skill própria de Marketing está indicada no cadastro consultado. Existe um perfil salvo e uma base de instruções e informações.'},
@@ -78,6 +79,8 @@ const specInfo={
 'financeiro-custos-obras':{name:'Financeiro de obras',desc:'Organiza documentos, materiais, serviços e conciliação dentro do financeiro da obra identificada, preservando a separação entre projetos.',summary:'Skill + perfil + método por obra.',base:'00-LEIA-ME.md e método financeiro',baseType:'memory',note:'O Financeiro de Ágora Materiais é uma frente separada e segue suas próprias instruções.'},
 'organizar-projetos-agora':{name:'Organização e fotos',desc:'Aplica os padrões de pastas, nomes de fotos e vídeos e memória por projeto. Reutiliza o perfil de gerente de projeto.',summary:'Skill + gerente + padrões compartilhados.',base:'PADRAO-PASTAS-PROJETOS.md',baseType:'instruction',note:'Esta frente reutiliza agora-gerente-projeto. Não existe um décimo perfil exclusivo de organização.'}
 };
+registry.updated_at='2026-10-09';
+registry.specialties.unshift({id:'sistema-despesas',label:'Sistema de Despesas',profile:'agora-especialista',profile_file:'Configuração IA/agents/agora-especialista.toml',skill:null,skill_file:null,entrypoint:'docs/SISTEMA-DESPESAS-DRIVE-CLERK.md',entrypoint_exists:true});
 registry.specialties.forEach(s=>{const x=specInfo[s.id];const types=s.skill?['skill','agent',x.baseType]:['agent',x.baseType];const comps=[];if(s.skill)comps.push(skillComponent(s.skill,'Método próprio instalado e referenciado no cadastro.'));comps.push(agentComponent(s.profile,'Papel selecionável para executar a tarefa.'));comps.push(component(x.baseType,x.base,'Entrada da base compartilhada consultada.',s.entrypoint));if(s.id==='marketing-marcas-campanhas'){const dir=s.entrypoint.replace(/AGENTS\.md$/,'');comps.push(component('memory','MARCAS.md e CAMPANHAS.md','Índices de identidade de marca e memória de campanhas.',dir));}if(s.id==='apresentacoes-web')comps.push(component('memory','PUBLICACOES.md','Catálogo central de fontes e publicações.',CENTRAL+'/PUBLICACOES.md'));register(s.id,{title:x.name,category:'Especialidade compartilhada',types,description:x.desc,components:comps,note:x.note});document.getElementById('specialties').append(node(s.id,x.name,types,x.summary));});
 registry.specialties.forEach(s=>{
   const d=details.get(s.id);
