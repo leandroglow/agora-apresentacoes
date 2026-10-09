@@ -1563,7 +1563,7 @@ const OPENAI_PROXY='https://agora-apresentacoes.vercel.app/api/analyze-receipt?v
 const GDRIVE_DESP_FOLDER='1665zvQOtbulPR59zjFLr37mflu9n31Yo';
 let gdriveBrowserAccessToken='';
 
-async function reconectarGoogleDrive(){
+async function reconectarGoogleDrive(silencioso=false){
   const clerkToken=await AgoraSistemaAuth.token();
   if(!clerkToken) throw new Error('Sessão expirada. Entre novamente no sistema.');
   if(!window.google?.accounts?.oauth2){
@@ -1586,8 +1586,16 @@ async function reconectarGoogleDrive(){
         else reject(new Error('O Google não autorizou o acesso ao Drive.'));
       }
     });
-    client.requestAccessToken({prompt:'consent'});
+    // Sem prompt, o Google reaproveita a sessão/autorização existente.
+    // Só usamos consent quando o usuário clica explicitamente em reconectar.
+    client.requestAccessToken({prompt:silencioso?'':'consent'});
   });
+}
+
+async function garantirGoogleDrive(){
+  if(gdriveBrowserAccessToken) return gdriveBrowserAccessToken;
+  try { return await reconectarGoogleDrive(true); }
+  catch(e) { return ''; }
 }
 
 async function openaiChat(messages, max_tokens=800){
@@ -1877,7 +1885,7 @@ window.salvarDespesa=async function(){
           fileBase64:b64,
           mimeType:despFotoFile.type||'image/jpeg',
           folderId:GDRIVE_DESP_FOLDER,
-          googleAccessToken:gdriveBrowserAccessToken
+          googleAccessToken:await garantirGoogleDrive()
         })
       });
       const upData=await upResp.json();
