@@ -1561,6 +1561,34 @@ document.getElementById('btn-apresentacao-voltar').addEventListener('click',()=>
 // ── OPENAI CONFIG ────────────────────────────────────────
 const OPENAI_PROXY='https://agora-apresentacoes.vercel.app/api/analyze-receipt?v=20261009-0025';
 const GDRIVE_DESP_FOLDER='1665zvQOtbulPR59zjFLr37mflu9n31Yo';
+let gdriveBrowserAccessToken='';
+
+async function reconectarGoogleDrive(){
+  const clerkToken=await AgoraSistemaAuth.token();
+  if(!clerkToken) throw new Error('Sessão expirada. Entre novamente no sistema.');
+  if(!window.google?.accounts?.oauth2){
+    await new Promise((resolve,reject)=>{
+      const script=document.createElement('script');
+      script.src='https://accounts.google.com/gsi/client';
+      script.onload=resolve; script.onerror=()=>reject(new Error('Não foi possível carregar a autenticação do Google.'));
+      document.head.appendChild(script);
+    });
+  }
+  const cfgResp=await fetch('https://agora-apresentacoes.vercel.app/api/drive-config',{headers:{Authorization:'Bearer '+clerkToken}});
+  const cfg=await cfgResp.json().catch(()=>({}));
+  if(!cfgResp.ok || !cfg.clientId) throw new Error('A reconexão do Google Drive não está configurada.');
+  return await new Promise((resolve,reject)=>{
+    const client=google.accounts.oauth2.initTokenClient({
+      client_id:cfg.clientId,
+      scope:cfg.scope,
+      callback:response=>{
+        if(response?.access_token){ gdriveBrowserAccessToken=response.access_token; resolve(response.access_token); }
+        else reject(new Error('O Google não autorizou o acesso ao Drive.'));
+      }
+    });
+    client.requestAccessToken({prompt:'consent'});
+  });
+}
 
 async function openaiChat(messages, max_tokens=800){
   const clerkToken=await AgoraSistemaAuth.token();
@@ -1694,6 +1722,16 @@ function getUploadErrorMessage(payload){
   if(!payload) return '';
   if(typeof payload === 'string') return payload;
   return payload.error || payload.message || payload.data?.error || '';
+}
+
+function mostrarBotaoReconectarDrive(){
+  const st=document.getElementById('desp-status');
+  if(!st || st.querySelector('.btn-reconectar-drive')) return;
+  const b=document.createElement('button');
+  b.className='btn-reconectar-drive btn-sm'; b.type='button'; b.textContent='🔐 Reconectar Google Drive';
+  b.style.marginTop='8px';
+  b.onclick=async()=>{ b.disabled=true; b.textContent='⏳ Abrindo Google...'; try{ await reconectarGoogleDrive(); st.className='sok'; st.textContent='✅ Drive reconectado. Clique em “Salvar despesa” novamente.'; }catch(e){ st.className='serr'; st.textContent='Erro na reconexão: '+e.message; } finally{ b.remove(); } };
+  st.appendChild(document.createElement('br')); st.appendChild(b);
 }
 
 function normalizeDespesaIA(parsed){
@@ -1838,7 +1876,8 @@ window.salvarDespesa=async function(){
           fileName:`${(obra||'geral').replace(/[^a-z0-9]+/gi,'_').replace(/^_|_$/g,'')}_desp_${despId}.${ext}`,
           fileBase64:b64,
           mimeType:despFotoFile.type||'image/jpeg',
-          folderId:GDRIVE_DESP_FOLDER
+          folderId:GDRIVE_DESP_FOLDER,
+          googleAccessToken:gdriveBrowserAccessToken
         })
       });
       const upData=await upResp.json();
@@ -1851,6 +1890,7 @@ window.salvarDespesa=async function(){
             : uploadError==='DRIVE_FOLDER_NOT_FOUND'
               ? 'A pasta de despesas do Drive não foi encontrada.'
               : (uploadError || `Falha no upload da foto (${upResp.status}).`);
+        if(uploadError==='DRIVE_AUTH_EXPIRED') mostrarBotaoReconectarDrive();
         throw new Error(msg);
       }
       fotoDriveId=extractDriveId(upData);
@@ -1881,7 +1921,7 @@ window.salvarDespesa=async function(){
     st.className='sok';
     st.textContent='✓ Despesa salva!'+(fotoDriveId?' Foto no Drive.':'')+(bancoOk?'':' Registro local pendente de sincronização.');
     setTimeout(limparFotoDesp,2000);
-  }catch(e){st.className='serr';st.textContent='⚠ Erro: '+e.message;}
+  }catch(e){st.className='serr';st.textContent='⚠ Erro: '+e.message; if(String(e.message||'').includes('autorização do Google Drive')) mostrarBotaoReconectarDrive();}
   btn.disabled=false; btn.textContent='💾 Salvar Despesa';
 };
 

@@ -7,7 +7,7 @@ O backend navega diretamente pela Drive API v3, usando o OAuth já cadastrado. A
 - `OPENAI_API_KEY`: chave no servidor.
 - `OPENAI_MODEL`: padrão `gpt-5.6-terra`; requer modelo Responses com function calling e entrada de imagens. Um valor existente na Vercel prevalece.
 - `OPENAI_REASONING_EFFORT`: padrão `medium`. Use um esforço aceito pelo modelo escolhido.
-- `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`: OAuth com `drive.readonly`.
+- `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`: OAuth com escopo de gravação do Drive (`https://www.googleapis.com/auth/drive`), renovado pelo servidor ou pelo botão de reconexão do sistema..
 - `GOOGLE_DRIVE_FOLDER_HINT`: link completo da pasta autorizada. Também aceita ID. O nome textual antigo não é suficiente.
 - `GOOGLE_DRIVE_FOLDER_ID`: alternativa opcional com prioridade sobre o link acima.
  `CLERK_PUBLISHABLE_KEY` e `CLERK_JWT_KEY` (chave pública PEM de assinatura): **a mesma instância Clerk da Ágora Automação**. A chave publicável deve corresponder à usada em `sistema/clerk-auth.js`. `CLERK_SECRET_KEY` pode ser usada no lugar de `CLERK_JWT_KEY`, mas não é necessária para esta API.

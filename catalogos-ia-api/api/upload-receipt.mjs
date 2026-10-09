@@ -17,7 +17,10 @@ export default async function handler(req, res) {
     const fileName = String(body.fileName || `despesa_${Date.now()}.jpg`).replace(/[^a-zA-Z0-9._-]/g, '_');
     const folderHint = body.folderId || process.env.GOOGLE_DRIVE_EXPENSE_FOLDER_ID || process.env.GOOGLE_DRIVE_FOLDER_HINT || DEFAULT_FOLDER;
     const folderId = driveId(folderHint) || String(folderHint);
-    const token = await getGoogleDriveAccessToken();
+    // A short-lived token obtained by the in-app Google reconnect flow takes
+    // precedence. The long-lived server refresh token remains the fallback.
+    const browserToken = String(body.googleAccessToken || '').trim();
+    const token = browserToken || await getGoogleDriveAccessToken();
     const boundary = `agora_${Date.now()}`;
     const metadata = JSON.stringify({ name: fileName, parents: [folderId], mimeType });
     const binary = Buffer.from(base64, 'base64');
