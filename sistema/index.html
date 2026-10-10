@@ -858,10 +858,53 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
 .desp-hist-card{ background:var(--white);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.75rem }
 .desp-hist-badge{ display:inline-block;background:var(--ardosia);color:#fff;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px;margin-bottom:6px }
 .desp-hist-valor{ font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--ambar) }
+
+/* Linguagem visual compartilhada com Ágora Automação: vidro escuro, oliva e dourado. */
+:root{
+  --glass-bg:rgba(39,43,36,.72);
+  --glass-bg-soft:rgba(39,43,36,.52);
+  --glass-line:rgba(241,238,230,.16);
+  --glass-text:#f1eee6;
+  --glass-muted:#c3c5bc;
+  --glass-gold:#c4ad71;
+}
+body{background:#171b16;color:var(--glass-text);background-image:radial-gradient(ellipse at 82% 8%,rgba(196,173,113,.12),transparent 48%),linear-gradient(120deg,rgba(9,11,10,.9),rgba(9,11,10,.2) 65%,rgba(9,11,10,.72));background-attachment:fixed}
+#tela-login,#tela-hub{background:transparent}
+.login-box,.card,.backup-bar,.proj-card,.proj-sub-card,.desp-hist-card,.report-wrap,.metric,.summary-strip{background:var(--glass-bg);border-color:var(--glass-line);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:inset 0 1px 0 rgba(241,238,230,.08),0 18px 60px rgba(0,0,0,.14)}
+.login-box{color:var(--glass-text)}
+.login-marca,.card-title,.label,.hint,.header-center,.tab,.tab.active,.proj-obra-title,.proj-sub-label,.proj-sub-desc,.desp-hist-card,.metric p,.report-wrap,.summary-strip{color:var(--glass-text)}
+.login-title,.hub-user,.label,.hint,.header-center,.proj-obra-sub,.proj-sub-desc,.desp-hist-badge,.metric p{color:var(--glass-muted)}
+.header{background:linear-gradient(150deg,rgba(101,107,88,.34),rgba(22,26,22,.78));border-bottom:1px solid var(--glass-line);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);box-shadow:inset 0 1px 0 rgba(241,238,230,.1),0 12px 35px rgba(0,0,0,.2)}
+.hub-header{background:transparent}.hub-marca,.hub-btn-title{color:var(--glass-text)}
+.hub-btn{border-color:var(--glass-line);background:rgba(241,238,230,.04);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.hub-btn:hover{background:rgba(241,238,230,.1);border-color:rgba(196,173,113,.42)}
+.hub-btn-catalogos{border-color:rgba(196,173,113,.42);background:rgba(196,173,113,.12)}
+.container{max-width:980px}
+.tab-bar{border-bottom-color:var(--glass-line)}
+.tab{color:var(--glass-muted)}.tab:hover,.tab.active{color:var(--glass-gold)}.tab.active{border-bottom-color:var(--glass-gold)}
+input,select,textarea{background:rgba(9,11,10,.28);border-color:var(--glass-line);color:var(--glass-text)}
+input::placeholder,textarea::placeholder{color:rgba(241,238,230,.4)}
+.btn-backup,.btn-secondary,.btn-sm{background:rgba(241,238,230,.06);border-color:var(--glass-line);color:var(--glass-text)}
+.btn-backup:hover,.btn-secondary:hover,.btn-sm:hover{background:rgba(241,238,230,.13);color:var(--glass-text)}
+.btn-primary{background:var(--glass-gold);color:#171b16}.btn-primary:hover,.btn-ambar:hover{background:#d8c58e}
+.btn-ambar{background:var(--glass-gold);color:#171b16}
+.sok{background:rgba(82,140,102,.2);color:#b7dfca;border-color:rgba(183,223,202,.25)}
+.sload{background:rgba(196,173,113,.13);color:var(--glass-gold);border-color:rgba(196,173,113,.3)}
+.serr{background:rgba(169,50,38,.2);color:#f5b7b1;border-color:rgba(245,183,177,.25)}
+.banner{background:rgba(196,173,113,.12);border-color:rgba(196,173,113,.25);color:var(--glass-text)}
+.proj-obra-btn,.proj-sub-btn{background:var(--glass-bg-soft);border-color:var(--glass-line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.proj-obra-btn:hover,.proj-sub-btn:hover{border-color:rgba(196,173,113,.55);box-shadow:0 8px 26px rgba(0,0,0,.18)}
+.proj-obra-ico,.proj-sub-ico{background:rgba(196,173,113,.15);color:var(--glass-gold)}
+.state-box,.proj-empty{color:var(--glass-muted)}
 </style>
 
 <script>
-const OBRAS=['Casa do Lago AC20','Evidencias K21','Salto M14','Chácara Lobo Guará','Galpão Smart City Q33 L25','Helvetia Park 2 B11','SMI — Smart City Indaiatuba, quadra 33, lote 25','SMS G13 — Smart City Salto, quadra G, lote 13','Outros','Gastos gerais'];
+// Projetos exibidos na aba Projetos. Categorias administrativas que servem
+// apenas para alocação de despesas ficam fora desta lista.
+const PROJETOS=['Casa do Lago AC20','Evidencias K21','Salto M14','Helvetia Park 2 B11','Galpão Smart City Q33 L25','SMS G13 — Smart City Salto, quadra G, lote 13'];
+// A lista de despesas preserva categorias históricas e destinos que não são
+// projetos navegáveis no sistema.
+const CATEGORIAS_DESPESAS=[...PROJETOS,'Chácara Lobo Guará','SMI — Smart City Indaiatuba, quadra 33, lote 25','Outros','Gastos gerais'];
 const CATALOGOS_API_BASE=(window.CATALOGOS_IA_API_BASE||'https://agora-apresentacoes.vercel.app').replace(/\/$/,'');
 let catalogosToken='';
 
@@ -1282,7 +1325,7 @@ function projMostrar(nivel){
 }
 
 window.renderListaObras = function(){
-  document.getElementById('proj-lista').innerHTML=OBRAS.map(obra=>`
+  document.getElementById('proj-lista').innerHTML=PROJETOS.map(obra=>`
     <button class="proj-obra-btn" onclick="abrirObra('${obra.replace(/'/g,"\\'")}')">
       <div class="proj-obra-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.8"><polygon points="3 9 12 2 21 9 21 20 3 20"/><rect x="9" y="13" width="6" height="7"/></svg></div>
       <div>
@@ -1772,7 +1815,7 @@ function mostrarPreviewDesp(file){
 
 function popularSelectDesp(){
   const sel=document.getElementById('desp-obra');
-  sel.innerHTML='<option value="">Selecione...</option>'+OBRAS.map(o=>`<option>${o}</option>`).join('');
+  sel.innerHTML='<option value="">Selecione...</option>'+CATEGORIAS_DESPESAS.map(o=>`<option>${o}</option>`).join('');
 }
 
 ['desp-input-camera','desp-input-galeria'].forEach(id=>{
@@ -2007,7 +2050,7 @@ async function carregarHistDesp(){
             <div><label class="label">Data</label><input type="date" id="ef-data-${d.id}" value="${d.data||''}" /></div>
             <div><label class="label">Obra</label>
               <select id="ef-obra-${d.id}" style="height:36px;width:100%;font-family:'Montserrat',sans-serif;font-size:12px;border:1px solid var(--border-strong);border-radius:4px;padding:0 8px;color:var(--ardosia)">
-                ${OBRAS.map(o=>`<option${o===d.obra?' selected':''}>${o}</option>`).join('')}
+                ${CATEGORIAS_DESPESAS.map(o=>`<option${o===d.obra?' selected':''}>${o}</option>`).join('')}
               </select>
             </div>
           </div>
