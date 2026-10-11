@@ -1,0 +1,55 @@
+import { hasGoogleDriveCredentials, getGoogleDriveAccessToken } from './_lib/google.mjs';
+import { CatalogDrive, configuredRoot } from './_lib/drive.mjs';
+import { modelConfig } from './_lib/agent.mjs';
+import { getOpenAI } from './_lib/openai.mjs';
+import { imageRendererReady } from './_lib/pdf-images.mjs';
+import { handleOptions, json, setCors } from './_lib/http.mjs';
+
+let verification;
+export async function checkServices({ getToken = getGoogleDriveAccessToken, getClient = getOpenAI, makeDrive = options => new CatalogDrive(options), checkImages = imageRendererReady, config = modelConfig() } = {}) {
+  const [drive, model, images] = await Promise.allSettled([
+    (async () => { const client = makeDrive({ token: await getToken(), signal: AbortSignal.timeout(10000) }); await client.list(); return true; })(),
+    (async () => { await getClient().models.retrieve(config.model, { timeout: 10000, maxRetries: 0 }); return true; })(),
+    checkImages()
+  ]);
+  // No filenames, folder IDs, account details, provider messages or credentials.
+  const driveCodes = ['DRIVE_AUTH_CONFIG', 'DRIVE_AUTH_EXPIRED', 'DRIVE_AUTH', 'DRIVE_FOLDER_CONFIG', 'DRIVE_NOT_FOUND'];
+  const oauthCodes = ['invalid_grant', 'invalid_client', 'invalid_request', 'refresh_failed'];
+  const driveIssue = drive.status === 'fulfilled' ? null :
+    oauthCodes.includes(drive.reason?.oauthReason) ? drive.reason.oauthReason :
+    driveCodes.includes(drive.reason?.code) ? drive.reason.code : 'DRIVE_UNAVAILABLE';
+  return { checkedAt: new Date().toISOString(), driveAccessible: drive.status === 'fulfilled', driveIssue, modelAvailable: model.status === 'fulfilled', imageRendererAvailable: images.status === 'fulfilled' };
+}
+
+export default async function handler(req, res) {
+  setCors(req, res);
+  if (handleOptions(req, res)) return;
+  if (req.method !== 'GET') return json(res, 405, { error: 'Método não permitido.' });
+  const googleDriveConfigured = hasGoogleDriveCredentials();
+  let config;
+  try { config = modelConfig(); }
+  catch { return json(res, 503, { ok: false, configured: false, code: 'MODEL_CONFIG', version: 'drive-direct-v3-images' }); }
+  let checks = {};
+  if (new URL(req.url, 'https://localhost').searchParams.get('check') === '1') {
+    if (!verification || verification.expiresAt < Date.now()) {
+      verification = { expiresAt: Date.now() + 60000, result: checkServices({ config }) };
+    }
+    checks = await verification.result;
+  }
+  return json(res, 200, {
+    ok: true,
+    source: 'google_drive',
+    version: 'drive-direct-v3-images',
+    model: config.model,
+    reasoningEffort: config.reasoning.effort,
+    ...checks,
+    folderConfigured: Boolean(configuredRoot()),
+    googleDriveConfigured,
+    configured: Boolean(
+      process.env.OPENAI_API_KEY &&
+      (process.env.CLERK_JWT_KEY || process.env.CLERK_SECRET_KEY) &&
+      process.env.CLERK_PUBLISHABLE_KEY === 'pk_live_Y2xlcmsuYXByZXNlbnRhY29lcy5hZ29yYWNvbnMuY29tLmJyJA' &&
+      googleDriveConfigured && configuredRoot()
+    )
+  });
+}
