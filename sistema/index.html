@@ -2658,6 +2658,7 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
 
   async function renderPdf(fileId){
     pPages.innerHTML='<div class="pdf-loading"><div class="big-spinner"></div><p>Carregando PDF...</p></div>';
+    pPages.style.transform=''; pPages.style.transformOrigin='top left'; pPages.style.width='100%';
     try{
       const token=await AgoraSistemaAuth.token();
       const resp=await fetch(driveMediaUrl(fileId),{headers:{Authorization:'Bearer '+token}});
@@ -2728,7 +2729,12 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
 
   function applyZoom(){
     zlbl.textContent=Math.round(zoom*100)+'%';
-    if(tipo==='pdf'){reRenderPdf();return;}
+    if(tipo==='pdf'){
+      pPages.style.transform='scale('+zoom+')';
+      pPages.style.transformOrigin='top left';
+      pPages.style.width=(100/zoom)+'%';
+      return;
+    }
     if(!img.naturalWidth)return;
     const nw=img.naturalWidth,nh=img.naturalHeight;
     const s=Math.min(Math.min(nw,window.innerWidth*0.9)/nw, Math.min(nh,(window.innerHeight-200)*0.9)/nh);
