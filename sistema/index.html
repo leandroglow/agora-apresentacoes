@@ -1482,7 +1482,7 @@ window.abrirCategoria=async function(cat){
 
     } else {
       // Renders / Fotos: imagens soltas + dentro de subpastas, tudo numa grade
-      const imgs = await gdriveTodasImagens(pastas[cat]);
+      const imgs = (await gdriveTodasImagens(pastas[cat])).sort((a,b)=>String(b.name||'').localeCompare(String(a.name||''),undefined,{numeric:true,sensitivity:'base'}));
 
       if(!imgs.length){
         cont.innerHTML=`<div class="proj-empty"><div class="proj-empty-icon">🖼️</div><p>Nenhuma imagem encontrada</p></div>`;
@@ -1512,7 +1512,7 @@ window.abrirSubpasta=async function(folderId, nome, voltarCat){
   projMostrar(3);
 
   try{
-    const [imgs, pdfs] = await Promise.all([gdriveImagens(folderId), gdrivePdfs(folderId)]);
+    const [rawImgs, rawPdfs] = await Promise.all([gdriveImagens(folderId), gdrivePdfs(folderId)]);\n    const imgs=rawImgs.sort((a,b)=>String(b.name||'').localeCompare(String(a.name||''),undefined,{numeric:true,sensitivity:'base'}));\n    const pdfs=rawPdfs.sort((a,b)=>String(b.name||'').localeCompare(String(a.name||''),undefined,{numeric:true,sensitivity:'base'}));
     const total=imgs.length+pdfs.length;
     document.getElementById('proj-subpasta-sub').textContent=`${total} arquivo${total!==1?'s':''}`;
 
@@ -2576,12 +2576,10 @@ function renderRelatorio(registros){
 <script>
 if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const DRIVE_IMG_PROXY='https://pderpmbmurtagpdsvzjg.supabase.co/functions/v1/drive-image';
-function driveImgUrl(id){ return DRIVE_IMG_PROXY+'?id='+id; }
-function drivePdfUrl(id){ return DRIVE_IMG_PROXY+'?id='+id+'&pdf=1'; }
+function driveMediaUrl(id){ return '/api/project-file?id='+encodeURIComponent(id); }
 
 (function(){
-  let items=[], cur=0, tipo='foto', zoom=1, pdfDoc=null;
+  let items=[], cur=0, tipo='foto', zoom=1, pdfDoc=null, mediaObjectUrl='';
   const STEP=0.25, MAX=8, MIN=0.25;
   const WM='Agora Construtora';
 
@@ -2615,7 +2613,7 @@ function drivePdfUrl(id){ return DRIVE_IMG_PROXY+'?id='+id+'&pdf=1'; }
     lb.classList.remove('open');
     document.body.style.overflow='';
     unlockVP();
-    img.src=''; pdfDoc=null; pPages.innerHTML='';
+    if(mediaObjectUrl){URL.revokeObjectURL(mediaObjectUrl);mediaObjectUrl='';} img.src=''; pdfDoc=null; pPages.innerHTML='';
     if(wmCvs.width) wmCvs.getContext('2d').clearRect(0,0,wmCvs.width,wmCvs.height);
   }
   document.getElementById('lb-fechar').onclick=fechar;
@@ -2634,10 +2632,7 @@ function drivePdfUrl(id){ return DRIVE_IMG_PROXY+'?id='+id+'&pdf=1'; }
       zoom=1; wmCvs.style.display='none';
       img.style.width=''; img.style.height='';
       img.style.maxWidth='90vw'; img.style.maxHeight='78vh';
-      const src=it.id ? driveImgUrl(it.id) : (it.url||it.thumb||'');
-      img.onload=()=>{applyZoom();drawWM();};
-      img.onerror=()=>{if(it.url&&img.src!==it.url)img.src=it.url;};
-      img.src=src;
+      img.onload=()=>{applyZoom();drawWM();};\n      img.onerror=()=>{img.alt='Não foi possível carregar a imagem';};\n      loadProtectedImage(it);
     } else {
       pWrap.classList.add('active'); fWrap.classList.remove('active');
       ctrlBar.style.display='flex';
@@ -2646,10 +2641,10 @@ function drivePdfUrl(id){ return DRIVE_IMG_PROXY+'?id='+id+'&pdf=1'; }
     }
   }
 
-  async function renderPdf(fileId){
+  async function loadProtectedImage(it){\n    try{\n      if(mediaObjectUrl){URL.revokeObjectURL(mediaObjectUrl);mediaObjectUrl='';}\n      if(!it.id){img.src=it.url||it.thumb||'';return;}\n      const token=await AgoraSistemaAuth.token();\n      const resp=await fetch(driveMediaUrl(it.id),{headers:{Authorization:'Bearer '+token}});\n      if(!resp.ok) throw new Error('Erro '+resp.status);\n      mediaObjectUrl=URL.createObjectURL(await resp.blob()); img.src=mediaObjectUrl;\n    }catch(e){img.alt='Erro ao carregar: '+e.message;}\n  }\n\n  async function renderPdf(fileId){
     pPages.innerHTML='<div class="pdf-loading"><div class="big-spinner"></div><p>Carregando PDF...</p></div>';
     try{
-      const resp=await fetch(drivePdfUrl(fileId));
+      const token=await AgoraSistemaAuth.token();\n      const resp=await fetch(driveMediaUrl(fileId),{headers:{Authorization:'Bearer '+token}});
       if(!resp.ok) throw new Error('Erro '+resp.status);
       const buf=await resp.arrayBuffer();
       const pdf=await pdfjsLib.getDocument({data:buf}).promise;
