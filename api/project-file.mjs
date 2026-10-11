@@ -2,6 +2,7 @@ import { getGoogleDriveAccessToken } from './_lib/google.mjs';
 import { requireAuth } from './_lib/auth.mjs';
 import { handleOptions, json, setCors } from './_lib/http.mjs';
 import {issueTicket,verifyTicket,mediaRange} from './_lib/media-ticket.mjs';
+import {inlineDisposition} from './_lib/file-headers.mjs';
 
 function validId(id){ return /^[A-Za-z0-9_-]{10,}$/.test(String(id||'')); }
 export default async function handler(req,res){
@@ -40,7 +41,7 @@ export default async function handler(req,res){
     res.statusCode=200;
     res.setHeader('Content-Type',info.mimeType||file.headers.get('content-type')||'application/octet-stream');
     res.setHeader('Content-Length',String(data.length));
-    res.setHeader('Content-Disposition',`inline; filename="${String(info.name||'arquivo').replace(/["\\\r\n]/g,'_')}"`);
+    res.setHeader('Content-Disposition',inlineDisposition(info.name));
     res.setHeader('Cache-Control','private, max-age=300');
     return res.end(data);
   }catch(error){ return json(res,502,{error:'Erro ao carregar o arquivo.'}); }
