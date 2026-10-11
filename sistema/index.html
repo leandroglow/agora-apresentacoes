@@ -1841,22 +1841,7 @@ window.analisarDespesa=async function(){
       {role:'system',content:'Você extrai dados de documentos brasileiros de compra. Responda somente JSON válido, sem markdown, sem comentários e sem texto extra. Não invente campos. Preserve a descrição dos itens o mais completa possível. Se a foto estiver girada, considere o documento na orientação correta antes de ler. Classifique o tipo pelo conteúdo principal do documento: nota fiscal => nota_fiscal; cupom fiscal/ECF/PDV => cupom; pedido, orçamento, proposta comercial ou orçamento válido por 1 dia => pedido.'},
       {role:'user',content:[
       {type:'image_url',image_url:{url:`data:${despFotoFile.type};base64,${b64}`,detail:'high'}},
-      {type:'text',text:`Analise este documento (nota fiscal, cupom, pedido, orçamento ou proposta de material de construção) e retorne SOMENTE um JSON válido sem markdown com este formato:
-{"tipo":"nota_fiscal|pedido|cupom|outro","fornecedor":"","data":"YYYY-MM-DD","valor_total":null,"observacoes":"","itens":[{"descricao":"","quantidade":null,"unidade":"","valor_unitario":null}]}
-Regras:
-- use null quando não conseguir confirmar um valor;
-- mantenha a descrição dos itens o mais completa possível;
-- quantidade e valor_unitario devem refletir o documento, sem inventar;
-- para unidade, priorize unidades comuns de obra: m, m2, m3, un, kg, sc, cx, rl, pct;
-- quando aparecer MT, metro, metros ou metro linear, normalize como m;
-- quando aparecer unidade, und, unid, peça ou peças, normalize como un;
-- se houver vários itens, liste todos os que conseguir ler;
-- a data deve ser a data principal do documento; se estiver em formato DD/MM/AA, converta para 20AA;
-- se houver desconto, valor à vista, valor líquido, total com desconto ou valor final a pagar, em valor_total use o valor final após desconto;
-- se aparecerem preço bruto e preço com desconto, priorize o valor final efetivamente pagável;
-- se o comprovante for de combustível, procure placa do veículo e quilometragem/KM e registre ambos em observacoes; não invente se não estiverem legíveis;
-- se o documento estiver identificado como ORÇAMENTO, PEDIDO, PROPOSTA ou similar, não classifique como outro;
-- hoje é 2026-10-08, então datas com ano de dois dígitos como 26 normalmente significam 2026.`}
+      {type:'text',text:`Analise este documento (nota fiscal, cupom, pedido, orçamento ou proposta de material de construção) e retorne SOMENTE um JSON válido sem markdown com este formato:\n{"tipo":"nota_fiscal|pedido|cupom|outro","fornecedor":"","data":"YYYY-MM-DD","valor_total":null,"observacoes":"","itens":[{"descricao":"","quantidade":null,"unidade":"","valor_unitario":null}]}\nRegras:\n- use null quando não conseguir confirmar um valor;\n- mantenha a descrição dos itens o mais completa possível;\n- quantidade e valor_unitario devem refletir o documento, sem inventar;\n- para unidade, priorize unidades comuns de obra: m, m2, m3, un, kg, sc, cx, rl, pct;\n- quando aparecer MT, metro, metros ou metro linear, normalize como m;\n- quando aparecer unidade, und, unid, peça ou peças, normalize como un;\n- se houver vários itens, liste todos os que conseguir ler;\n- a data deve ser a data principal do documento; se estiver em formato DD/MM/AA, converta para 20AA;\n- se houver desconto, valor à vista, valor líquido, total com desconto ou valor final a pagar, em valor_total use o valor final após desconto;\n- se aparecerem preço bruto e preço com desconto, priorize o valor final efetivamente pagável;\n- se o comprovante for de combustível, procure placa do veículo e quilometragem/KM e registre ambos em observacoes; não invente se não estiverem legíveis;\n- se o documento estiver identificado como ORÇAMENTO, PEDIDO, PROPOSTA ou similar, não classifique como outro;\n- hoje é 2026-10-08, então datas com ano de dois dígitos como 26 normalmente significam 2026.`}
     ]}], 1400);
     const cleaned=txt.replace(/```json|```/g,'').trim();
     const jsonText=(cleaned.match(/\{[\s\S]*\}/)||[])[0]||cleaned;
@@ -2170,8 +2155,7 @@ function chatMsg(role,texto,fontes=[],imagens=[]){
   div.className=`chat-msg chat-msg-${role}`;
   const av=role==='ai'?'Á':(usuarioLogado?usuarioLogado[0].toUpperCase():'U');
   const fontesHtml=fontes.length?`<div class="chat-sources">${CatalogChat.sources(fontes)}</div>`:'';
-  const corpo=role==='ai'?CatalogChat.render(texto):chatEscape(texto).replace(/
-/g,'<br>');
+  const corpo=role==='ai'?CatalogChat.render(texto):chatEscape(texto).replace(/\n/g,'<br>');
   div.innerHTML=`<div class="chat-avatar">${chatEscape(av)}</div><div class="chat-bubble">${corpo}${fontesHtml}</div>`;
   msgs.appendChild(div);
   if(role==='ai')CatalogImages.mount(div.querySelector('.chat-bubble'),imagens);
@@ -2402,8 +2386,7 @@ function rP(){
   totHD();
 }
 function totHD(){const el=$('total-hd');if(!st.pessoas.length){el.style.display='none';return;}const t=st.pessoas.reduce((s,p)=>s+(p.fracao||1),0);el.style.display='block';el.textContent='Total: '+(Math.round(t*100)/100)+' homens-dia';}
-function rC(){const txt=($('tarefas').value||'').trim(),box=$('comp-box'),ct=$('comp-txt');const lin=txt.split('
-').filter(l=>l.trim());if(!lin.length){box.style.display='none';return;}ct.innerHTML=lin.map((l,i)=>'<div class="citem"'+(i<lin.length-1?' style="border-bottom:1px solid var(--border)"':'')+'>• '+l.trim()+'</div>').join('');box.style.display='block';}
+function rC(){const txt=($('tarefas').value||'').trim(),box=$('comp-box'),ct=$('comp-txt');const lin=txt.split('\n').filter(l=>l.trim());if(!lin.length){box.style.display='none';return;}ct.innerHTML=lin.map((l,i)=>'<div class="citem"'+(i<lin.length-1?' style="border-bottom:1px solid var(--border)"':'')+'>• '+l.trim()+'</div>').join('');box.style.display='block';}
 $('tarefas').addEventListener('input',rC);
 function rF(){
   const c=$('galeria');
@@ -2460,8 +2443,7 @@ async function rH(){
     const items=await Promise.all(regs.map(async r=>{const fotos=await listarFotos(r.id);return{r,fotos,cols:cpr[r.id]||[]};}));
     c.innerHTML=items.map(({r,fotos,cols})=>{
       const hd=cols.reduce((s,p)=>s+(p.fracao||1),0);
-      const lin=(r.tarefas||'').split('
-').filter(l=>l.trim());
+      const lin=(r.tarefas||'').split('\n').filter(l=>l.trim());
       const pH=cols.map(p=>'<div class="prow"><span><strong>'+p.nome+'</strong> <span style="color:var(--concreto)">('+ff(p.fracao||1)+')</span></span><span style="color:var(--concreto)">'+(p.tarefa||'—')+'</span></div>').join('');
       const fotosHtml=fotos.length?'<div class="hist-fotos">'+fotos.map(u=>'<div class="hist-foto"><img src="'+u+'" onclick="window.open(\''+u+'\',\'_blank\')" /></div>').join('')+'</div>':'';
       return'<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div class="obra-badge">'+r.obra+'</div><div class="data-badge">'+fd(r.data)+(r.encarregado?' · '+r.encarregado:'')+'</div></div></div><div class="hd-info">'+cols.length+' colaborador'+(cols.length!==1?'es':'')+' · <span class="ambar-text">'+(Math.round(hd*100)/100)+' HD</span> · '+fotos.length+' foto'+(fotos.length!==1?'s':'')+'</div>'+(cols.length?'<div style="margin-bottom:10px">'+pH+'</div>':'')+(lin.length?'<div class="hist-comp">'+lin.map(l=>'• '+l.trim()).join('<br>')+'</div>':'')+fotosHtml+(r.obs?'<div style="font-size:12px;color:var(--concreto);margin-bottom:10px;font-style:italic;border-left:2px solid var(--border);padding-left:8px">'+r.obs+'</div>':'')+'<div style="display:flex;gap:8px"><button class="btn-sm" onclick="loadEdit('+r.id+')">Editar</button><button class="btn-danger" data-ex="'+r.id+'" style="font-size:12px">Excluir</button></div></div>';
@@ -2540,8 +2522,7 @@ function renderRelatorio(registros){
   registros.forEach((reg,idx)=>{
     const colabs=allColabs.filter(c=>c.registro_id===reg.id);
     const fotos=allFotos[reg.id]||[];
-    const tarefas=reg.tarefas?(Array.isArray(reg.tarefas)?reg.tarefas:String(reg.tarefas).split('
-').filter(t=>t.trim())):[];
+    const tarefas=reg.tarefas?(Array.isArray(reg.tarefas)?reg.tarefas:String(reg.tarefas).split('\n').filter(t=>t.trim())):[];
     html+=`<div class="obra-card"><div class="obra-card-header"><span class="obra-num-badge">Nº ${String(idx+1).padStart(2,'0')}</span><span class="obra-nome-r">${reg.obra||'Sem nome'}</span><span class="obra-data-r">${fmtDate(reg.data)}</span><span class="obra-enc-r">Encarregado: <strong>${reg.encarregado||'—'}</strong></span></div><div class="obra-body"><div><div class="section-label">Tarefas Realizadas</div>${tarefas.length?`<ul class="tarefas-list">${tarefas.map(t=>`<li>${t}</li>`).join('')}</ul>`:`<p class="obs-none">Nenhuma tarefa registrada</p>`}</div><div><div class="section-label">Observações</div>${reg.obs?`<div class="obs-box">${reg.obs}</div>`:`<p class="obs-none">Sem observações</p>`}</div>${colabs.length?`<div class="full-col"><div class="section-label">Equipe (${colabs.length})</div><div class="colabs-grid">${colabs.map(c=>`<div class="colab-chip"><div class="colab-av">${initials(c.nome)}</div><div class="colab-info"><div class="colab-nome">${c.nome||'—'}</div><div class="colab-tarefa">${c.tarefa||'Geral'}</div></div>${c.fracao?`<span class="colab-frac">${c.fracao}</span>`:''}</div>`).join('')}</div></div>`:''}${fotos.length?`<div class="full-col"><div class="section-label">Fotos (${fotos.length})</div><div class="fotos-grid">${fotos.map(url=>`<div class="foto-thumb" onclick="window.open('${url}','_blank')"><img src="${url}" alt="Foto" onerror="this.parentElement.innerHTML='<div class=foto-ph>Indisponível</div>'" /></div>`).join('')}</div></div>`:''}</div></div>`;
   });
   html+=`</div>`;main.innerHTML=html;
