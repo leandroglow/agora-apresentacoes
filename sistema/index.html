@@ -1071,7 +1071,7 @@ O orçamento está consolidado para conferência e compra inicial, mas ainda nã
 // ── Google Drive ─────────────────────────────────────────
 const SBASE_ANON='sb_publishable_E_fFSYpICmFlbto06qOi4A_07x-69nj';
 const SBASE_URL='https://pderpmbmurtagpdsvzjg.supabase.co';
-const PROJECT_DRIVE_API='/api/project-files';
+const PROJECT_DRIVE_API='https://agora-apresentacoes.vercel.app/api/project-files';
 
 // Pastas padrão — sobrescritas pelo JSON importado ou pelo Supabase
 let GDRIVE_PASTAS={
@@ -2578,7 +2578,7 @@ function renderRelatorio(registros){
 <script>
 if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-function driveMediaUrl(id){ return '/api/project-file?id='+encodeURIComponent(id); }
+function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/project-file?id='+encodeURIComponent(id); }
 
 (function(){
   let items=[], cur=0, tipo='foto', zoom=1, pdfDoc=null, mediaObjectUrl='';
