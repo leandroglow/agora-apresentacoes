@@ -1141,8 +1141,9 @@ async function gdriveListar(folderRef, mime=''){
 }
 function gdriveSubpastas(id){ return gdriveListar(id,'application/vnd.google-apps.folder'); }
 async function gdriveImagens(id){
-  const[a,b,c]=await Promise.all([gdriveListar(id,'image/jpeg'),gdriveListar(id,'image/png'),gdriveListar(id,'image/webp')]);
-  return [...a,...b,...c];
+  const tipos=['image/jpeg','image/png','image/webp','video/mp4','video/quicktime','video/webm'];
+  const grupos=await Promise.all(tipos.map(t=>gdriveListar(id,t)));
+  return grupos.flat();
 }
 function gdrivePdfs(id){ return gdriveListar(id,'application/pdf'); }
 
@@ -1489,7 +1490,7 @@ window.abrirCategoria=async function(cat){
         return;
       }
 
-      const lbItems=imgs.map(f=>({id:f.id,name:f.name,url:gdView(f.id),thumb:gdThumb(f.id,'w300')}));
+      const lbItems=imgs.map(f=>({id:f.id,name:f.name,mimeType:f.mimeType,url:gdView(f.id),thumb:gdThumb(f.id,'w300')}));
       cont.innerHTML=`<div class="proj-cat-title">${cat==='renders'?'Renders':'Fotos'} (${imgs.length})</div>
       <div class="gdrive-fotos-grid" id="grid-imgs-cat">
         ${imgs.map((f,i)=>fotoCard(f,i)).join('')}
@@ -1525,7 +1526,7 @@ window.abrirSubpasta=async function(folderId, nome, voltarCat){
 
     let html='';
     if(imgs.length){
-      const lbItems=imgs.map(f=>({id:f.id,name:f.name,url:gdView(f.id),thumb:gdThumb(f.id,'w300')}));
+      const lbItems=imgs.map(f=>({id:f.id,name:f.name,mimeType:f.mimeType,url:gdView(f.id),thumb:gdThumb(f.id,'w300')}));
       html+=`<div class="proj-cat-title">Imagens (${imgs.length})</div>
       <div class="gdrive-fotos-grid" id="grid-imgs-sub">${imgs.map((f,i)=>fotoCard(f,i)).join('')}</div>`;
       cont.innerHTML=html+(pdfs.length?pdfSection(pdfs,imgs.length):'');
@@ -1563,7 +1564,7 @@ function pdfSection(pdfs, hasImgs){
 function bindFotos(sel,lbItems){
   setTimeout(()=>{
     document.querySelectorAll(sel+' .gdrive-foto-card').forEach(c=>{
-      c.onclick=()=>window.lbAbrir(lbItems,+c.dataset.i,'foto');
+      c.onclick=()=>window.lbAbrir(lbItems,+c.dataset.i,String(lbItems[+c.dataset.i].mimeType||'').startsWith('video/')?'video':'foto');
     });
   },0);
 }
@@ -2551,6 +2552,7 @@ function renderRelatorio(registros){
     <div id="lb-foto-wrap">
       <div id="lb-img-container">
         <img id="lb-img" src="" alt="" crossorigin="anonymous" />
+        <video id="lb-video" controls playsinline preload="metadata" style="display:none;max-width:90vw;max-height:78vh;background:#000"></video>
         <canvas id="lb-wm-canvas"></canvas>
       </div>
     </div>
@@ -2590,6 +2592,7 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
   const pWrap=document.getElementById('lb-pdf-wrap');
   const pPages=document.getElementById('lb-pdf-pages');
   const img=document.getElementById('lb-img');
+  const video=document.getElementById('lb-video');
   const imgCon=document.getElementById('lb-img-container');
   const wmCvs=document.getElementById('lb-wm-canvas');
   const titulo=document.getElementById('lb-titulo');
@@ -2615,7 +2618,7 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
     lb.classList.remove('open');
     document.body.style.overflow='';
     unlockVP();
-    if(mediaObjectUrl){URL.revokeObjectURL(mediaObjectUrl);mediaObjectUrl='';} img.src=''; pdfDoc=null; pPages.innerHTML='';
+    if(mediaObjectUrl){URL.revokeObjectURL(mediaObjectUrl);mediaObjectUrl='';} img.src=''; video.pause(); video.removeAttribute('src'); video.load(); pdfDoc=null; pPages.innerHTML='';
     if(wmCvs.width) wmCvs.getContext('2d').clearRect(0,0,wmCvs.width,wmCvs.height);
   }
   document.getElementById('lb-fechar').onclick=fechar;
@@ -2628,15 +2631,16 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
     prev.classList.toggle('disabled',cur===0);
     next.classList.toggle('disabled',cur===items.length-1);
     syncThumbActive();
-    if(tipo==='foto'){
+    if(tipo==='foto' || tipo==='video'){
       fWrap.classList.add('active'); pWrap.classList.remove('active');
       ctrlBar.style.display='flex';
       zoom=1; wmCvs.style.display='none';
       img.style.width=''; img.style.height='';
       img.style.maxWidth='90vw'; img.style.maxHeight='78vh';
+      video.style.display=tipo==='video'?'block':'none'; img.style.display=tipo==='video'?'none':'block'; video.pause(); video.removeAttribute('src');
       img.onload=()=>{applyZoom();};
       img.onerror=()=>{img.alt='Não foi possível carregar a imagem';};
-      loadProtectedImage(it);
+      loadProtectedMedia(it);
     } else {
       pWrap.classList.add('active'); fWrap.classList.remove('active');
       ctrlBar.style.display='flex';
@@ -2645,14 +2649,16 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
     }
   }
 
-  async function loadProtectedImage(it){
+  async function loadProtectedMedia(it){
     try{
       if(mediaObjectUrl){URL.revokeObjectURL(mediaObjectUrl);mediaObjectUrl='';}
       if(!it.id){img.src=it.url||it.thumb||'';return;}
       const token=await AgoraSistemaAuth.token();
       const resp=await fetch(driveMediaUrl(it.id),{headers:{Authorization:'Bearer '+token}});
       if(!resp.ok) throw new Error('Erro '+resp.status);
-      mediaObjectUrl=URL.createObjectURL(await resp.blob()); img.src=mediaObjectUrl;
+      mediaObjectUrl=URL.createObjectURL(await resp.blob());
+      if(tipo==='video'){video.src=mediaObjectUrl; video.style.width=''; video.style.height=''; video.onloadedmetadata=()=>applyZoom();}
+      else img.src=mediaObjectUrl;
     }catch(e){img.alt='Erro ao carregar: '+e.message;}
   }
 
@@ -2735,12 +2741,14 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
       pPages.style.width=(100/zoom)+'%';
       return;
     }
-    if(!img.naturalWidth)return;
-    const nw=img.naturalWidth,nh=img.naturalHeight;
+    const media=tipo==='video'?video:img;
+    if(!media.videoWidth && !media.naturalWidth)return;
+    const nw=tipo==='video'?video.videoWidth:img.naturalWidth;
+    const nh=tipo==='video'?video.videoHeight:img.naturalHeight;
     const s=Math.min(Math.min(nw,window.innerWidth*0.9)/nw, Math.min(nh,(window.innerHeight-200)*0.9)/nh);
     const newW=Math.round(nw*s*zoom),newH=Math.round(nh*s*zoom);
-    img.style.maxWidth='none'; img.style.maxHeight='none';
-    img.style.width=newW+'px'; img.style.height=newH+'px';
+    media.style.maxWidth='none'; media.style.maxHeight='none';
+    media.style.width=newW+'px'; media.style.height=newH+'px';
     img.style.transform='';
     wmCvs.style.width=newW+'px'; wmCvs.style.height=newH+'px';
     wmCvs.width=newW; wmCvs.height=newH;
