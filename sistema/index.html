@@ -2634,7 +2634,7 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
       zoom=1; wmCvs.style.display='none';
       img.style.width=''; img.style.height='';
       img.style.maxWidth='90vw'; img.style.maxHeight='78vh';
-      img.onload=()=>{applyZoom();drawWM();};
+      img.onload=()=>{applyZoom();};
       img.onerror=()=>{img.alt='Não foi possível carregar a imagem';};
       loadProtectedImage(it);
     } else {
@@ -2658,17 +2658,27 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
 
   async function renderPdf(fileId){
     pPages.innerHTML='<div class="pdf-loading"><div class="big-spinner"></div><p>Carregando PDF...</p></div>';
+    let blob;
     try{
       const token=await AgoraSistemaAuth.token();
       const resp=await fetch(driveMediaUrl(fileId),{headers:{Authorization:'Bearer '+token}});
       if(!resp.ok) throw new Error('Erro '+resp.status);
-      const buf=await resp.arrayBuffer();
+      blob=await resp.blob();
+      if(typeof pdfjsLib==='undefined') return renderPdfNative(blob);
+      const buf=await blob.arrayBuffer();
       const pdf=await pdfjsLib.getDocument({data:buf}).promise;
       pdfDoc=pdf; pPages.innerHTML='';
       for(let p=1;p<=pdf.numPages;p++) await renderPage(pdf,p,zoom);
     }catch(e){
-      pPages.innerHTML='<div class="pdf-loading"><p style="color:#f87171">Erro ao carregar: '+e.message+'</p></div>';
+      if(typeof blob!=='undefined') return renderPdfNative(blob);
+      pPages.innerHTML='<div class="pdf-loading"><p style="color:#f87171">Erro ao carregar o PDF.</p></div>';
     }
+  }
+
+  function renderPdfNative(blob){
+    if(mediaObjectUrl){URL.revokeObjectURL(mediaObjectUrl);mediaObjectUrl='';}
+    mediaObjectUrl=URL.createObjectURL(blob);
+    pPages.innerHTML='<iframe title="Visualização do PDF" src="'+mediaObjectUrl+'" style="width:100%;height:calc(100vh - 150px);border:0;background:#fff"></iframe>';
   }
 
   async function renderPage(pdf,pageNum,z){
@@ -2680,7 +2690,6 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
     canvas.width=vp.width; canvas.height=vp.height;
     canvas.style.width=vp.width+'px'; canvas.style.height=vp.height+'px';
     await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
-    addPdfWM(canvas);
     wrap.appendChild(canvas); pPages.appendChild(wrap);
   }
 
@@ -2724,7 +2733,6 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
     imgCon.style.marginLeft=newW<fw?Math.round((fw-newW)/2)+'px':'8px';
     imgCon.style.marginTop=newH<fh?Math.round((fh-newH)/2)+'px':'8px';
     imgCon.style.marginRight='8px'; imgCon.style.marginBottom='8px';
-    drawWM();
   }
   function zoomIn(){zoom=Math.min(+(zoom+STEP).toFixed(2),MAX);applyZoom();}
   function zoomOut(){zoom=Math.max(+(zoom-STEP).toFixed(2),MIN);applyZoom();}
