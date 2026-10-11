@@ -2664,11 +2664,7 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
       const resp=await fetch(driveMediaUrl(fileId),{headers:{Authorization:'Bearer '+token}});
       if(!resp.ok) throw new Error('Erro '+resp.status);
       blob=await resp.blob();
-      if(typeof pdfjsLib==='undefined') return renderPdfNative(blob);
-      const buf=await blob.arrayBuffer();
-      const pdf=await pdfjsLib.getDocument({data:buf}).promise;
-      pdfDoc=pdf; pPages.innerHTML='';
-      for(let p=1;p<=pdf.numPages;p++) await renderPage(pdf,p,zoom);
+      renderPdfNative(blob);
     }catch(e){
       if(typeof blob!=='undefined') return renderPdfNative(blob);
       pPages.innerHTML='<div class="pdf-loading"><p style="color:#f87171">Erro ao carregar o PDF.</p></div>';
@@ -2678,7 +2674,7 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
   function renderPdfNative(blob){
     if(mediaObjectUrl){URL.revokeObjectURL(mediaObjectUrl);mediaObjectUrl='';}
     mediaObjectUrl=URL.createObjectURL(blob);
-    pPages.innerHTML='<iframe title="Visualização do PDF" src="'+mediaObjectUrl+'" style="width:100%;height:calc(100vh - 150px);border:0;background:#fff"></iframe>';
+    pPages.innerHTML='<iframe title="Visualização do PDF" src="'+mediaObjectUrl+'" style="width:100%;height:calc(100vh - 150px);border:0;background:#fff"></iframe><div style="padding:10px;text-align:center;background:#fff"><a href="'+mediaObjectUrl+'" target="_blank" rel="noopener" style="color:#334155;font-weight:700">Abrir PDF em nova aba</a></div>';
   }
 
   async function renderPage(pdf,pageNum,z){

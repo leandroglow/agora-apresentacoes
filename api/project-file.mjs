@@ -12,11 +12,11 @@ export default async function handler(req,res){
   if(!validId(id)) return json(res,400,{error:'Arquivo inválido.'});
   try{
     const token=await getGoogleDriveAccessToken();
-    const meta=await fetch(`https://www.googleapis.com/drive/v3/files/${id}?fields=id,mimeType,name,trashed`,{headers:{Authorization:`Bearer ${token}`}});
+    const meta=await fetch(`https://www.googleapis.com/drive/v3/files/${id}?supportsAllDrives=true&fields=id,mimeType,name,trashed`,{headers:{Authorization:`Bearer ${token}`}});
     if(!meta.ok) return json(res,meta.status===404?404:502,{error:'Arquivo não encontrado.'});
     const info=await meta.json();
     if(info.trashed) return json(res,404,{error:'Arquivo indisponível.'});
-    const file=await fetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`,{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(60000)});
+    const file=await fetch(`https://www.googleapis.com/drive/v3/files/${id}?supportsAllDrives=true&alt=media`,{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(60000)});
     if(!file.ok) return json(res,502,{error:'Não foi possível carregar o arquivo.'});
     const data=Buffer.from(await file.arrayBuffer());
     res.statusCode=200;
