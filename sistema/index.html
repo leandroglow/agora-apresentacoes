@@ -1512,7 +1512,9 @@ window.abrirSubpasta=async function(folderId, nome, voltarCat){
   projMostrar(3);
 
   try{
-    const [rawImgs, rawPdfs] = await Promise.all([gdriveImagens(folderId), gdrivePdfs(folderId)]);\n    const imgs=rawImgs.sort((a,b)=>String(b.name||'').localeCompare(String(a.name||''),undefined,{numeric:true,sensitivity:'base'}));\n    const pdfs=rawPdfs.sort((a,b)=>String(b.name||'').localeCompare(String(a.name||''),undefined,{numeric:true,sensitivity:'base'}));
+    const [rawImgs, rawPdfs] = await Promise.all([gdriveImagens(folderId), gdrivePdfs(folderId)]);
+    const imgs=rawImgs.sort((a,b)=>String(b.name||'').localeCompare(String(a.name||''),undefined,{numeric:true,sensitivity:'base'}));
+    const pdfs=rawPdfs.sort((a,b)=>String(b.name||'').localeCompare(String(a.name||''),undefined,{numeric:true,sensitivity:'base'}));
     const total=imgs.length+pdfs.length;
     document.getElementById('proj-subpasta-sub').textContent=`${total} arquivo${total!==1?'s':''}`;
 
