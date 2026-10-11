@@ -2789,7 +2789,7 @@ function driveMediaUrl(id){ return '/api/project-file?id='+encodeURIComponent(id
   function buildThumbs(){
     thumbs.innerHTML=items.map((it,i)=>{
       const src=tipo==='foto'
-        ?(it.id?driveImgUrl(it.id):(it.thumb||it.url))
+        ?(it.id?gdThumb(it.id,'w120'):(it.thumb||it.url))
         :(it.id?'https://drive.google.com/thumbnail?id='+it.id+'&sz=w120':'');
       return '<div class="lb-thumb'+(i===cur?' active':'')+'" data-i="'+i+'"><img src="'+src+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=lb-thumb-pdf>\u{1F4C4}</div>\'" /></div>';
     }).join('');
