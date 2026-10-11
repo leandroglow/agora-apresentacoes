@@ -1075,11 +1075,11 @@ const PROJECT_DRIVE_API='https://agora-apresentacoes.vercel.app/api/project-file
 
 // Pastas padrão — sobrescritas pelo JSON importado ou pelo Supabase
 let GDRIVE_PASTAS={
-  'Casa do Lago AC20':{projeto:'project:casa-do-lago:projeto',fotos:'project:casa-do-lago:fotos'},
-  'Evidencias K21':{projeto:'project:evidencias:projeto',fotos:'project:evidencias:fotos'},
-  'Helvetia Park 2 B11':{projeto:'project:helvetia:projeto',fotos:'project:helvetia:fotos'},
-  'Galpão Smart City Q33 L25':{projeto:'project:galpao:projeto',fotos:'project:galpao:fotos'},
-  'SMS G13 — Smart City Salto, quadra G, lote 13':{projeto:'project:g13:projeto',fotos:'project:g13:fotos'}
+  'Casa do Lago AC20':{projeto:'project:casa-do-lago:projeto',fotos:'project:casa-do-lago:fotos',renders:'project:casa-do-lago:renders'},
+  'Evidencias K21':{projeto:'project:evidencias:projeto',fotos:'project:evidencias:fotos',renders:'project:evidencias:renders'},
+  'Helvetia Park 2 B11':{projeto:'project:helvetia:projeto',fotos:'project:helvetia:fotos',renders:'project:helvetia:renders'},
+  'Galpão Smart City Q33 L25':{projeto:'project:galpao:projeto',fotos:'project:galpao:fotos',renders:'project:galpao:renders'},
+  'SMS G13 — Smart City Salto, quadra G, lote 13':{projeto:'project:g13:projeto',fotos:'project:g13:fotos',renders:'project:g13:renders'}
 };
 let APRESENTACOES_OBRAS={
   'Casa do Lago AC20':'https://apresentacoes.agoracons.com.br/casa-ac20/',
@@ -1126,7 +1126,14 @@ async function gdriveListar(folderRef, mime=''){
     const[,project,category]=ref.split(':');
     params.set('project',project); params.set('category',category);
   }else params.set('folder',ref);
-  const res=await fetch(PROJECT_DRIVE_API+'?'+params,{headers:{Authorization:'Bearer '+token}});
+  let res;
+  try{
+    res=await fetch(PROJECT_DRIVE_API+'?'+params,{headers:{Authorization:'Bearer '+token}});
+  }catch(networkError){
+    // A API pode estar publicada no mesmo domínio do sistema; usar o caminho local
+    // evita que uma alteração do domínio Vercel derrube todas as categorias.
+    res=await fetch('/api/project-files?'+params,{headers:{Authorization:'Bearer '+token}}).catch(()=>{throw networkError;});
+  }
   const data=await res.json().catch(()=>({}));
   if(!res.ok) throw new Error(data.error||'Não foi possível acessar a pasta do projeto.');
   const files=data.files||[];
