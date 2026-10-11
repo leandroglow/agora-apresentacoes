@@ -2534,6 +2534,7 @@ function renderRelatorio(registros){
 
 <!-- ══ LIGHTBOX ══ -->
 <!-- PDF.js library -->
+<script src="pdf-viewer.js?v=20261011-tiles"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -2603,6 +2604,8 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
   const prev=document.getElementById('lb-prev');
   const next=document.getElementById('lb-next');
   const metaVP=document.querySelector('meta[name=viewport]');
+  const pdfViewer=new AgoraPdfViewer(pWrap,pPages,z=>{zoom=z;zlbl.textContent=Math.round(z*100)+'%';});
+  let mediaGeneration=0;
 
   function lockVP(){metaVP.content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no';}
   function unlockVP(){metaVP.content='width=device-width,initial-scale=1.0,maximum-scale=1.0';}
@@ -2615,6 +2618,7 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
   };
 
   function fechar(){
+    mediaGeneration++;pdfViewer.clear();
     lb.classList.remove('open');
     document.body.style.overflow='';
     unlockVP();
@@ -2625,7 +2629,9 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
   lb.addEventListener('click',e=>{if(e.target===lb)fechar();});
 
   function show(){
+    mediaGeneration++;pdfViewer.clear();video.pause();video.removeAttribute('src');video.load();
     const it=items[cur];
+    if(tipo!=='pdf')tipo=String(it.mimeType||'').startsWith('video/')?'video':'foto';
     titulo.textContent=it.name.replace(/\.[^.]+$/,'');
     contEl.textContent=(cur+1)+' / '+items.length;
     prev.classList.toggle('disabled',cur===0);
@@ -2650,10 +2656,18 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
   }
 
   async function loadProtectedMedia(it){
+    const generation=mediaGeneration;
     try{
       if(mediaObjectUrl){URL.revokeObjectURL(mediaObjectUrl);mediaObjectUrl='';}
       if(!it.id){img.src=it.url||it.thumb||'';return;}
       const token=await AgoraSistemaAuth.token();
+      if(tipo==='video'){
+        const reply=await fetch(driveMediaUrl(it.id)+'&action=playback',{headers:{Authorization:'Bearer '+token}});
+        const playback=await reply.json();if(!reply.ok)throw new Error(playback.error||'Não foi possível abrir o vídeo');
+        if(generation!==mediaGeneration)return;
+        video.src=playback.url;video.load();video.onloadedmetadata=()=>applyZoom();
+        video.onerror=()=>{video.title='Não foi possível reproduzir este formato de vídeo neste aparelho.';};return;
+      }
       const resp=await fetch(driveMediaUrl(it.id),{headers:{Authorization:'Bearer '+token}});
       if(!resp.ok) throw new Error('Erro '+resp.status);
       mediaObjectUrl=URL.createObjectURL(await resp.blob());
@@ -2663,8 +2677,9 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
   }
 
   async function renderPdf(fileId){
+    const generation=mediaGeneration;
     pPages.innerHTML='<div class="pdf-loading"><div class="big-spinner"></div><p>Carregando PDF...</p></div>';
-    pPages.style.transform=''; pPages.style.transformOrigin='top left'; pPages.style.width='100%';
+    pPages.style.transform='';
     try{
       const token=await AgoraSistemaAuth.token();
       const resp=await fetch(driveMediaUrl(fileId),{headers:{Authorization:'Bearer '+token}});
@@ -2674,8 +2689,8 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
       if(typeof pdfjsLib==='undefined') throw new Error('Visualizador de PDF indisponível');
       pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       const pdf=await pdfjsLib.getDocument({data:await blob.arrayBuffer()}).promise;
-      pdfDoc=pdf; pPages.innerHTML='';
-      for(let p=1;p<=pdf.numPages;p++) await renderPage(pdf,p,zoom);
+      if(generation!==mediaGeneration){pdf.destroy();return;}
+      pdfDoc=pdf;await pdfViewer.open(pdf);
     }catch(e){
       pPages.innerHTML='<div class="pdf-loading"><p style="color:#f87171">Erro ao carregar o PDF.</p><p style="opacity:.75">'+String(e.message||'Tente novamente').replace(/[<>]/g,'')+'</p></div>';
     }
@@ -2735,12 +2750,7 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
 
   function applyZoom(){
     zlbl.textContent=Math.round(zoom*100)+'%';
-    if(tipo==='pdf'){
-      pPages.style.transform='scale('+zoom+')';
-      pPages.style.transformOrigin='top left';
-      pPages.style.width=(100/zoom)+'%';
-      return;
-    }
+    if(tipo==='pdf'){pdfViewer.setZoom(zoom);return;}
     const media=tipo==='video'?video:img;
     if(!media.videoWidth && !media.naturalWidth)return;
     const nw=tipo==='video'?video.videoWidth:img.naturalWidth;
@@ -2771,8 +2781,8 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
   fWrap.addEventListener('wheel',e=>{e.preventDefault();e.deltaY<0?zoomIn():zoomOut();},{passive:false});
   imgCon.onclick=e=>{if(e.target===wmCvs||e.target===img){zoom===1?setZoom(2):setZoom(1);}};
   let d0=0;
-  lb.addEventListener('touchstart',e=>{if(e.touches.length===2)d0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
-  lb.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(Math.abs(d-d0)>6){d>d0?zoomIn():zoomOut();d0=d;}}},{passive:true});
+  lb.addEventListener('touchstart',e=>{if(tipo!=='pdf'&&e.touches.length===2)d0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
+  lb.addEventListener('touchmove',e=>{if(tipo!=='pdf'&&e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(Math.abs(d-d0)>6){d>d0?zoomIn():zoomOut();d0=d;}}},{passive:true});
 
   function drawWM(){
     if(!img.naturalWidth||!img.offsetWidth)return;
