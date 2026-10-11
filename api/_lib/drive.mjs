@@ -1,5 +1,4 @@
 import { excerpts, matchScore, normalize } from './retrieval.mjs';
-import { CatalogImages } from './pdf-images.mjs';
 import { CatalogError } from './catalog-error.mjs';
 export { CatalogError } from './catalog-error.mjs';
 
@@ -39,7 +38,7 @@ export class CatalogDrive {
     this.metadata = new Map(); this.texts = new Map(); this.opened = new Map(); this.treeCache = new Map();
     this.bytesRead = 0;
     this.binary = new Map();
-    this.images = new CatalogImages(this);
+    this.images = null;
   }
 
   async request(path, params = {}) {
@@ -217,8 +216,8 @@ export class CatalogDrive {
   }
 
   async execute(name, args) {
-    if (name === 'inspect_catalog_page') return this.images.inspect(driveId(args.file_id), args.page);
-    if (name === 'show_catalog_image') return this.images.show(driveId(args.file_id), args.page, args.caption, args.crop);
+    if (name === 'inspect_catalog_page') { const { CatalogImages } = await import('./pdf-images.mjs'); this.images ||= new CatalogImages(this); return this.images.inspect(driveId(args.file_id), args.page); }
+    if (name === 'show_catalog_image') { const { CatalogImages } = await import('./pdf-images.mjs'); this.images ||= new CatalogImages(this); return this.images.show(driveId(args.file_id), args.page, args.caption, args.crop); }
     if (name === 'list_catalog_folder') return this.list(args.folder_id || this.rootId, args.page_token || '');
     if (name === 'search_catalog') return this.search(String(args.query || '').slice(0, 200), args.folder_id || this.rootId);
     if (name === 'read_catalog') return this.read(args.file_id, String(args.query || '').slice(0, 200), args.offset || 0);
@@ -230,6 +229,6 @@ export class CatalogDrive {
   }
 
   dispose() {
-    this.binary.clear(); this.texts.clear(); this.images.dispose(); this.metadata.clear(); this.treeCache.clear();
+    this.binary.clear(); this.texts.clear(); if (this.images) this.images.dispose(); this.metadata.clear(); this.treeCache.clear();
   }
 }
