@@ -1069,17 +1069,17 @@ O orçamento está consolidado para conferência e compra inicial, mas ainda nã
 };
 
 // ── Google Drive ─────────────────────────────────────────
-const GDRIVE_KEY='AIzaSyBUoEB4qeeIl0dTLDg6AbS-gQL6sTNf__Q';
 const SBASE_ANON='sb_publishable_E_fFSYpICmFlbto06qOi4A_07x-69nj';
 const SBASE_URL='https://pderpmbmurtagpdsvzjg.supabase.co';
+const PROJECT_DRIVE_API='https://agora-apresentacoes.vercel.app/api/project-files';
 
 // Pastas padrão — sobrescritas pelo JSON importado ou pelo Supabase
 let GDRIVE_PASTAS={
-  'Chácara Lobo Guará':{
-    renders:'1J3kj6ENZNz5D9p4nJGclkPe17NbObzy1',
-    projeto:'1J3kj6ENZNz5D9p4nJGclkPe17NbObzy1',
-    fotos:  '1J3kj6ENZNz5D9p4nJGclkPe17NbObzy1',
-  },
+  'Casa do Lago AC20':{projeto:'project:casa-do-lago:projeto',fotos:'project:casa-do-lago:fotos'},
+  'Evidencias K21':{projeto:'project:evidencias:projeto',fotos:'project:evidencias:fotos'},
+  'Helvetia Park 2 B11':{projeto:'project:helvetia:projeto',fotos:'project:helvetia:fotos'},
+  'Galpão Smart City Q33 L25':{projeto:'project:galpao:projeto',fotos:'project:galpao:fotos'},
+  'SMS G13 — Smart City Salto, quadra G, lote 13':{projeto:'project:g13:projeto',fotos:'project:g13:fotos'}
 };
 let APRESENTACOES_OBRAS={
   'Casa do Lago AC20':'https://apresentacoes.agoracons.com.br/casa-ac20/',
@@ -1090,18 +1090,7 @@ let APRESENTACOES_OBRAS={
 };
 
 // Carrega config do Supabase ao iniciar
-window.carregarConfigDrive = async function(){
-  try{
-    const res=await fetch(SBASE_URL+'/rest/v1/configuracoes?chave=eq.gdrive_pastas&select=valor',{
-      headers:{'apikey':SBASE_ANON,'Authorization':'Bearer '+SBASE_ANON}
-    });
-    const rows=await res.json();
-    if(rows&&rows.length&&rows[0].valor){
-      GDRIVE_PASTAS=rows[0].valor;
-      renderListaObras(); // atualiza status das obras
-    }
-  }catch(e){ console.warn('Config Drive não carregada:', e.message); }
-}
+window.carregarConfigDrive = async function(){ renderListaObras(); }
 
 window.carregarConfigApresentacoes = async function(){
   try{
@@ -1116,23 +1105,7 @@ window.carregarConfigApresentacoes = async function(){
   }catch(e){ console.warn('Config Apresentações não carregada:', e.message); }
 }
 
-window.salvarConfigDriveSupabase = async function(){
-  const H={'apikey':SBASE_ANON,'Authorization':'Bearer '+SBASE_ANON,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'};
-  const r=await fetch(SBASE_URL+'/rest/v1/configuracoes',{
-    method:'POST',
-    headers:H,
-    body:JSON.stringify({chave:'gdrive_pastas',valor:GDRIVE_PASTAS,atualizado_em:new Date().toISOString()})
-  });
-  if(!r.ok){
-    const err=await r.text();
-    // Se der erro de RLS, tenta via upsert com patch
-    if(err.includes('row-level security')){
-      console.warn('RLS bloqueou insert — tente rodar no SQL Editor: create policy "allow all" on configuracoes for all using (true) with check (true);');
-      throw new Error('Permissão negada. Rode a policy de RLS no Supabase SQL Editor.');
-    }
-    throw new Error(err);
-  }
-}
+window.salvarConfigDriveSupabase = async function(){ throw new Error('A configuração segura do Drive é mantida somente no servidor.'); }
 
 window.salvarConfigApresentacoesSupabase = async function(){
   const H={'apikey':SBASE_ANON,'Authorization':'Bearer '+SBASE_ANON,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'};
@@ -1144,13 +1117,20 @@ window.salvarConfigApresentacoesSupabase = async function(){
   if(!r.ok) throw new Error(await r.text());
 }
 
-async function gdriveListar(folderId, mime=''){
-  let q=`'${folderId}' in parents and trashed=false`;
-  if(mime) q+=` and mimeType='${mime}'`;
-  const url=`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType)&key=${GDRIVE_KEY}&pageSize=100&orderBy=name`;
-  const res=await fetch(url);
-  if(!res.ok) throw new Error('Drive API: '+res.status);
-  return (await res.json()).files||[];
+async function gdriveListar(folderRef, mime=''){
+  const token=await AgoraSistemaAuth.token();
+  if(!token) throw new Error('Sessão expirada. Entre novamente no sistema.');
+  const params=new URLSearchParams();
+  const ref=String(folderRef||'');
+  if(ref.startsWith('project:')){
+    const[,project,category]=ref.split(':');
+    params.set('project',project); params.set('category',category);
+  }else params.set('folder',ref);
+  const res=await fetch(PROJECT_DRIVE_API+'?'+params,{headers:{Authorization:'Bearer '+token}});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error||'Não foi possível acessar a pasta do projeto.');
+  const files=data.files||[];
+  return mime ? files.filter(f=>f.mimeType===mime) : files;
 }
 function gdriveSubpastas(id){ return gdriveListar(id,'application/vnd.google-apps.folder'); }
 async function gdriveImagens(id){
