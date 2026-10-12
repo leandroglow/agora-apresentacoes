@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Apresentações Sistema · Ágora Construtora</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="clerk-auth.js?v=1"></script>
 <script src="catalogos-ia-config.js"></script>
 <script src="catalogos-chat.js?v=3"></script>
@@ -1069,8 +1068,8 @@ O orçamento está consolidado para conferência e compra inicial, mas ainda nã
 };
 
 // ── Google Drive ─────────────────────────────────────────
-const SBASE_ANON='sb_publishable_E_fFSYpICmFlbto06qOi4A_07x-69nj';
-const SBASE_URL='https://pderpmbmurtagpdsvzjg.supabase.co';
+const API_BASE='https://agora-apresentacoes.vercel.app';
+async function apiAuthFetch(url, options={}){const token=await (window.AgoraSistemaAuth?.token?.()||Promise.resolve(null));if(!token)throw new Error('Sessão expirada. Entre novamente.');return fetch(url,{...options,headers:{...(options.headers||{}),Authorization:'Bearer '+token}});}
 const PROJECT_DRIVE_API='https://agora-apresentacoes.vercel.app/api/project-files';
 
 // Pastas padrão — sobrescritas pelo JSON importado ou pelo Supabase
@@ -1090,32 +1089,13 @@ let APRESENTACOES_OBRAS={
 };
 
 // Carrega config do Supabase ao iniciar
-window.carregarConfigDrive = async function(){ renderListaObras(); }
+window.carregarConfigDrive = async function(){ try{const res=await apiAuthFetch(API_BASE+'/api/system-config');if(res.ok){const cfg=await res.json();if(cfg.gdrive_pastas)GDRIVE_PASTAS={...GDRIVE_PASTAS,...cfg.gdrive_pastas};if(cfg.apresentacoes_obras)APRESENTACOES_OBRAS={...APRESENTACOES_OBRAS,...cfg.apresentacoes_obras};if(cfg.projetos_info)window.PROJETOS_INFO_LOCAL={...(window.PROJETOS_INFO_LOCAL||{}),...cfg.projetos_info};}renderListaObras();}catch(e){console.warn('Config Drive não carregada:',e.message);} }
 
-window.carregarConfigApresentacoes = async function(){
-  try{
-    const res=await fetch(SBASE_URL+'/rest/v1/configuracoes?chave=eq.apresentacoes_obras&select=valor',{
-      headers:{'apikey':SBASE_ANON,'Authorization':'Bearer '+SBASE_ANON}
-    });
-    const rows=await res.json();
-    if(rows&&rows.length&&rows[0].valor && typeof rows[0].valor==='object'){
-      APRESENTACOES_OBRAS={...APRESENTACOES_OBRAS,...rows[0].valor};
-      renderListaObras();
-    }
-  }catch(e){ console.warn('Config Apresentações não carregada:', e.message); }
-}
+window.carregarConfigApresentacoes = async function(){ await window.carregarConfigDrive(); }
 
 window.salvarConfigDriveSupabase = async function(){ throw new Error('A configuração segura do Drive é mantida somente no servidor.'); }
 
-window.salvarConfigApresentacoesSupabase = async function(){
-  const H={'apikey':SBASE_ANON,'Authorization':'Bearer '+SBASE_ANON,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'};
-  const r=await fetch(SBASE_URL+'/rest/v1/configuracoes',{
-    method:'POST',
-    headers:H,
-    body:JSON.stringify({chave:'apresentacoes_obras',valor:APRESENTACOES_OBRAS,atualizado_em:new Date().toISOString()})
-  });
-  if(!r.ok) throw new Error(await r.text());
-}
+window.salvarConfigApresentacoesSupabase = async function(){const r=await apiAuthFetch(API_BASE+'/api/system-config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({apresentacoes_obras:APRESENTACOES_OBRAS})});if(!r.ok)throw new Error(await r.text());}
 
 async function gdriveListar(folderRef, mime=''){
   const token=await AgoraSistemaAuth.token();
@@ -1348,11 +1328,8 @@ window.abrirInfoObra=async function(){
   cont.innerHTML=`<div class="proj-cat-title">Informações para o Assistente</div>
     <div class="proj-empty"><div class="big-spinner"></div><p>Carregando...</p></div>`;
   try{
-    const res=await fetch(SBASE_URL+'/rest/v1/projetos_info?obra=eq.'+encodeURIComponent(obraAtual)+'&select=conteudo',{
-      headers:{'apikey':SBASE_ANON,'Authorization':'Bearer '+SBASE_ANON}
-    });
-    const rows=await res.json();
-    const conteudo=(rows&&rows.length&&rows[0].conteudo)?rows[0].conteudo:(PROJETOS_INFO_LOCAL[obraAtual]||'');
+    await carregarConfigDrive();
+    const conteudo=(window.PROJETOS_INFO_LOCAL&&window.PROJETOS_INFO_LOCAL[obraAtual])||'';
     cont.innerHTML=`<div class="proj-cat-title">Informações para o Assistente</div>
       <p class="hint" style="margin-bottom:12px">Estas informações são usadas pelo assistente para responder sobre esta obra. Use o modelo .md fornecido como guia.</p>
       <textarea id="proj-info-txt" rows="16" style="resize:vertical;font-family:monospace;font-size:12px;line-height:1.6">${conteudo.replace(/</g,'&lt;')}</textarea>
@@ -1406,11 +1383,8 @@ window.salvarInfoObra=async function(){
   const statusEl=document.getElementById('proj-info-status');
   statusEl.textContent='Salvando...'; statusEl.style.color='var(--ambar)';
   try{
-    const H={'apikey':SBASE_ANON,'Authorization':'Bearer '+SBASE_ANON,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'};
-    const r=await fetch(SBASE_URL+'/rest/v1/projetos_info',{
-      method:'POST',headers:H,
-      body:JSON.stringify({obra:obraAtual,conteudo,atualizado_em:new Date().toISOString()})
-    });
+    const projetos_info={...(window.PROJETOS_INFO_LOCAL||{}),[obraAtual]:conteudo};
+    const r=await apiAuthFetch(API_BASE+'/api/system-config',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({projetos_info})});
     if(!r.ok) throw new Error(await r.text());
     statusEl.textContent='✓ Salvo! O assistente já pode usar estas informações.';
     statusEl.style.color='#2d6a4f';
@@ -2274,11 +2248,6 @@ renderListaObras();
 
 // ── App / Supabase ────────────────────────────────────────
 function iniciarApp(){
-
-const SUPABASE_URL='https://pderpmbmurtagpdsvzjg.supabase.co';
-const SUPABASE_KEY='sb_publishable_E_fFSYpICmFlbto06qOi4A_07x-69nj';
-const BUCKET='fotos-obras';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const COLS=['Reginaldo','Francisco','Roberto','Antonio','Bruno','Tassio','Berdenego','Mezaque','Grandão','Cristiano'];
 const FRAC=[{l:'100% (dia inteiro)',v:1},{l:'75%',v:.75},{l:'50%',v:.5},{l:'25%',v:.25}];
 const st={editId:null,pessoas:[],fotosNovas:[],fotosExistentes:[],fotosOriginais:[]};
@@ -2287,24 +2256,17 @@ $('data').valueAsDate=new Date();
 function sbar(msg,t){const e=$('sbar');e.innerHTML=msg;e.className=t;}
 
 async function api(path,opts={}){
-  const res=await fetch(SUPABASE_URL+'/rest/v1/'+path,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=representation',...opts.headers},...opts});
+  const token=await (window.AgoraSistemaAuth?.token?.()||Promise.resolve(null));if(!token)throw new Error('Sessão expirada.');
+  const[resource,query='']=path.split('?');const url=new URL(API_BASE+'/api/rh');url.searchParams.set('resource',resource);new URLSearchParams(query).forEach((v,k)=>url.searchParams.set(k,v));const method=opts.method||'GET';const res=await fetch(url,{...opts,method,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})},body:method==='GET'?undefined:(typeof opts.body==='string'?opts.body:JSON.stringify(opts.body||{}))});
   if(!res.ok){const e=await res.text();throw new Error(e);}
   const txt=await res.text();return txt?JSON.parse(txt):null;
 }
 async function uploadFoto(file,registroId){
-  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
-  const path=registroId+'/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'.'+ext;
-  const{data,error}=await sb.storage.from(BUCKET).upload(path,file,{contentType:file.type||'image/jpeg',upsert:true});
-  if(error)throw new Error('Upload falhou: '+error.message);
-  const{data:urlData}=sb.storage.from(BUCKET).getPublicUrl(path);
-  return urlData.publicUrl;
+  const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});
+  return (await api('registros',{method:'POST',body:{action:'photo_upload',recordId:registroId,data}})).url;
 }
 async function listarFotos(registroId){
-  const{data,error}=await sb.storage.from(BUCKET).list(registroId,{limit:100});
-  if(error||!data)return[];
-  return data.filter(f=>f.name&&!f.name.startsWith('.')).map(f=>{
-    const{data:u}=sb.storage.from(BUCKET).getPublicUrl(registroId+'/'+f.name);return u.publicUrl;
-  });
+  const token=await (window.AgoraSistemaAuth?.token?.()||Promise.resolve(null));if(!token)return[];const u=new URL(API_BASE+'/api/rh');u.searchParams.set('action','photos');u.searchParams.set('recordId',registroId);const res=await fetch(u,{headers:{Authorization:'Bearer '+token}});return res.ok?(await res.json()).photos||[]:[];
 }
 
 sbar('<span class="spinner"></span> Conectando...','sload');
@@ -2413,7 +2375,7 @@ $('btn-salvar').addEventListener('click',async()=>{
     else{reg.id=Date.now();await api('registros',{method:'POST',body:JSON.stringify(reg)});registroId=reg.id;}
     const cols=st.pessoas.filter(p=>p.nome).map(p=>({registro_id:registroId,nome:p.nome,fracao:p.fracao,tarefa:p.tarefa}));
     if(cols.length)await api('colaboradores',{method:'POST',body:JSON.stringify(cols)});
-    if(st.fotosOriginais&&st.fotosOriginais.length){const rem=st.fotosOriginais.filter(url=>!st.fotosExistentes.includes(url));for(const url of rem){try{const path=url.split('/object/public/'+BUCKET+'/')[1];await sb.storage.from(BUCKET).remove([path]);}catch(fe){}}}
+    if(st.fotosOriginais&&st.fotosOriginais.length){const rem=st.fotosOriginais.filter(url=>!st.fotosExistentes.includes(url));for(const data of rem){try{await api('registros',{method:'POST',body:{action:'photo_delete',recordId:registroId,data}});}catch(fe){}}}
     let fotosOk=0,fotosErr=0;
     for(const file of st.fotosNovas){try{await uploadFoto(file,registroId);fotosOk++;}catch(fe){fotosErr++;}}
     sbar(fotosErr>0?'✓ Salvo! Mas '+fotosErr+' foto(s) falharam.':'✓ Registro salvo'+(fotosOk?' com '+fotosOk+' foto(s)':'')+'!',fotosErr>0?'serr':'sok');
@@ -2470,7 +2432,6 @@ rP();rF();
 
 // Relatório
 let allRegistros=[],allColabs=[],allFotos={},filteredRegistros=[];
-const H={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'};
 function fmtDate(s){if(!s)return'—';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}
 function fmtDateLong(s){if(!s)return'—';const[y,m,d]=s.split('-');const months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];return`${d} ${months[parseInt(m)-1]} ${y}`;}
 function initials(n){return(n||'?').split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();}
@@ -2480,13 +2441,11 @@ window.buscarTodos=async function(){
   btn.innerHTML='<div style="width:11px;height:11px;border:2px solid rgba(0,0,0,.15);border-top-color:#0E1418;border-radius:50%;animation:spin .9s linear infinite"></div> Carregando...';
   showRelLoading('Buscando registros...');
   try{
-    const[rRes,cRes]=await Promise.all([fetch(`${SUPABASE_URL}/rest/v1/registros?select=*&order=data.desc`,{headers:H}),fetch(`${SUPABASE_URL}/rest/v1/colaboradores?select=*`,{headers:H})]);
-    if(!rRes.ok)throw new Error(`Erro ${rRes.status}`);
-    allRegistros=await rRes.json();allColabs=await cRes.json();
+    const[rRes,cRes]=await Promise.all([api('registros?select=*&order=data.desc'),api('colaboradores?select=*')]);
+    allRegistros=rRes||[];allColabs=cRes||[];
     showRelLoading('Buscando fotos...');allFotos={};
     await Promise.all(allRegistros.map(async reg=>{
-      try{const fr=await fetch(`${SUPABASE_URL}/storage/v1/object/list/${BUCKET}/${reg.id}`,{method:'POST',headers:H,body:JSON.stringify({limit:20,offset:0})});
-        if(fr.ok){const files=await fr.json();allFotos[reg.id]=(files||[]).filter(f=>f.name&&!f.name.endsWith('/')).map(f=>`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${reg.id}/${f.name}`);}else allFotos[reg.id]=[];
+      try{allFotos[reg.id]=await listarFotos(reg.id);
       }catch{allFotos[reg.id]=[];}
     }));
     popularSelectObras();filteredRegistros=[...allRegistros];renderRelatorio(filteredRegistros);
