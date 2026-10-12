@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#090B0A"><meta name="robots" content="noindex">
+  <title>ÁGORA Casa · Início</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body.casa-panel{background:radial-gradient(ellipse at 85% 15%,rgba(196,173,113,.28),transparent 48%),radial-gradient(ellipse at 15% 70%,rgba(83,120,94,.42),transparent 55%),linear-gradient(135deg,#090b0a,#202e24 55%,#111711) fixed;color:#f1eee6;min-height:100vh}
+    .casa-grid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:24px;padding:28px;max-width:1500px;margin:auto}.casa-section{min-width:0}.casa-section h2{font-size:1rem;letter-spacing:.02em;margin:0 0 12px;color:#f1eee6}.casa-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.casa-card{appearance:none;width:100%;min-height:88px;border:1px solid rgba(223,202,143,.35);border-radius:22px;background:rgba(23,32,26,.68);box-shadow:0 16px 40px rgba(0,0,0,.3);color:#f1eee6;padding:16px;text-align:left;cursor:pointer;transition:.18s}.casa-card:hover,.casa-card:focus-visible{border-color:#dfca8f;transform:translateY(-2px)}.casa-card.on{background:linear-gradient(135deg,rgba(196,173,113,.28),rgba(23,32,26,.75));box-shadow:0 0 0 1px rgba(223,202,143,.3),0 16px 40px rgba(0,0,0,.3)}.casa-card strong,.casa-card small{display:block}.casa-card strong{font-size:1rem}.casa-card small{margin-top:8px;color:#b9b7af}.casa-status{padding:0 28px;color:#b9b7af}.casa-top{display:flex;justify-content:space-between;align-items:center;padding:26px 28px 0}.casa-top h1{margin:0}.casa-top a{color:#dfca8f}.casa-login{max-width:540px;margin:10vh auto;padding:32px}.casa-empty{grid-column:1/-1;text-align:center;padding:40px;color:#b9b7af}@media(max-width:900px){.casa-grid{grid-template-columns:1fr 1fr}}@media(max-width:620px){.casa-grid{grid-template-columns:1fr;padding:18px}.casa-top{padding:20px 18px 0}.casa-status{padding:0 18px}}
+  </style>
+</head>
+<body class="control-app casa-panel">
+  <section id="casaLogin" class="login-gate casa-login" aria-label="Entrar na ÁGORA Construtora"><div class="login-shell"><div class="login-brand"><span class="mark">Á</span><span>ÁGORA<small>CONSTRUTORA</small></span></div><p class="login-section-label">ÁGORA CASA · INÍCIO</p><div id="signInMount" class="login-form"></div><p id="loginNotice" class="notice" role="status" hidden></p></div></section>
+  <div id="casaApp" hidden><header class="casa-top"><h1>Ágora Casa · Início</h1><a href="./">Automação</a></header><p id="casaStatus" class="casa-status" role="status"></p><main id="casaGrid" class="casa-grid"></main></div>
+  <script defer src="capabilities.js"></script><script defer src="portal-config.js"></script><script defer src="portal-auth.js"></script><script defer src="casa.js"></script>
+</body>
+</html>
