@@ -22,14 +22,15 @@ window.AgoraSistemaAuth = (() => {
   const ready = (async () => {
     const domain = atob(publishableKey.split('_')[2]).slice(0, -1);
     if (!/^[a-z0-9.-]+$/i.test(domain)) throw new Error('Configuração do Clerk inválida.');
-    const base = `https://${domain}/npm/`;
-    await loadScript(base + '@clerk/ui@1/dist/ui.browser.js');
+    // The custom Clerk frontend domain is not available on every network.
+    // Load the public SDK from the official CDN; the publishable key still
+    // selects the same Clerk application and no secret is exposed here.
+    const base = 'https://cdn.jsdelivr.net/npm/';
     await loadScript(base + '@clerk/clerk-js@6/dist/clerk.browser.js', {
       'data-clerk-publishable-key': publishableKey
     });
     clerk = window.Clerk;
     await clerk.load({
-      ui: { ClerkUI: window.__internal_ClerkUICtor },
       signInForceRedirectUrl: returnUrl,
       localization: {
         locale: 'pt-BR',
