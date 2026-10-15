@@ -26,11 +26,17 @@ window.AgoraSistemaAuth = (() => {
     // Load the public SDK from the official CDN; the publishable key still
     // selects the same Clerk application and no secret is exposed here.
     const base = 'https://cdn.jsdelivr.net/npm/';
+    // Clerk v6 requires its separate UI bundle for sign-in components.
+    await loadScript(base + '@clerk/ui@1/dist/ui.browser.js');
+    if (typeof window.__internal_ClerkUICtor !== 'function') {
+      throw new Error('Não foi possível carregar a tela de login. Atualize a página e tente novamente.');
+    }
     await loadScript(base + '@clerk/clerk-js@6/dist/clerk.browser.js', {
       'data-clerk-publishable-key': publishableKey
     });
     clerk = window.Clerk;
     await clerk.load({
+      ui: { ClerkUI: window.__internal_ClerkUICtor },
       signInForceRedirectUrl: returnUrl,
       localization: {
         locale: 'pt-BR',
