@@ -97,7 +97,7 @@ window.AgoraPdfViewer = class {
   }
   setZoom(z,x=this.v.clientWidth/2,y=this.v.clientHeight/2) {
     if (!this.doc) return;
-    z=Math.max(.25,Math.min(8,z)); if (z===this.z) return;
+    z=Math.max(.25,Math.min(12,z)); if (z===this.z) return;
     const anchorX=(this.v.scrollLeft+x-(this.offsetX||0))/this.z;
     const anchorY=(this.v.scrollTop+y-(this.offsetY||0))/this.z;
     this.cancelTiles(); this.z=z; this.layout();

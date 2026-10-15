@@ -8,7 +8,7 @@
   };
   const viewer = new AgoraPdfViewer($('document-viewport'), $('document-stage'), z => {
     $('document-zoom').value = Math.round(z*100)+'%';
-    $('document-minus').disabled=z<=.25; $('document-plus').disabled=z>=8;
+    $('document-minus').disabled=z<=.25; $('document-plus').disabled=z>=12;
   });
   let library, loading, pdf, generation=0;
   function loadLibrary() {
