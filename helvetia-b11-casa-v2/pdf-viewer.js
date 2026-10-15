@@ -11,8 +11,8 @@ window.AgoraPdfViewer = class {
     viewport.addEventListener('scroll', () => this.schedule(), {passive:true});
     viewport.addEventListener('wheel', e => {
       if (!this.doc) return;
-      e.preventDefault(); const r = viewport.getBoundingClientRect();
-      this.setZoom(this.z * Math.exp(-e.deltaY * .002), e.clientX-r.left, e.clientY-r.top);
+      e.preventDefault();
+      this.setZoom(this.z * Math.exp(-e.deltaY * .002));
     }, {passive:false});
     let drag = null;
     viewport.addEventListener('pointerdown', e => {
@@ -32,7 +32,7 @@ window.AgoraPdfViewer = class {
     };
     const start = e => {
       clearTimeout(this.timer);
-      this.gesture=e.touches.length&&this.doc ? {...point(e),z:this.z,l:viewport.scrollLeft,t:viewport.scrollTop} : null;
+      this.gesture=e.touches.length&&this.doc ? {...point(e),z:this.z,l:viewport.scrollLeft,t:viewport.scrollTop,ox:this.offsetX||0,oy:this.offsetY||0} : null;
       if (!this.gesture) this.schedule();
     };
     viewport.addEventListener('touchstart', e => { e.preventDefault(); start(e); }, {passive:false});
@@ -44,8 +44,8 @@ window.AgoraPdfViewer = class {
         // Absolute distance ratio: no steps or repeated + / - actions.
         this.setZoom(g.z*p.d/g.d,g.x,g.y);
         const ratio=this.z/g.z;
-        viewport.scrollLeft=(g.l+g.x)*ratio-p.x;
-        viewport.scrollTop=(g.t+g.y)*ratio-p.y;
+        viewport.scrollLeft=(g.l+g.x-g.ox)*ratio+this.offsetX-p.x;
+        viewport.scrollTop=(g.t+g.y-g.oy)*ratio+this.offsetY-p.y;
       } else { viewport.scrollLeft=g.l+g.x-p.x; viewport.scrollTop=g.t+g.y-p.y; }
     }, {passive:false});
     viewport.addEventListener('touchend', start, {passive:true});
@@ -78,13 +78,17 @@ window.AgoraPdfViewer = class {
     this.layout(); this.v.scrollTo(0,0); this.onZoom(1); this.schedule();
   }
   layout() {
-    let y=16*this.z;
+    const width=(this.base+32)*this.z;
+    const height=(32+this.pages.reduce((n,p)=>n+p.h+12,0))*this.z;
+    this.offsetX=Math.max(0,(this.v.clientWidth-width)/2);
+    this.offsetY=Math.max(0,(this.v.clientHeight-height)/2);
+    let y=16*this.z+this.offsetY;
     for (const p of this.pages) {
-      p.y=y; p.x=16*this.z;
+      p.y=y; p.x=16*this.z+this.offsetX;
       Object.assign(p.el.style,{left:p.x+'px',top:y+'px',width:p.w*this.z+'px',height:p.h*this.z+'px'});
       y+=(p.h+12)*this.z;
     }
-    this.s.style.width=(this.base+32)*this.z+'px'; this.s.style.height=y+'px';
+    this.s.style.width=Math.max(this.v.clientWidth,width)+'px'; this.s.style.height=Math.max(this.v.clientHeight,height)+'px';
     for (const tile of this.tiles.values()) {
       const ratio=this.z/tile.z;
       tile.canvas.style.left=tile.x*ratio+'px'; tile.canvas.style.top=tile.y*ratio+'px';
@@ -94,9 +98,10 @@ window.AgoraPdfViewer = class {
   setZoom(z,x=this.v.clientWidth/2,y=this.v.clientHeight/2) {
     if (!this.doc) return;
     z=Math.max(.25,Math.min(8,z)); if (z===this.z) return;
-    const ratio=z/this.z, l=(this.v.scrollLeft+x)*ratio-x, t=(this.v.scrollTop+y)*ratio-y;
+    const anchorX=(this.v.scrollLeft+x-(this.offsetX||0))/this.z;
+    const anchorY=(this.v.scrollTop+y-(this.offsetY||0))/this.z;
     this.cancelTiles(); this.z=z; this.layout();
-    this.v.scrollLeft=l; this.v.scrollTop=t; this.onZoom(z); this.schedule();
+    this.v.scrollLeft=anchorX*z+this.offsetX-x; this.v.scrollTop=anchorY*z+this.offsetY-y; this.onZoom(z); this.schedule();
   }
   schedule() {
     clearTimeout(this.timer);
