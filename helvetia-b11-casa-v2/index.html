@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="robots" content="noindex,nofollow"><title>Ágora · Helvetia B11 · Casa inteira V2</title><meta name="description" content="Comparação interativa da planta existente e proposta, com demolições e construções do executivo REV00."><link rel="stylesheet" href="styles.css"></head>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="robots" content="noindex,nofollow"><title>Ágora · Helvetia B11 · Casa inteira V2</title><meta name="description" content="Comparação interativa da planta existente e proposta, com demolições e construções do executivo REV00."><link rel="stylesheet" href="styles.css?v=20261014"></head>
 <body><main>
-<header><a class="brand" href="https://apresentacoes.agoracons.com.br/helvetia-b11-piscina/">ÁGORA <span>/ ENGENHARIA</span></a><h1>Helvetia Park II · B11</h1><p>Casa inteira · Antiga e nova</p><a class="back" href="https://apresentacoes.agoracons.com.br/helvetia-b11-piscina/">Ver piscina ↗</a></header>
+<header><a class="brand" href="#">ÁGORA <span>/ ENGENHARIA</span></a><h1>Helvetia Park II · B11</h1><p>Casa inteira · Antiga e nova</p><nav class="documents" aria-label="Documentos do projeto"><a href="?documento=executivo" data-document="executivo">Projeto executivo · REV00</a><a href="?documento=apresentacao" data-document="apresentacao">Apresentação do projeto</a></nav></header>
 <section class="card viewer" id="viewer" aria-label="Comparador de plantas">
 <div class="viewer-head"><div><h2>Plantas</h2></div><button id="expand" aria-expanded="false">Ampliar tela</button></div>
 <label class="mode-label" for="mode">Visualização</label>
@@ -13,8 +13,15 @@
 </section>
 
 
-<footer>Ágora · Engenharia</footer>
-</main><script src="app.js"></script></body></html>
+<footer>Ágora · Engenharia <a class="back" href="https://apresentacoes.agoracons.com.br/helvetia-b11-piscina/">Ver piscina ↗</a></footer>
+</main>
+<dialog id="document-dialog" aria-labelledby="document-title">
+<div class="document-head"><h2 id="document-title">Documento</h2><button id="document-close" aria-label="Fechar documento">Fechar ×</button></div>
+<p id="document-status" role="status">Carregando…</p>
+<div id="document-viewport" tabindex="0" aria-label="Documento com zoom e arraste"><div id="document-stage"></div></div>
+<div class="document-tools"><button id="document-minus" aria-label="Diminuir documento">−</button><output id="document-zoom">100%</output><button id="document-plus" aria-label="Ampliar documento">+</button><button id="document-fit">Enquadrar</button></div>
+</dialog>
+<script src="app.js"></script><script src="pdf-viewer.js?v=20261014"></script><script src="documents.js?v=20261014"></script></body></html>
 
 
 
