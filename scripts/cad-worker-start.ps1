@@ -1,6 +1,13 @@
 param([switch]$Once)
 $ErrorActionPreference = 'Stop'
-$cadSecret = Join-Path $env:LOCALAPPDATA 'AgoraCAD\worker-secret.xml'
+$cadLocal = Join-Path $env:LOCALAPPDATA 'AgoraCAD'
+New-Item -ItemType Directory -Path $cadLocal -Force | Out-Null
+$cadSecret = Join-Path $cadLocal 'worker-secret.xml'
+# Packaged desktop apps virtualize LocalAppData; use the same protected file.
+if (-not (Test-Path -LiteralPath $cadSecret)) {
+    $cadPackagedSecret = Join-Path $env:LOCALAPPDATA 'Packages\OpenAI.Codex_2p2nqsd0c76g0\LocalCache\Local\AgoraCAD\worker-secret.xml'
+    if (Test-Path -LiteralPath $cadPackagedSecret) { $cadSecret = $cadPackagedSecret }
+}
 if (-not $env:CAD_WORKER_TOKEN -and (Test-Path -LiteralPath $cadSecret)) {
     $cadSecure = Import-Clixml -LiteralPath $cadSecret
     $env:CAD_WORKER_TOKEN = [System.Net.NetworkCredential]::new('', $cadSecure).Password
@@ -14,7 +21,9 @@ if (-not $cadMutex.WaitOne(0)) { exit 0 }
 try {
     $cadArgs = @((Join-Path $PSScriptRoot 'cad-worker.py'))
     if ($Once) { $cadArgs += '--once' }
-    & $cadPython @cadArgs
+    $cadLog = Join-Path $env:LOCALAPPDATA 'AgoraCAD\worker.log'
+    Add-Content -LiteralPath $cadLog -Value ('Starting CAD worker ' + (Get-Date -Format o))
+    & $cadPython @cadArgs >> $cadLog 2>&1
     $cadExit = $LASTEXITCODE
 } finally {
     $env:CAD_WORKER_TOKEN = $null
@@ -22,3 +31,5 @@ try {
     $cadMutex.Dispose()
 }
 exit $cadExit
+
+
