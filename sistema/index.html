@@ -403,6 +403,7 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
 .print-date{margin-left:auto;text-align:right;font-size:11px;color:var(--g600)}
 .print-date strong{font-weight:600;color:var(--ardosia)}
 </style>
+<link rel="stylesheet" href="cad-tools.css?v=1">
 </head>
 <body>
 
@@ -502,6 +503,7 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
   <section id="secao-organizacao" class="organizacao-page" style="display:none" aria-labelledby="organizacao-title">
     <div class="organizacao-intro"><p>ÁGORA CONSTRUTORA</p><h1 id="organizacao-title">Organização</h1><span>Recursos de IA e a estrutura que apoia o trabalho da empresa.</span></div>
     <div class="organizacao-grid">
+      <button type="button" class="organizacao-card" id="card-cad"><span class="organizacao-symbol" aria-hidden="true">▧</span><span class="organizacao-card-title">Arquivos CAD</span><span class="organizacao-card-description">Converta DWG e DXF, salve no Drive e visualize plantas pelo celular.</span><span class="organizacao-card-action">Converter ou visualizar →</span></button>
       <button type="button" class="organizacao-card" id="card-catalogos-ia">
         <span class="organizacao-symbol" aria-hidden="true">✦</span>
         <span class="organizacao-card-title">Catálogo de IA</span>
@@ -2830,6 +2832,7 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
   });
 })();
 </script>
+<script src="cad-tools.js?v=1"></script>
 </body>
 </html>
 

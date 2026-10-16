@@ -1,6 +1,7 @@
 /* Keep existing pixels during gestures; refine visible PDF tiles after release. */
 window.AgoraPdfViewer = class {
-  constructor(viewport, stage, onZoom) {
+  constructor(viewport, stage, onZoom, options = {}) {
+    this.maxZoom = options.maxZoom || 8;
     this.v = viewport; this.s = stage; this.onZoom = onZoom;
     this.z = 1; this.pages = []; this.tiles = new Map(); this.epoch = 0;
     this.paintId = 0; this.gesture = null;
@@ -93,7 +94,7 @@ window.AgoraPdfViewer = class {
   }
   setZoom(z,x=this.v.clientWidth/2,y=this.v.clientHeight/2) {
     if (!this.doc) return;
-    z=Math.max(.25,Math.min(8,z)); if (z===this.z) return;
+    z=Math.max(.25,Math.min(this.maxZoom,z)); if (z===this.z) return;
     const ratio=z/this.z, l=(this.v.scrollLeft+x)*ratio-x, t=(this.v.scrollTop+y)*ratio-y;
     this.cancelTiles(); this.z=z; this.layout();
     this.v.scrollLeft=l; this.v.scrollTop=t; this.onZoom(z); this.schedule();
