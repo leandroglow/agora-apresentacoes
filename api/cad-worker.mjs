@@ -45,6 +45,9 @@ export default async function handler(req,res) {
     const bytes=Buffer.from(body.dataBase64,'base64');if(!bytes.length||bytes.length>MAX_BYTES)fail(413,'Saída vazia ou acima de 3 MB.');
     if(job.format==='pdf'&&!bytes.subarray(0,5).equals(Buffer.from('%PDF-')))fail(400,'PDF inválido.');
     if(job.format==='dwg'&&!/^AC10/.test(bytes.subarray(0,6).toString()))fail(400,'DWG inválido.');
+    if(!(await sourceAllowed(job)))fail(403,'Fonte não autorizada.');
+    const current=await meta(job.sourceId);
+    if(current.modifiedTime!==job.source.modifiedTime||(current.md5Checksum||'')!==job.source.checksum)fail(409,'A fonte mudou durante a conversão.');
     if(!(await allowed(job.destinationId)))fail(403,'Destino não autorizado.');
     let output=(await children(job.destinationId)).find(f=>f.appProperties?.cadOutputJob===job.id);
     if(!output)output=await uploadBinary(job.destinationId,clean(job.source.name.replace(/\.(dwg|dxf)$/i,''))+` - convertido ${job.id.slice(0,8)}.${job.format}`,job.format==='pdf'?'application/pdf':'application/octet-stream',bytes,{cadOutputJob:job.id,cadFormat:job.format});

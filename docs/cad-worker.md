@@ -1,12 +1,9 @@
-# Worker local de CAD
+# Worker Windows de CAD
 
-Processo Windows de saída: consulta GET /api/cad-worker, baixa o arquivo por HTTPS autenticado, converte e envia POST /api/cad-worker. Não abre porta local e não altera originais.
+scripts/cad-worker-start.ps1 inicia o worker. -Once processa no máximo um pedido. Configuração por CAD_API_URL, CAD_WORKER_TOKEN, CAD_ODA, CAD_LIBS e CAD_PYTHON. Há defaults deste computador no iniciador. A chave fica em %LOCALAPPDATA%/AgoraCAD/worker-secret.xml, protegida por DPAPI da conta Windows; nunca no Drive ou Git.
 
-Variáveis: CAD_API_URL, CAD_WORKER_TOKEN, CAD_ODA, CAD_LIBS opcional, CAD_PYTHON opcional, CAD_WORKER_POLL_SECONDS e CAD_WORKER_TIMEOUT_SECONDS. Execute scripts/cad-worker-start.ps1; use -Once para uma consulta. A instalação agendada fica fora deste escopo até confirmação operacional.
+O iniciador impede duas instâncias na mesma sessão com mutex. O serviço não abre porta; consulta HTTPS. ODA converte DWG/DXF e ezdxf/PyMuPDF renderiza PDF Model ajustado a A1. O arquivo original não é alterado. Input e output até 3 MiB. PDF→DWG não habilitado.
 
-O GET retorna {job:null} ou {job:{id,inputName,format,downloadUrl,leaseToken}}. O POST devolve leaseToken em completed/failed, com dataBase64/name no sucesso. ODA atende alvos DWG e DXF; DWG para PDF passa por DXF e ezdxf/PyMuPDF. PDF é validado pelo PyMuPDF. Entrada e saída são limitadas a 3 MB para caber no payload da Vercel. Cada trabalho usa pasta temporária UUID.
+leaseToken é obrigatório e devolvido no POST. Download precisa estar no mesmo domínio HTTPS da API. Repetição de conclusão tem três tentativas; backend deduplica saída. Polling repete após falha de rede. Processo deve executar em sessão interativa para ODA; computador acordado e conta conectada.
 
-O endpoint /api/cad-worker já existe no repositório e usa x-cad-worker-token; a operação real ainda depende de deployment, token configurado, Drive acessível e fila populada. A conversão local real do ABR13.dxf foi executada com ezdxf/PyMuPDF: 1 página PDF, 652.775 bytes. Os testes reais DWG→PDF (652.775 bytes) e DXF→DWG (403.913 bytes) passaram em diretórios temporários.
-
-Para instalação segura no Windows, use uma conta dedicada sem privilégios administrativos, mantenha CAD_WORKER_TOKEN somente nas variáveis de ambiente da conta da tarefa, restrinja ACL do diretório e execute apenas scripts/cad-worker-start.ps1. Uma tarefa agendada pode usar powershell.exe -NoProfile -ExecutionPolicy Bypass -File <caminho>, com execução somente quando a conta estiver conectada e sem exposição de porta. Não registrar o token em argumentos, logs ou arquivos do repositório.
- 
+Teste real ABR13: DWG→PDF 652775 bytes; DXF→DWG 403913 bytes; DXF→PDF 652775 bytes. Unitários Python aprovados. Serviço não ativado nem tarefa agendada registrada enquanto a publicação aprovada em produção não acontecer.

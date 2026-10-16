@@ -20,6 +20,7 @@
   const $ = s => dialog.querySelector(s);
   let source = null, destination = null, mode = 'source', stack = [], folder = null;
   let job = null, timer, epoch = 0, listing = 0, viewer, pdfDoc, pdfTask, resultBlob;
+  try {const id=sessionStorage.getItem('agora-cad-job');if(id)job={id,status:'queued'};} catch {}
   const status = text => $('[data-status]').textContent = text;
   const message = err => err?.message || 'Não foi possível concluir a operação.';
   async function request(path, options = {}) {
@@ -69,7 +70,7 @@
   $('[data-convert]').onclick=async()=>{
     if(!source||!destination)return;
     $('[data-convert]').disabled=true; closePreview(); resultBlob=null; $('[data-result]').hidden=true; status('Enviando pedido…');
-    try {const data=await json('cad-jobs',{method:'POST',body:JSON.stringify({sourceId:source.id,fileName:source.fileName,fileBase64:source.fileBase64,destinationId:destination.id,format:$('[data-format]').value})});job=data.job||data;await poll();}
+    try {const data=await json('cad-jobs',{method:'POST',body:JSON.stringify({sourceId:source.id,fileName:source.fileName,fileBase64:source.fileBase64,destinationId:destination.id,format:$('[data-format]').value})});job=data.job||data;try{sessionStorage.setItem('agora-cad-job',job.id);}catch{} await poll();}
     catch(err){job=null;status(message(err));ready();}
   };
   async function poll() {
