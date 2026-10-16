@@ -1,7 +1,7 @@
-import { setCors, handleOptions, json, readJsonBody } from './_lib/http.mjs';
-import { requireAuth } from './_lib/auth.mjs';
-import { create, get, queue } from './_lib/cad-jobs.mjs';
-import { children, roots, allowed } from './_lib/cad-drive.mjs';
+import { setCors, handleOptions, json, readJsonBody } from '../http.mjs';
+import { requireAuth } from '../auth.mjs';
+import { create, get, queue } from '../cad-jobs.mjs';
+import { children, roots, allowed } from '../cad-drive.mjs';
 
 function publicJob(j) {
   return { id: j.id, status: j.status, error: j.error, outputId: j.outputId, outputName: j.outputName,

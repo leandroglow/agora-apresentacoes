@@ -1,12 +1,53 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": { "api/*.mjs": { "maxDuration": 300 } },
-  "headers": [{
-    "source": "/api/(.*)",
-    "headers": [
-      { "key": "X-Content-Type-Options", "value": "nosniff" },
-      { "key": "Referrer-Policy", "value": "no-referrer" },
-      { "key": "Cache-Control", "value": "no-store" }
-    ]
-  }]
+  "functions": {
+    "api/*.mjs": {
+      "maxDuration": 300
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/cad-jobs",
+      "destination": "/api/service?_route=cad-jobs"
+    },
+    {
+      "source": "/api/cad-worker",
+      "destination": "/api/service?_route=cad-worker"
+    },
+    {
+      "source": "/api/health",
+      "destination": "/api/service?_route=health"
+    },
+    {
+      "source": "/api/login",
+      "destination": "/api/service?_route=login"
+    },
+    {
+      "source": "/api/drive-config",
+      "destination": "/api/service?_route=drive-config"
+    },
+    {
+      "source": "/api/system-config",
+      "destination": "/api/service?_route=system-config"
+    }
+  ]
 }

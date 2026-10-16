@@ -1,5 +1,5 @@
-import { requireAuth } from './_lib/auth.mjs';
-import { handleOptions, json, requireMethod, setCors } from './_lib/http.mjs';
+import { requireAuth } from '../auth.mjs';
+import { handleOptions, json, requireMethod, setCors } from '../http.mjs';
 
 export default async function handler(req, res) {
   setCors(req, res);

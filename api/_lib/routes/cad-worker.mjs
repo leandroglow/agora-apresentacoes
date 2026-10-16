@@ -1,7 +1,7 @@
 import {timingSafeEqual,randomUUID} from 'node:crypto';
-import {json,readJsonBody} from './_lib/http.mjs';
-import {get,records,load,save,sourceAllowed,clean} from './_lib/cad-jobs.mjs';
-import {children,meta,allowed,uploadBinary,download,fail,MAX_BYTES} from './_lib/cad-drive.mjs';
+import {json,readJsonBody} from '../http.mjs';
+import {get,records,load,save,sourceAllowed,clean} from '../cad-jobs.mjs';
+import {children,meta,allowed,uploadBinary,download,fail,MAX_BYTES} from '../cad-drive.mjs';
 const LEASE_MS=15*60*1000;
 export function authenticated(req) {
   const expected=process.env.CAD_WORKER_TOKEN, provided=req.headers['x-cad-worker-token'];

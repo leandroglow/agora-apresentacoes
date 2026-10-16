@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { create, get } from '../api/_lib/cad-jobs.mjs';
-import handler from '../api/cad-worker.mjs';
+import handler from '../api/_lib/routes/cad-worker.mjs';
 
 test('CAD queue: claim, protected download, completion, replay, source revision, foreign roots', async () => {
  const original=global.fetch, old={...process.env};

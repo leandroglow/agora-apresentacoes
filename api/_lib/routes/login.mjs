@@ -1,4 +1,4 @@
-import { handleOptions, json, setCors } from './_lib/http.mjs';
+import { handleOptions, json, setCors } from '../http.mjs';
 
 // The old password-based login is intentionally disabled. Clerk is the only
 // supported identity provider for Sistema and Catálogos IA.

@@ -1,7 +1,7 @@
 import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { roots, children } from '../api/_lib/cad-drive.mjs';
-import { authenticated } from '../api/cad-worker.mjs';
+import { authenticated } from '../api/_lib/routes/cad-worker.mjs';
 
 const oldEnv = { ...process.env };
 beforeEach(() => { process.env.GOOGLE_OAUTH_CLIENT_ID='x'; process.env.GOOGLE_OAUTH_CLIENT_SECRET='x'; process.env.GOOGLE_OAUTH_REFRESH_TOKEN='x'; process.env.GOOGLE_DRIVE_OAUTH_ACCESS_TOKEN='test-token'; process.env.GOOGLE_DRIVE_PROJECTS_JSON=JSON.stringify({ hp:{projeto:'rootproject123',fotos:'rootphotos123',renders:'rootrenders123'} }); });
@@ -22,7 +22,7 @@ test('worker rejeita token ausente, curto ou diferente',()=>{
   assert.equal(authenticated({headers:{'x-cad-worker-token':'12345678901234567890123456789012'}}),true);
 });
 
-import worker from '../api/cad-worker.mjs';
+import worker from '../api/_lib/routes/cad-worker.mjs';
 function responseCapture(){const out={headers:{},statusCode:200,body:null};return {out,setHeader(k,v){out.headers[k]=v},status(n){out.statusCode=n;return this},json(x){out.body=x;return this},send(x){out.body=x;return this},end(x){out.body=x;return this}}}
 
 test('worker rejeita autenticação ausente no endpoint',async()=>{process.env.CAD_WORKER_TOKEN='12345678901234567890123456789012';const r=responseCapture();await worker({method:'GET',headers:{} ,url:'/api/cad-worker'},r);assert.equal(r.out.statusCode,401)});

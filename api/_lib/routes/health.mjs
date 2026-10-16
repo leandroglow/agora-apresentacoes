@@ -1,9 +1,9 @@
-import { hasGoogleDriveCredentials, getGoogleDriveAccessToken } from './_lib/google.mjs';
-import { CatalogDrive, configuredRoot } from './_lib/drive.mjs';
-import { modelConfig } from './_lib/agent.mjs';
-import { getOpenAI } from './_lib/openai.mjs';
-import { imageRendererReady } from './_lib/pdf-images.mjs';
-import { handleOptions, json, setCors } from './_lib/http.mjs';
+import { hasGoogleDriveCredentials, getGoogleDriveAccessToken } from '../google.mjs';
+import { CatalogDrive, configuredRoot } from '../drive.mjs';
+import { modelConfig } from '../agent.mjs';
+import { getOpenAI } from '../openai.mjs';
+import { imageRendererReady } from '../pdf-images.mjs';
+import { handleOptions, json, setCors } from '../http.mjs';
 
 let verification;
 export async function checkServices({ getToken = getGoogleDriveAccessToken, getClient = getOpenAI, makeDrive = options => new CatalogDrive(options), checkImages = imageRendererReady, config = modelConfig() } = {}) {

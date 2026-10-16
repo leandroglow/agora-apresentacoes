@@ -1,6 +1,6 @@
-import { getGoogleDriveAccessToken } from './_lib/google.mjs';
-import { requireAuth } from './_lib/auth.mjs';
-import { handleOptions, json, readJsonBody, setCors } from './_lib/http.mjs';
+import { getGoogleDriveAccessToken } from '../google.mjs';
+import { requireAuth } from '../auth.mjs';
+import { handleOptions, json, readJsonBody, setCors } from '../http.mjs';
 const folder=()=>String(process.env.GOOGLE_DRIVE_SYSTEM_CONFIG_FOLDER_ID||'').trim(); const fileName='agora-system-config.json';
 async function req(token,path,opt={}){const r=await fetch('https://www.googleapis.com/'+path,{...opt,headers:{Authorization:`Bearer ${token}`,...(opt.headers||{})},signal:AbortSignal.timeout(30000)});if(!r.ok)throw new Error(`Drive indisponível (${r.status}).`);return r;}
 async function find(token){const p=new URLSearchParams({q:`'${folder()}' in parents and name='${fileName}' and trashed=false`,fields:'files(id,name)',pageSize:'10'});return(await(await req(token,'drive/v3/files?'+p)).json()).files?.[0]||null;}
