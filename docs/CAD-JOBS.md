@@ -24,3 +24,7 @@ POST cad-worker recebe {id,leaseToken,status:'completed',dataBase64} ou status f
 Testes mocked: ciclo completo, fonte alterada, token ausente, lease inválido, conclusão repetida sem duplicata, raízes e paginação. Interface no Edge: seleção, conversão, prévia, download e zoom 1200%. Conversões ABR13 DWG→PDF (652775 bytes), DXF→DWG (403913 bytes), DXF→PDF validadas localmente.
 
 Produção NÃO ativada: revisão automática exigiu aprovação para publicar na main. Fila privada e variáveis CAD configuradas na Vercel, sem deployment; serviço local ainda não iniciado.
+
+## Ampliação aprovada em 15/10/2026
+Arquivos do Drive e resultados agora até 10 MiB. Transferência em partes de 2 MiB autenticadas; partes de saída identificadas por lease e índice, repetição sem duplicação. Upload do aparelho permanece 2 MiB. Teste simulado percorreu entrada e saída de 10 MiB com cinco partes. Resultado/preview também usa download em partes. A publicação foi autorizada pelo usuário neste turno.
+

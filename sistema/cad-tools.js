@@ -7,7 +7,7 @@
   dialog.innerHTML = `<header><h2>Arquivos CAD</h2><button type="button" data-close aria-label="Fechar conversor">Fechar ×</button></header>
     <div class="cad-body"><p>Converta DWG ou DXF e visualize a prévia no celular. O computador da Ágora precisa estar ligado para processar a fila.</p>
     <div class="cad-controls"><button type="button" data-source>Escolher arquivo no Drive</button><span data-source-name>Nenhum arquivo selecionado</span>
-    <label>Ou arquivo do aparelho (até 2 MB)<input type="file" data-local accept=".dwg,.dxf"></label><span>Arquivos do Drive: até 3 MB nesta versão.</span>
+    <label>Ou arquivo do aparelho (até 2 MB)<input type="file" data-local accept=".dwg,.dxf"></label><span>Arquivos do Drive: até 10 MB nesta versão.</span>
     <button type="button" data-destination>Escolher pasta de destino</button><span data-destination-name>Nenhuma pasta selecionada</span>
     <label>Formato de saída <select data-format><option value="pdf">PDF para visualizar</option><option value="dxf">DXF</option><option value="dwg">DWG</option></select></label>
     <button type="button" data-convert disabled>Converter e salvar</button></div>
@@ -91,7 +91,18 @@
   }
   async function blob() {
     if(!job?.outputId)throw new Error('O arquivo ainda não está disponível.');
-    if(!resultBlob)resultBlob=await (await request('project-file?id='+encodeURIComponent(job.outputId))).blob();
+    if(!resultBlob){
+      const parts=[];let offset=0,total;
+      do {
+        const response=await request('cad-jobs?action=result&id='+encodeURIComponent(job.id)+'&offset='+offset);
+        const range=/^bytes (\d+)-(\d+)\/(\d+)$/.exec(response.headers.get('Content-Range')||'');
+        if(!range||Number(range[1])!==offset)throw new Error('Download incompleto. Tente novamente.');
+        const part=await response.blob();total=Number(range[3]);
+        if(total>10*1024*1024||part.size!==Number(range[2])-offset+1)throw new Error('Resposta inválida.');
+        parts.push(part);offset=Number(range[2])+1;
+      }while(offset<total);
+      resultBlob=new Blob(parts,{type:job.format==='pdf'?'application/pdf':'application/octet-stream'});
+    }
     return resultBlob;
   }
   $('[data-preview]').onclick=async()=>{

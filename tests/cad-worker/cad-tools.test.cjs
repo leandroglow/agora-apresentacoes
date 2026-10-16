@@ -19,6 +19,7 @@ const { chromium } = require('C:/Users/leand/.cache/codex-runtimes/codex-primary
     if (u.pathname.endsWith('/cad-jobs') && route.request().method() === 'GET' && u.searchParams.get('action') === 'folders') {
       await route.fulfill({ json: { folders: [{ id: 'dest', name: 'Destino' }], files: [{ id: 'src', name: 'Projeto.dxf' }] } }); return;
     }
+    if(u.searchParams.get('action')==='result'){await route.fulfill({status:206,headers:{'Content-Range':'bytes 0-12/13','Access-Control-Expose-Headers':'Content-Range'},body:Buffer.from('%PDF-1.4 mock')});return;}
     if (u.pathname.endsWith('/cad-jobs') && route.request().method() === 'POST') { await route.fulfill({ json: { job: { id: 'job1', status: 'queued' } } }); return; }
     if (u.pathname.endsWith('/cad-jobs') && u.searchParams.get('id')) { polls++; await route.fulfill({ json: { job: { id: 'job1', status: 'completed', format: 'pdf', outputId: 'out1', outputName: 'Projeto convertido.pdf' } } }); return; }
     if (u.pathname.endsWith('/project-file')) { await route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4 mock') }); return; }
@@ -49,3 +50,4 @@ const { chromium } = require('C:/Users/leand/.cache/codex-runtimes/codex-primary
   console.log('cad-tools Playwright flow: OK');
   process.exit(0);
 })().catch(err => { console.error(err); process.exit(1); });
+

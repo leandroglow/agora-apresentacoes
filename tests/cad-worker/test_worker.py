@@ -6,7 +6,7 @@ class T(unittest.TestCase):
  def test_extension_and_limit(self):
   self.assertEqual(w.Path("x.DWG").suffix.lower().lstrip("."),"dwg")
   self.assertGreater(w.MAX_BYTES,0)
-  self.assertEqual(w.MAX_OUTPUT_BYTES,3*1024*1024)
+  self.assertEqual(w.MAX_OUTPUT_BYTES,10*1024*1024)
  def test_config_requires_env(self):
   old={k:os.environ.pop(k,None) for k in ("CAD_API_URL","CAD_WORKER_TOKEN")}
   try:
