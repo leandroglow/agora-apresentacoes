@@ -5,7 +5,7 @@
   const dialog = document.createElement('dialog');
   dialog.id = 'cad-dialog';
   dialog.innerHTML = `<header><h2>Visualizador DWG</h2><button type="button" data-close aria-label="Fechar visualizador">Fechar ×</button></header>
-    <div class="cad-body"><p>Abra um DWG ou DXF e navegue com os dedos, até 1.200%. O desenho é lido no seu navegador, sem conversão em serviço externo. O desenho original é preservado.</p>
+    <div class="cad-body"><p>Abra um DWG ou DXF e navegue com os dedos, até 1.600%. O desenho é lido no seu navegador, sem conversão em serviço externo. O desenho original é preservado.</p>
     <div class="cad-controls"><button type="button" data-source>Escolher arquivo no Drive</button><span data-source-name>Nenhum arquivo selecionado</span>
     <label>Ou arquivo do aparelho (até 10 MB)<input type="file" data-local accept=".dwg,.dxf"></label><span>Arquivos do Drive: até 10 MB nesta versão.</span>
     <button type="button" data-open disabled>Abrir desenho</button><details class="cad-advanced"><summary>Converter e salvar uma cópia (opcional)</summary><div class="cad-controls"><button type="button" data-destination>Escolher pasta de destino</button><span data-destination-name>Nenhuma pasta selecionada</span>
@@ -130,7 +130,7 @@
     try {
       const bytes=await (await blob()).arrayBuffer();if(revision!==epoch||!dialog.open)return;
       $('[data-preview-panel]').hidden=false;
-      viewer ||= new window.AgoraPdfViewer($('.cad-viewport'),$('.cad-pages'),z=>$('[data-zoom]').textContent=Math.round(z*100)+'%',{maxZoom:12});
+      viewer ||= new window.AgoraPdfViewer($('.cad-viewport'),$('.cad-pages'),z=>$('[data-zoom]').textContent=Math.round(z*100)+'%',{maxZoom:16});
       pdfTask=window.pdfjsLib.getDocument({data:bytes}); const doc=await pdfTask.promise;
       if(revision!==epoch){doc.destroy();return;}pdfDoc=doc; await viewer.open(doc);$('[data-zoom]').textContent='100%';status('');
     }catch(err){if(revision===epoch)status(message(err));}

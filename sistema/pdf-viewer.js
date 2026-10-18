@@ -1,7 +1,7 @@
 /* Keep existing pixels during gestures; refine visible PDF tiles after release. */
 window.AgoraPdfViewer = class {
   constructor(viewport, stage, onZoom, options = {}) {
-    this.maxZoom = options.maxZoom || 8;
+    this.maxZoom = options.maxZoom || 16;
     this.v = viewport; this.s = stage; this.onZoom = onZoom;
     this.z = 1; this.pages = []; this.tiles = new Map(); this.epoch = 0;
     this.paintId = 0; this.gesture = null;

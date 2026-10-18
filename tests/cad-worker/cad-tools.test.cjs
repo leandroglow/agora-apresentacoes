@@ -28,6 +28,7 @@ const { chromium } = require('C:/Users/leand/.cache/codex-runtimes/codex-primary
   await page.setContent('<button id="card-cad">CAD</button>');
   await page.addScriptTag({ content: fs.readFileSync(path.join(__dirname, '../../sistema/pdf-viewer.js'), 'utf8') });
   await page.addScriptTag({ content: fs.readFileSync(path.join(__dirname, '../../sistema/cad-tools.js'), 'utf8') });
+  assert.equal(await page.evaluate(()=>new window.AgoraPdfViewer(document.createElement('div'),document.createElement('div'),()=>{}).maxZoom),16);
   await page.locator('#card-cad').click();
   await page.locator('[data-source]').click();
   await page.locator('[data-list] button', { hasText: 'Projeto.dxf' }).click();
@@ -44,7 +45,7 @@ const { chromium } = require('C:/Users/leand/.cache/codex-runtimes/codex-primary
   await page.locator('[data-preview]').click();
   await page.waitForTimeout(100);
   for(let i=0;i<14;i++) await page.locator('[data-plus]').click();
-  assert.equal(await page.locator('[data-zoom]').textContent(), '1200%');
+  assert.equal(await page.locator('[data-zoom]').textContent(), '1600%');
   await page.locator('[data-download]').click();
   await page.locator('[data-hide-preview]').click();
   assert.equal(polls,1);

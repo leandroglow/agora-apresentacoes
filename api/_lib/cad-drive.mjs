@@ -48,7 +48,7 @@ export async function roots() {
 
   const config=JSON.parse(process.env.GOOGLE_DRIVE_PROJECTS_JSON||'{}'), out=[];
 
-  for(const [project,value] of Object.entries(config)) for(const category of ['projeto','fotos','renders']) {
+  for(const [project,value] of Object.entries(config)) for(const category of ['projeto']) {
 
     const id=driveId(value?.[category]); if(id&&!out.some(x=>x.id===id))out.push({id,name:`${project} — ${category}`});
 
