@@ -31,6 +31,7 @@ const { chromium } = require('C:/Users/leand/.cache/codex-runtimes/codex-primary
   await page.locator('#card-cad').click();
   await page.locator('[data-source]').click();
   await page.locator('[data-list] button', { hasText: 'Projeto.dxf' }).click();
+  await page.locator('summary').click();
   await page.locator('[data-destination]').click();
   await page.locator('[data-list] button', { hasText: 'Destino' }).click();
   await page.locator('[data-select-folder]').click();
@@ -39,12 +40,17 @@ const { chromium } = require('C:/Users/leand/.cache/codex-runtimes/codex-primary
   await page.locator('[data-convert]').click();
   await page.waitForTimeout(100);
   assert.equal(polls, 1);
-  assert.match(await page.locator('[data-status]').textContent(), /salvo/);
+  assert.match(await page.locator('[data-status]').textContent(), /pronto/);
   await page.locator('[data-preview]').click();
   await page.waitForTimeout(100);
   for(let i=0;i<14;i++) await page.locator('[data-plus]').click();
   assert.equal(await page.locator('[data-zoom]').textContent(), '1200%');
   await page.locator('[data-download]').click();
+  await page.locator('[data-hide-preview]').click();
+  await page.locator('[data-open]').click();
+  await page.waitForTimeout(150);
+  assert.equal(await page.locator('[data-preview-panel]').isVisible(),true);
+  assert.equal(polls,2);
   await page.locator('[data-close]').click();
   await browser.close();
   console.log('cad-tools Playwright flow: OK');

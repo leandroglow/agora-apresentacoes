@@ -4,17 +4,17 @@
   const base = (window.CATALOGOS_IA_API_BASE || 'https://agora-apresentacoes.vercel.app').replace(/\/$/, '');
   const dialog = document.createElement('dialog');
   dialog.id = 'cad-dialog';
-  dialog.innerHTML = `<header><h2>Arquivos CAD</h2><button type="button" data-close aria-label="Fechar conversor">Fechar ×</button></header>
-    <div class="cad-body"><p>Converta DWG ou DXF e visualize a prévia no celular. O computador da Ágora precisa estar ligado para processar a fila.</p>
+  dialog.innerHTML = `<header><h2>Visualizador DWG</h2><button type="button" data-close aria-label="Fechar visualizador">Fechar ×</button></header>
+    <div class="cad-body"><p>Abra um DWG ou DXF e navegue com os dedos, até 1.200%. A visualização é preparada automaticamente pelo computador da Ágora, que precisa estar ligado. O desenho original é preservado.</p>
     <div class="cad-controls"><button type="button" data-source>Escolher arquivo no Drive</button><span data-source-name>Nenhum arquivo selecionado</span>
     <label>Ou arquivo do aparelho (até 2 MB)<input type="file" data-local accept=".dwg,.dxf"></label><span>Arquivos do Drive: até 10 MB nesta versão.</span>
-    <button type="button" data-destination>Escolher pasta de destino</button><span data-destination-name>Nenhuma pasta selecionada</span>
+    <button type="button" data-open disabled>Abrir desenho</button><details class="cad-advanced"><summary>Converter e salvar uma cópia (opcional)</summary><div class="cad-controls"><button type="button" data-destination>Escolher pasta de destino</button><span data-destination-name>Nenhuma pasta selecionada</span>
     <label>Formato de saída <select data-format><option value="pdf">PDF para visualizar</option><option value="dxf">DXF</option><option value="dwg">DWG</option></select></label>
-    <button type="button" data-convert disabled>Converter e salvar</button></div>
+    <button type="button" data-convert disabled>Converter e salvar</button></div></details></div>
     <div data-picker hidden><h3 data-picker-title></h3><button type="button" data-back>Voltar</button><button type="button" data-select-folder hidden>Usar esta pasta</button><div data-list></div></div>
     <p data-status role="status" aria-live="polite"></p>
     <div data-result hidden><button type="button" data-preview>Visualizar PDF</button><button type="button" data-download>Baixar arquivo</button><button type="button" data-share>Compartilhar</button><a data-drive target="_blank" rel="noopener">Abrir no Drive</a></div>
-    <p class="cad-note">O original é preservado. A prévia é ajustada à folha e não garante a escala de impressão do desenho.</p></div>
+    <p class="cad-note">O original é preservado. A visualização usa uma prévia PDF gerada pelo mecanismo CAD; não edita o DWG e não garante escala de impressão.</p></div>
     <section data-preview-panel hidden><div class="cad-toolbar"><button type="button" data-minus aria-label="Diminuir zoom">−</button><span data-zoom>100%</span><button type="button" data-plus aria-label="Aumentar zoom">+</button><button type="button" data-fit>Enquadrar</button><button type="button" data-hide-preview>Fechar prévia</button></div><div class="cad-viewport"><div class="cad-pages"></div></div></section>`;
   document.body.append(dialog);
   const $ = s => dialog.querySelector(s);
@@ -34,7 +34,7 @@
     return response;
   }
   const json = async (path, options) => (await request(path, options)).json();
-  function ready() { $('[data-convert]').disabled = !source || !destination || (job && ['queued','processing'].includes(job.status)); }
+  function ready() { $('[data-open]').disabled = !source || (job && ['queued','processing'].includes(job.status)); $('[data-convert]').disabled = !source || !destination || (job && ['queued','processing'].includes(job.status)); }
   function closePreview() { epoch++; viewer?.clear(); pdfTask?.destroy(); pdfTask=null; pdfDoc?.destroy(); pdfDoc=null; $('[data-preview-panel]').hidden=true; }
   function close() { clearTimeout(timer); listing++; closePreview(); dialog.close(); }
   $('[data-close]').onclick=close;
@@ -67,12 +67,15 @@
   $('[data-destination]').onclick=()=>{mode='destination';stack=[];browse(null);};
   $('[data-back]').onclick=()=>browse(stack.pop()||null);
   $('[data-select-folder]').onclick=()=>{destination=folder;$('[data-destination-name]').textContent=folder.name;$('[data-picker]').hidden=true;status('');ready();};
-  $('[data-convert]').onclick=async()=>{
-    if(!source||!destination)return;
-    $('[data-convert]').disabled=true; closePreview(); resultBlob=null; $('[data-result]').hidden=true; status('Enviando pedido…');
-    try {const data=await json('cad-jobs',{method:'POST',body:JSON.stringify({sourceId:source.id,fileName:source.fileName,fileBase64:source.fileBase64,destinationId:destination.id,format:$('[data-format]').value})});job=data.job||data;try{sessionStorage.setItem('agora-cad-job',job.id);}catch{} await poll();}
+  async function submit(preview=false) {
+    if(!source||(!preview&&!destination))return;
+    $('[data-convert]').disabled=true; $('[data-open]').disabled=true; closePreview(); resultBlob=null; $('[data-result]').hidden=true; status('Enviando pedido…');
+    try {const data=await json('cad-jobs',{method:'POST',body:JSON.stringify({sourceId:source.id,fileName:source.fileName,fileBase64:source.fileBase64,preview,destinationId:destination?.id,format:$('[data-format]').value})});job=data.job||data;autoOpen=preview;ready();try{sessionStorage.setItem('agora-cad-job',job.id);}catch{} await poll();}
     catch(err){job=null;status(message(err));ready();}
-  };
+  }
+  $('[data-open]').onclick=()=>submit(true);
+  $('[data-convert]').onclick=()=>submit(false);
+  let autoOpen=false;
   async function poll() {
     clearTimeout(timer); if(!job||!dialog.open)return;
     const id=job.id;
@@ -80,9 +83,9 @@
       const data=await json('cad-jobs?id='+encodeURIComponent(id)); if(!dialog.open||job?.id!==id)return;
       job=data.job||data;
       if(job.status==='completed') {
-        status('Arquivo convertido e salvo na pasta escolhida.'); $('[data-result]').hidden=false;
+        status('Desenho pronto para visualizar.'); $('[data-result]').hidden=false;
         $('[data-preview]').hidden=job.format!=='pdf';
-        $('[data-drive]').href='https://drive.google.com/file/d/'+encodeURIComponent(job.outputId)+'/view'; ready(); return;
+        $('[data-drive]').href='https://drive.google.com/file/d/'+encodeURIComponent(job.outputId)+'/view'; ready(); if(autoOpen&&job.format==='pdf'){autoOpen=false;await $('[data-preview]').onclick();} return;
       }
       if(job.status==='failed'){status(job.error||'A conversão falhou. Você pode tentar novamente.');ready();return;}
       status(job.status==='processing'?'Convertendo no computador da Ágora…':'Na fila. O processamento começa quando o computador estiver disponível.');
@@ -120,5 +123,6 @@
   $('[data-minus]').onclick=()=>viewer?.setZoom(viewer.z/1.25);
   $('[data-fit]').onclick=()=>viewer?.setZoom(1);
   $('[data-download]').onclick=async()=>{try{const url=URL.createObjectURL(await blob());const a=document.createElement('a');a.href=url;a.download=job.outputName||('desenho.'+job.format);a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}catch(err){status(message(err));}};
+  window.AgoraCadViewer={open(file){if(!file?.id||!/\.(dwg|dxf)$/i.test(file.name||''))return;source=file;$('[data-source-name]').textContent=file.name;if(!dialog.open)dialog.showModal();submit(true);}};
   $('[data-share]').onclick=async()=>{try{const file=new File([await blob()],job.outputName||('desenho.'+job.format),{type:job.format==='pdf'?'application/pdf':'application/octet-stream'});if(navigator.canShare?.({files:[file]}))await navigator.share({files:[file],title:file.name});else status('Este navegador não compartilha arquivos. Use Baixar arquivo.');}catch(err){if(err.name!=='AbortError')status(message(err));}};
 })();

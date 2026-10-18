@@ -28,3 +28,7 @@ Produção NÃO ativada: revisão automática exigiu aprovação para publicar n
 ## Ampliação aprovada em 15/10/2026
 Arquivos do Drive e resultados agora até 10 MiB. Transferência em partes de 2 MiB autenticadas; partes de saída identificadas por lease e índice, repetição sem duplicação. Upload do aparelho permanece 2 MiB. Teste simulado percorreu entrada e saída de 10 MiB com cinco partes. Resultado/preview também usa download em partes. A publicação foi autorizada pelo usuário neste turno.
 
+
+## Visualizador simplificado — 18/10/2026
+
+A ação principal Abrir desenho envia preview:true. A API força PDF e guarda o resultado técnico na fila CAD, sem solicitar destino e sem gravar junto aos projetos originais. O fluxo avançado de exportação mantém destino/formato explícitos. ODA ainda prepara uma prévia vetorial; não é engine DWG nativo no navegador. Exige computador acordado e worker disponível; resultados são reutilizados por fonte/revisão/usuário. Resultado técnico exige proprietário autenticado, origem autorizada, pasta da fila e cadOutputJob correspondente. Navegação reutiliza AgoraPdfViewer, centralização, arraste e pinça contínua até 1200%.

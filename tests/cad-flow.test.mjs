@@ -8,7 +8,7 @@ test('CAD queue: claim, protected download, completion, replay, source revision,
  const root='root_folder_0001', queue='queue_folder_001', source='source_file_0001';
  process.env.GOOGLE_DRIVE_OAUTH_ACCESS_TOKEN='mock';process.env.GOOGLE_DRIVE_PROJECTS_JSON=JSON.stringify({test:{projeto:root}});
  process.env.CAD_QUEUE_FOLDER_ID=queue;process.env.CAD_WORKER_TOKEN='x'.repeat(48);
- const files=new Map([[root,{id:root,name:'Root',mimeType:'application/vnd.google-apps.folder',parents:[]}],[source,{id:source,name:'planta.dwg',size:6,parents:[root],modifiedTime:'v1',md5Checksum:'hash1',data:Buffer.from('AC1032')}]]);
+ const files=new Map([[queue,{id:queue,name:'Technical queue',mimeType:'application/vnd.google-apps.folder',parents:[]}],[root,{id:root,name:'Root',mimeType:'application/vnd.google-apps.folder',parents:[]}],[source,{id:source,name:'planta.dwg',size:6,parents:[root],modifiedTime:'v1',md5Checksum:'hash1',data:Buffer.from('AC1032')}]]);
  let counter=0, outputs=0;
  global.fetch=async (input,options={})=>{
   const url=new URL(input), id=url.pathname.split('/').pop(), method=options.method||'GET';
@@ -38,6 +38,11 @@ test('CAD queue: claim, protected download, completion, replay, source revision,
  }
  try {
   assert.equal((await call('GET','/api/cad-worker',null,'bad')).code,401);
+  const preview=await create({sourceId:source,preview:true,format:'dwg',destinationId:'untrusted'},'owner');
+  assert.equal(preview.destinationId,queue);assert.equal(preview.format,'pdf');assert.equal(preview.preview,true);
+  const previewClaim=(await call('GET','/api/cad-worker')).value.job;assert.equal(previewClaim.id,preview.id);
+  assert.equal((await call('POST','/api/cad-worker',{id:preview.id,leaseToken:previewClaim.leaseToken,status:'completed',dataBase64:Buffer.from('%PDF-preview').toString('base64')})).code,200);
+  outputs=0;
   const j=await create({sourceId:source,destinationId:root,format:'pdf'},'owner');
   assert.equal((await create({sourceId:source,destinationId:root,format:'pdf'},'owner')).id,j.id);
   const claim=(await call('GET','/api/cad-worker')).value.job;assert.equal(claim.id,j.id);
