@@ -32,3 +32,9 @@ Arquivos do Drive e resultados agora até 10 MiB. Transferência em partes de 2 
 ## Visualizador simplificado — 18/10/2026
 
 A ação principal Abrir desenho envia preview:true. A API força PDF e guarda o resultado técnico na fila CAD, sem solicitar destino e sem gravar junto aos projetos originais. O fluxo avançado de exportação mantém destino/formato explícitos. ODA ainda prepara uma prévia vetorial; não é engine DWG nativo no navegador. Exige computador acordado e worker disponível; resultados são reutilizados por fonte/revisão/usuário. Resultado técnico exige proprietário autenticado, origem autorizada, pasta da fila e cadOutputJob correspondente. Navegação reutiliza AgoraPdfViewer, centralização, arraste e pinça contínua até 1200%.
+
+## Visualização local no navegador — 18/10/2026
+
+Fluxo principal usa LibreDWG WASM em Worker + mlightcad WebGL, fontes Noto Sans locais, sem fila ODA, sem upload e sem serviços pagos. Drive usa GET cad-jobs?action=source autenticado (Clerk), valida raiz autorizada, extensão DWG/DXF e entrega partes de até 2 MiB (arquivo até 10 MiB). Aparelho até 10 MiB é lido apenas na memória do navegador. Exportação legada fica nas opções avançadas. Abrir não depende do status de jobs antigos. Fechar destrói iframe e cancela download. Timeout de 90s.
+
+Teste real arquitetura_copia.dwg 474151 bytes: geometria/carimbo/textos visíveis, sem pageerror, sem pedido externo; teste integração um GET de fonte com Bearer e zero POST/fila. Pinça real emulada via CDP 100→1200% em um gesto; enquadrar restabelece centro. Testes privados não devem ser publicados. LibreDWG é GPL-3.0; fontes correspondentes e licença em sistema/cad-browser/sources, código reproduzível scripts/cad-browser-source. Limites: fontes especiais substituídas, Xrefs/imagens externas não carregadas, entidades proprietárias/versões não cobertas podem falhar; testar cada desenho real antes de uso técnico.

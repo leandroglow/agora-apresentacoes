@@ -47,10 +47,7 @@ const { chromium } = require('C:/Users/leand/.cache/codex-runtimes/codex-primary
   assert.equal(await page.locator('[data-zoom]').textContent(), '1200%');
   await page.locator('[data-download]').click();
   await page.locator('[data-hide-preview]').click();
-  await page.locator('[data-open]').click();
-  await page.waitForTimeout(150);
-  assert.equal(await page.locator('[data-preview-panel]').isVisible(),true);
-  assert.equal(polls,2);
+  assert.equal(polls,1);
   await page.locator('[data-close]').click();
   await browser.close();
   console.log('cad-tools Playwright flow: OK');

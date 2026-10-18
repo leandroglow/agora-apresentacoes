@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { create, get } from '../api/_lib/cad-jobs.mjs';
 import handler from '../api/_lib/routes/cad-worker.mjs';
+import {sourcePart} from '../api/_lib/cad-drive.mjs';
 
 test('CAD queue: claim, protected download, completion, replay, source revision, foreign roots', async () => {
  const original=global.fetch, old={...process.env};
@@ -38,6 +39,9 @@ test('CAD queue: claim, protected download, completion, replay, source revision,
  }
  try {
   assert.equal((await call('GET','/api/cad-worker',null,'bad')).code,401);
+  assert.equal((await sourcePart(source)).bytes.toString(),'AC1032');
+  const denied=files.get(source);denied.parents=[];await assert.rejects(sourcePart(source),e=>e.status===403);denied.parents=[root];
+  denied.name='not-cad.pdf';await assert.rejects(sourcePart(source),e=>e.status===400);denied.name='planta.dwg';
   const preview=await create({sourceId:source,preview:true,format:'dwg',destinationId:'untrusted'},'owner');
   assert.equal(preview.destinationId,queue);assert.equal(preview.format,'pdf');assert.equal(preview.preview,true);
   const previewClaim=(await call('GET','/api/cad-worker')).value.job;assert.equal(previewClaim.id,preview.id);
@@ -72,3 +76,4 @@ test('CAD queue: claim, protected download, completion, replay, source revision,
   await assert.rejects(create({sourceId:'foreign_file_001',destinationId:root,format:'pdf'},'owner'),e=>e.status===403);
  } finally {global.fetch=original;for(const key of Object.keys(process.env))if(!(key in old))delete process.env[key];Object.assign(process.env,old);}
 });
+

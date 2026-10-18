@@ -4,7 +4,7 @@ import { requireAuth } from '../auth.mjs';
 
 import { create, get, queue, sourceAllowed } from '../cad-jobs.mjs';
 
-import { children, roots, allowed, meta, downloadPart, sendPart } from '../cad-drive.mjs';
+import { children, roots, allowed, meta, sourcePart, downloadPart, sendPart } from '../cad-drive.mjs';
 
 
 
@@ -34,6 +34,9 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
 
+      if(query.get('action')==='source'){
+        return sendPart(res,await sourcePart(query.get('sourceId'),Number(query.get('offset')||0)));
+      }
       if (query.get('action') === 'roots') {
 
         return json(res, 200, { roots: (await roots()).map(x => ({ id: x.id || x.folderId, name: x.name || '' })) });

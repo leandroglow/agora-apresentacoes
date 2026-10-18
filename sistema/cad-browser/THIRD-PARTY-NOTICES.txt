@@ -1,0 +1,17 @@
+Ágora CAD Browser — 18/10/2026
+
+Leitura DWG/DXF no navegador. Não envia desenhos a terceiros.
+mlightcad CAD Simple Viewer 1.7.4 e bibliotecas de renderização/data-model: MIT.
+Three.js: MIT. Noto Sans: SIL Open Font License (resources/fonts/OFL.txt).
+LibreDWG converter 3.15.4 / LibreDWG Web 0.7.17: GPL-3.0.
+O parser GPL executa em Worker separado; fonte original, scripts de compilação e licença são disponibilizados neste mesmo servidor.
+
+Fontes correspondentes (não modificadas):
+- sources/libredwg-web-0.7.17.tar.gz (tag v0.7.17, commit 2654a724bce3d5f588a0d16b6426a23e3f0fef46)
+- sources/realdwg-web-v1.15.4.tar.gz (commit d2dc515e57653a149a6b747efac5a62889fb7e90; packages/libredwg-converter)
+- sources/jsmn-85695f3.tar.gz (submódulo jsmn; extrair em jsmn/ da fonte LibreDWG)
+- GPL-3.0.txt
+- código do host e build reproduzível: ../../scripts/cad-browser-source/
+Repositórios oficiais: https://github.com/mlightcad/cad-viewer, https://github.com/mlightcad/realdwg-web, https://github.com/mlightcad/libredwg-web
+
+Fontes ausentes do desenho usam Noto Sans como substituta; tipografia, símbolos, fontes SHX especiais, referências externas e entidades proprietárias podem não reproduzir exatamente o CAD original. Uso somente para consulta, não impressão técnica ou edição.
