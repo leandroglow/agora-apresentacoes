@@ -44,3 +44,7 @@ Teste real arquitetura_copia.dwg 474151 bytes: geometria/carimbo/textos visívei
 CAD e visualizador PDF do sistema: zoom máximo 1600%. CAD em carvão/dourado, modal desktop quase tela toda e celular 100dvh com safe areas, mantendo área flexível de desenho. Seletor e leitura/worker aceitam somente raízes da categoria projeto dos projetos configurados (008, 013, 016, 017, 019); categorias fotos e renders rejeitadas mesmo cadastradas. A configuração Clerk atual autentica o acesso e aplica as mesmas raízes a todos autenticados: não existe ACL distinta por usuário nesta entrega. Resultado técnico legado permanece na fila pelo vínculo de job validado.
 
 Verificação: 6 testes backend; DWG real local em desktop1440x1000/celular390x844, pinça única100→1600%, enquadrar, fechamento, zero POST/fila e zero pedidos externos; PDF preview1600% e default do viewer16 validados.
+
+## Limite e interface — 18/10/2026
+
+Visualização local/Drive aceita até25MiB; download autenticado sourcePart permite25MiB em partes2MiB, enquanto downloadPart mantém padrão10MiB para o worker/conversão. Selecionar arquivo local não lê nem gera base64; base64 só é calculado quando se solicita exportação legada (local até2MiB). Interface normal exibe seleção, abertura e link discreto de licenças, sem textos introdutórios ou limites; mensagens de erro informam limite. Testes: transporte25MiB completo, rejeição25MiB+1, conversão continua rejeitando25MiB, seleção25MiB sem btoa, e DWG real474151bytes integra/abre1600%. Nenhum teste afirma fidelidade ou compatibilidade de qualquer DWG25MB.

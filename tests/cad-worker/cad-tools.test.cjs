@@ -49,6 +49,11 @@ const { chromium } = require('C:/Users/leand/.cache/codex-runtimes/codex-primary
   await page.locator('[data-download]').click();
   await page.locator('[data-hide-preview]').click();
   assert.equal(polls,1);
+  await page.evaluate(()=>{window.btoa=()=>{throw Error('Base64 should not run for viewing');};});
+  await page.locator('[data-local]').setInputFiles({name:'large25.dwg',mimeType:'application/octet-stream',buffer:Buffer.alloc(25*1024*1024,65)});
+  assert.equal(await page.locator('[data-open]').isEnabled(),true);assert.equal(await page.locator('[data-status]').textContent(),'');
+  await page.locator('[data-local]').setInputFiles({name:'too-large.dwg',mimeType:'application/octet-stream',buffer:Buffer.alloc(25*1024*1024+1,65)});
+  assert.match(await page.locator('[data-status]').textContent(),/25 MB/);assert.equal(await page.locator('[data-open]').isEnabled(),false);
   await page.locator('[data-close]').click();
   await browser.close();
   console.log('cad-tools Playwright flow: OK');

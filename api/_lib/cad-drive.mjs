@@ -114,11 +114,11 @@ export const hashKey=value=>createHash('sha256').update(value).digest('hex');
 
 export const CHUNK_BYTES=2*1024*1024;
 
-export async function downloadPart(id,offset=0) {
+export async function downloadPart(id,offset=0,max=MAX_BYTES) {
 
  const file=await meta(id),total=Number(file.size);
 
- if(!Number.isSafeInteger(total)||total<1||total>MAX_BYTES)fail(413,'Limite de 10 MB.');
+ if(!Number.isSafeInteger(total)||total<1||total>max)fail(413,`Limite de ${max/1024/1024} MB.`);
 
  if(!Number.isSafeInteger(offset)||offset<0||offset>=total)fail(416,'Parte inválida.');
 
@@ -153,6 +153,6 @@ export async function sourcePart(id,offset=0){
   if(!(await allowed(id)))throw Object.assign(new Error('Arquivo não autorizado.'),{status:403});
   const file=await meta(id);
   if(!/\.(dwg|dxf)$/i.test(file.name)||file.trashed)throw Object.assign(new Error('Escolha um DWG ou DXF.'),{status:400});
-  return downloadPart(id,offset);
+  return downloadPart(id,offset,25*1024*1024);
 }
 

@@ -1,20 +1,20 @@
-/* CAD uses the authenticated Drive queue; no worker credential reaches the browser. */
+/* Browser viewing reads authenticated Drive bytes; legacy export uses the CAD queue. */
 (() => {
   'use strict';
   const base = (window.CATALOGOS_IA_API_BASE || 'https://agora-apresentacoes.vercel.app').replace(/\/$/, '');
   const dialog = document.createElement('dialog');
   dialog.id = 'cad-dialog';
   dialog.innerHTML = `<header><h2>Visualizador DWG</h2><button type="button" data-close aria-label="Fechar visualizador">Fechar ×</button></header>
-    <div class="cad-body"><p>Abra um DWG ou DXF e navegue com os dedos, até 1.600%. O desenho é lido no seu navegador, sem conversão em serviço externo. O desenho original é preservado.</p>
+    <div class="cad-body">
     <div class="cad-controls"><button type="button" data-source>Escolher arquivo no Drive</button><span data-source-name>Nenhum arquivo selecionado</span>
-    <label>Ou arquivo do aparelho (até 10 MB)<input type="file" data-local accept=".dwg,.dxf"></label><span>Arquivos do Drive: até 10 MB nesta versão.</span>
+    <label>Ou arquivo do aparelho<input type="file" data-local accept=".dwg,.dxf"></label><span></span>
     <button type="button" data-open disabled>Abrir desenho</button><details class="cad-advanced"><summary>Converter e salvar uma cópia (opcional)</summary><div class="cad-controls"><button type="button" data-destination>Escolher pasta de destino</button><span data-destination-name>Nenhuma pasta selecionada</span>
     <label>Formato de saída <select data-format><option value="pdf">PDF para visualizar</option><option value="dxf">DXF</option><option value="dwg">DWG</option></select></label>
     <button type="button" data-convert disabled>Converter e salvar</button></div></details></div>
     <div data-picker hidden><h3 data-picker-title></h3><button type="button" data-back>Voltar</button><button type="button" data-select-folder hidden>Usar esta pasta</button><div data-list></div></div>
     <p data-status role="status" aria-live="polite"></p>
     <div data-result hidden><button type="button" data-preview>Visualizar PDF</button><button type="button" data-download>Baixar arquivo</button><button type="button" data-share>Compartilhar</button><a data-drive target="_blank" rel="noopener">Abrir no Drive</a></div>
-    <p class="cad-note">Somente visualização. Fontes especiais e referências externas podem aparecer diferentes do original. <a href="cad-browser/THIRD-PARTY-NOTICES.txt" target="_blank" rel="noopener">Bibliotecas e licenças</a></p></div>
+    <p class="cad-note"><a href="cad-browser/THIRD-PARTY-NOTICES.txt" target="_blank" rel="noopener">Bibliotecas e licenças</a></p></div>
     <section data-native-panel hidden><button type="button" data-hide-native>Voltar aos arquivos</button><iframe title="Visualizador DWG" data-native-frame></iframe></section>
     <section data-preview-panel hidden><div class="cad-toolbar"><button type="button" data-minus aria-label="Diminuir zoom">−</button><span data-zoom>100%</span><button type="button" data-plus aria-label="Aumentar zoom">+</button><button type="button" data-fit>Enquadrar</button><button type="button" data-hide-preview>Fechar prévia</button></div><div class="cad-viewport"><div class="cad-pages"></div></div></section>`;
   document.body.append(dialog);
@@ -31,7 +31,7 @@
     const response = await fetch(base + '/api/' + path, {...options, headers: {'Authorization': 'Bearer ' + token, ...(options.body ? {'Content-Type':'application/json'} : {}), ...options.headers}});
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
-      throw new Error(data.error || 'O serviço não respondeu. Tente novamente.');
+      throw new Error(response.status===413&&path.startsWith('cad-jobs?action=source')?'Escolha um DWG ou DXF de até 25 MB.':data.error || 'O serviço não respondeu. Tente novamente.');
     }
     return response;
   }
@@ -64,15 +64,15 @@
       status('');
     } catch(err){if(revision===listing)status(message(err));}
   }
-  $('[data-local]').onchange=async event=>{const file=event.target.files?.[0];if(!file)return;if(file.size>10*1024*1024||!/\.(dwg|dxf)$/i.test(file.name)){status('Escolha um DWG ou DXF de até 10 MB.');event.target.value='';return;}const buffer=await file.arrayBuffer();const bytes=new Uint8Array(buffer);let text='';for(let i=0;i<bytes.length;i+=8192)text+=String.fromCharCode(...bytes.subarray(i,i+8192));source={name:file.name,fileName:file.name,localFile:file,fileBase64:file.size<=2*1024*1024?btoa(text):undefined};$('[data-source-name]').textContent=file.name;status('');ready();};
+  $('[data-local]').onchange=event=>{const file=event.target.files?.[0];if(!file)return;if(file.size>25*1024*1024||!/\.(dwg|dxf)$/i.test(file.name)){status('Escolha um DWG ou DXF de até 25 MB.');event.target.value='';source=null;ready();return;}source={name:file.name,fileName:file.name,localFile:file};$('[data-source-name]').textContent=file.name;status('');ready();};
   $('[data-source]').onclick=()=>{mode='source';stack=[];browse(null);};
   $('[data-destination]').onclick=()=>{mode='destination';stack=[];browse(null);};
   $('[data-back]').onclick=()=>browse(stack.pop()||null);
   $('[data-select-folder]').onclick=()=>{destination=folder;$('[data-destination-name]').textContent=folder.name;$('[data-picker]').hidden=true;status('');ready();};
   async function submit(preview=false) {
-    if(!source||(!preview&&!destination))return;if(source.localFile&&source.localFile.size>2*1024*1024){status('Para exportar, use um arquivo do aparelho de até 2 MB ou um arquivo do Drive. A visualização aceita até 10 MB.');return;}
+    if(!source||(!preview&&!destination))return;if(source.localFile&&source.localFile.size>2*1024*1024){status('Para exportar, use um arquivo do aparelho de até 2 MB ou um arquivo do Drive. A visualização aceita até 25 MB.');return;}
     $('[data-convert]').disabled=true; $('[data-open]').disabled=true; closePreview(); resultBlob=null; $('[data-result]').hidden=true; status('Enviando pedido…');
-    try {const data=await json('cad-jobs',{method:'POST',body:JSON.stringify({sourceId:source.id,fileName:source.fileName,fileBase64:source.fileBase64,preview,destinationId:destination?.id,format:$('[data-format]').value})});job=data.job||data;autoOpen=preview;ready();try{sessionStorage.setItem('agora-cad-job',job.id);}catch{} await poll();}
+    try {if(source.localFile&&!source.fileBase64){const bytes=new Uint8Array(await source.localFile.arrayBuffer());let text='';for(let i=0;i<bytes.length;i+=8192)text+=String.fromCharCode(...bytes.subarray(i,i+8192));source.fileBase64=btoa(text);}const data=await json('cad-jobs',{method:'POST',body:JSON.stringify({sourceId:source.id,fileName:source.fileName,fileBase64:source.fileBase64,preview,destinationId:destination?.id,format:$('[data-format]').value})});job=data.job||data;autoOpen=preview;ready();try{sessionStorage.setItem('agora-cad-job',job.id);}catch{} await poll();}
     catch(err){job=null;status(message(err));ready();}
   }
   function closeNative(){nativeEpoch++;nativeAbort?.abort();const old=$('[data-native-frame]');old.src='about:blank';$('[data-native-panel]').hidden=true;}
@@ -85,7 +85,7 @@
     frame.src='cad-browser/agora.html';
     let timeout;const deadline=new Promise((_,reject)=>{timeout=setTimeout(()=>{controller.abort();reject(Error('O desenho demorou para abrir. Tente novamente ou use um arquivo menor.'));},90000);});
     try{
-      const loadBytes=async()=>{if(selectedSource.localFile)return selectedSource.localFile.arrayBuffer();const parts=[];let offset=0,total=0;do{const response=await request('cad-jobs?action=source&sourceId='+encodeURIComponent(selectedSource.id)+'&offset='+offset,{signal:controller.signal});const r=/^bytes (\d+)-(\d+)\/(\d+)$/.exec(response.headers.get('Content-Range')||'');if(!r||Number(r[1])!==offset)throw Error('Resposta incompleta.');const b=await response.arrayBuffer();total=Number(r[3]);if(total>10*1024*1024||b.byteLength!==Number(r[2])-offset+1)throw Error('Desenho acima do limite ou incompleto.');parts.push(b);offset=Number(r[2])+1;}while(offset<total);return new Blob(parts).arrayBuffer();};
+      const loadBytes=async()=>{if(selectedSource.localFile)return selectedSource.localFile.arrayBuffer();const parts=[];let offset=0,total=0;do{const response=await request('cad-jobs?action=source&sourceId='+encodeURIComponent(selectedSource.id)+'&offset='+offset,{signal:controller.signal});const r=/^bytes (\d+)-(\d+)\/(\d+)$/.exec(response.headers.get('Content-Range')||'');if(!r||Number(r[1])!==offset)throw Error('Resposta incompleta.');const b=await response.arrayBuffer();total=Number(r[3]);if(total>25*1024*1024||b.byteLength!==Number(r[2])-offset+1)throw Error('Desenho acima do limite ou incompleto.');parts.push(b);offset=Number(r[2])+1;}while(offset<total);return new Blob(parts).arrayBuffer();};
       const [bytes]=await Promise.race([Promise.all([loadBytes(),loaded]),deadline]);if(revision!==nativeEpoch||!dialog.open)return;
       await Promise.race([frame.contentWindow.agoraOpenCad(selectedSource.name,bytes),deadline]);if(revision===nativeEpoch)status('');
     }catch(err){if(revision===nativeEpoch&&err.name!=='AbortError')status(message(err));}finally{clearTimeout(timeout);}
@@ -118,7 +118,7 @@
         const range=/^bytes (\d+)-(\d+)\/(\d+)$/.exec(response.headers.get('Content-Range')||'');
         if(!range||Number(range[1])!==offset)throw new Error('Download incompleto. Tente novamente.');
         const part=await response.blob();total=Number(range[3]);
-        if(total>10*1024*1024||part.size!==Number(range[2])-offset+1)throw new Error('Resposta inválida.');
+        if(total>25*1024*1024||part.size!==Number(range[2])-offset+1)throw new Error('Resposta inválida.');
         parts.push(part);offset=Number(range[2])+1;
       }while(offset<total);
       resultBlob=new Blob(parts,{type:job.format==='pdf'?'application/pdf':'application/octet-stream'});

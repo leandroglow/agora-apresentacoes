@@ -42,6 +42,12 @@ test('CAD queue: claim, protected download, completion, replay, source revision,
   assert.equal((await sourcePart(source)).bytes.toString(),'AC1032');
   const denied=files.get(source);denied.parents=[];await assert.rejects(sourcePart(source),e=>e.status===403);denied.parents=[root];
   denied.name='not-cad.pdf';await assert.rejects(sourcePart(source),e=>e.status===400);denied.name='planta.dwg';
+  const src25=files.get(source);const originalData=src25.data,originalSize=src25.size;
+  src25.data=Buffer.alloc(25*1024*1024,65);src25.size=src25.data.length;
+  let total25=0;for(let offset=0;offset<src25.size;offset+=2*1024*1024){const part=await sourcePart(source,offset);total25+=part.bytes.length;}assert.equal(total25,25*1024*1024);
+  await assert.rejects(create({sourceId:source,destinationId:root,format:'pdf'},'owner'),e=>e.status===413);
+  src25.size=25*1024*1024+1;await assert.rejects(sourcePart(source),e=>e.status===413);
+  src25.data=originalData;src25.size=originalSize;
   const preview=await create({sourceId:source,preview:true,format:'dwg',destinationId:'untrusted'},'owner');
   assert.equal(preview.destinationId,queue);assert.equal(preview.format,'pdf');assert.equal(preview.preview,true);
   const previewClaim=(await call('GET','/api/cad-worker')).value.job;assert.equal(previewClaim.id,preview.id);
