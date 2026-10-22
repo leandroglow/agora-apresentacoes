@@ -2496,10 +2496,7 @@ function renderRelatorio(registros){
 <!-- ══ LIGHTBOX ══ -->
 <!-- PDF.js library -->
 <script src="pdf-viewer.js?v=20261018-zoom1600"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
-  if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-</script>
+<script src="../lib/agora-pdf.js?v=20261021-security"></script>
 
 <div id="lightbox">
   <div class="lb-header">
@@ -2538,9 +2535,7 @@ function renderRelatorio(registros){
   <div class="lb-thumbs" id="lb-thumbs"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/project-file?id='+encodeURIComponent(id); }
 
@@ -2646,10 +2641,8 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
       const resp=await fetch(driveMediaUrl(fileId),{headers:{Authorization:'Bearer '+token}});
       if(!resp.ok) throw new Error('Erro '+resp.status);
       const blob=await resp.blob();
-      if(typeof pdfjsLib==='undefined') await loadPdfJs();
-      if(typeof pdfjsLib==='undefined') throw new Error('Visualizador de PDF indisponível');
-      pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      const pdf=await pdfjsLib.getDocument({data:await blob.arrayBuffer()}).promise;
+      const safePdf=await loadPdfJs();
+      const pdf=await safePdf.getDocument({data:await blob.arrayBuffer(),isEvalSupported:false}).promise;
       if(generation!==mediaGeneration){pdf.destroy();return;}
       pdfDoc=pdf;await pdfViewer.open(pdf);
     }catch(e){
@@ -2658,14 +2651,7 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
   }
 
   function loadPdfJs(){
-    return new Promise((resolve,reject)=>{
-      const existing=document.querySelector('script[data-pdfjs]');
-      if(existing){existing.addEventListener('load',resolve,{once:true});existing.addEventListener('error',reject,{once:true});return;}
-      const s=document.createElement('script'); s.dataset.pdfjs='1';
-      s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-      s.onload=resolve; s.onerror=()=>reject(new Error('Não foi possível iniciar o visualizador'));
-      document.head.appendChild(s);
-    });
+    return window.loadAgoraPdfJs();
   }
 
   function renderPdfNative(blob){
@@ -2832,7 +2818,7 @@ function driveMediaUrl(id){ return 'https://agora-apresentacoes.vercel.app/api/p
   });
 })();
 </script>
-<script src="cad-tools.js?v=6"></script>
+<script src="cad-tools.js?v=20261021-pdf-security"></script>
 </body>
 </html>
 

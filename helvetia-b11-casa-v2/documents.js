@@ -10,15 +10,9 @@
     $('document-zoom').value = Math.round(z*100)+'%';
     $('document-minus').disabled=z<=.25; $('document-plus').disabled=z>=12;
   });
-  let library, loading, pdf, generation=0;
+  let loading, pdf, generation=0;
   function loadLibrary() {
-    return library ||= new Promise((resolve,reject) => {
-      const script=document.createElement('script');
-      script.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-      script.onload=()=>{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';resolve();};
-      script.onerror=()=>{library=null;script.remove();reject(new Error('Não foi possível carregar o visualizador.'));};
-      document.head.appendChild(script);
-    });
+    return window.loadAgoraPdfJs();
   }
   async function open(key) {
     if(!sources[key])return;
@@ -29,8 +23,8 @@
     $('document-title').textContent=sources[key].title;
     status.hidden=false;status.textContent='Carregando…';
     try {
-      await loadLibrary(); if(current!==generation)return;
-      loading=pdfjsLib.getDocument(sources[key].url);
+      const safePdf=await loadLibrary(); if(current!==generation)return;
+      loading=safePdf.getDocument({url:sources[key].url,isEvalSupported:false});
       const doc=await loading.promise;
       if(current!==generation){doc.destroy();return;}
       pdf=doc; await viewer.open(doc);

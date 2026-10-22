@@ -131,7 +131,8 @@
       const bytes=await (await blob()).arrayBuffer();if(revision!==epoch||!dialog.open)return;
       $('[data-preview-panel]').hidden=false;
       viewer ||= new window.AgoraPdfViewer($('.cad-viewport'),$('.cad-pages'),z=>$('[data-zoom]').textContent=Math.round(z*100)+'%',{maxZoom:16});
-      pdfTask=window.pdfjsLib.getDocument({data:bytes}); const doc=await pdfTask.promise;
+      const safePdf=await window.loadAgoraPdfJs(); if(revision!==epoch||!dialog.open)return;
+      pdfTask=safePdf.getDocument({data:bytes,isEvalSupported:false}); const doc=await pdfTask.promise;
       if(revision!==epoch){doc.destroy();return;}pdfDoc=doc; await viewer.open(doc);$('[data-zoom]').textContent='100%';status('');
     }catch(err){if(revision===epoch)status(message(err));}
   };
