@@ -12,7 +12,7 @@
 .organizacao-card-description{font-size:12px;line-height:1.75;color:var(--g600)}
 .organizacao-card-action{margin-top:auto;padding-top:15px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:space-between;width:100%;color:#945e07}
 .organizacao-card-action span{font-size:20px}
-#iframe-estrutura-ia{width:100%;height:calc(100dvh - 65px);min-height:400px;display:block;border:0;background:#f6f5f0}
+#iframe-estrutura-ia{width:100%;height:calc(100dvh - 65px);min-height:400px;display:block;border:0;background:#090b0a}
 @media(max-width:600px){.organizacao-page{padding:28px 18px 40px}.organizacao-grid{grid-template-columns:1fr;gap:14px}.organizacao-card{padding:22px}.organizacao-intro h1{font-size:35px}.header-center{font-size:8px;letter-spacing:.03em}.header-right{flex-wrap:wrap;justify-content:flex-end}.btn-hdr{padding:6px 8px;font-size:8px}#iframe-estrutura-ia{height:calc(100dvh - 76px)}}
 @media(prefers-reduced-motion:reduce){.organizacao-card{transition:none}}
 @media print{#secao-organizacao,#secao-estrutura-ia{display:none!important}}

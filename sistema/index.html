@@ -10,7 +10,7 @@
 <script src="catalogos-chat.js?v=3"></script>
 <script src="catalogos-images.js?v=1"></script>
 <link rel="stylesheet" href="catalogos-images.css?v=1">
-<link rel="stylesheet" href="organizacao.css?v=1">
+<link rel="stylesheet" href="organizacao.css?v=20261022">
 <style>
 :root {
   --ardosia: #3A4A5A; --ardosia-light: #4E6070;
@@ -512,9 +512,9 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
       </button>
       <button type="button" class="organizacao-card" id="card-estrutura-ia">
         <span class="organizacao-symbol" aria-hidden="true">◎</span>
-        <span class="organizacao-card-title">Estrutura de IA</span>
-        <span class="organizacao-card-description">Explore o mapa interativo. Clique nos blocos para conhecer agentes, skills, projetos e arquivos de memória.</span>
-        <span class="organizacao-card-action">Explorar estrutura <span aria-hidden="true">→</span></span>
+        <span class="organizacao-card-title">Agentes IA</span>
+        <span class="organizacao-card-description">Conheça quem cuida de cada área, como o trabalho acontece e onde ficam os sistemas e a memória da Ágora.</span>
+        <span class="organizacao-card-action">Explorar o painel <span aria-hidden="true">→</span></span>
       </button>
       <button type="button" class="organizacao-card" id="card-organizacao-despesas">
         <span class="organizacao-symbol" aria-hidden="true">▣</span>
@@ -524,8 +524,8 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
       </button>
     </div>
   </section>
-  <section id="secao-estrutura-ia" style="display:none" aria-label="Estrutura de IA">
-    <iframe id="iframe-estrutura-ia" title="Mapa interativo da estrutura de IA da Ágora" src="about:blank" referrerpolicy="same-origin"></iframe>
+  <section id="secao-estrutura-ia" style="display:none" aria-label="Agentes IA">
+    <iframe id="iframe-estrutura-ia" title="Agentes, fluxos e sistemas da Ágora" src="about:blank" referrerpolicy="same-origin"></iframe>
   </section>
 
   <!-- DIÁRIO -->
@@ -1194,12 +1194,12 @@ function abrirSecao(secao){
 
   if(secao==='estrutura-ia'){
     const mapa=document.getElementById('iframe-estrutura-ia');
-    if(mapa.getAttribute('src')==='about:blank')mapa.src='estrutura-ia.html?v=1';
+    if(mapa.getAttribute('src')==='about:blank')mapa.src='estrutura-ia.html?v=20261022';
   }
   if(secao==='projetos'){ projMostrar(1); obraAtual=null; pastaAtual=null; }
   if(secao==='despesas'){ popularSelectDesp(); }
 
-    const tit={diario:'Diário de Obra',relatorio:'Relatórios',projetos:'Projetos',tour360:'Obras 360°',apresentacao:'Apresentação',despesas:'Despesas',assistente:'Catálogo de IA',organizacao:'Organização','estrutura-ia':'Estrutura de IA'};
+    const tit={diario:'Diário de Obra',relatorio:'Relatórios',projetos:'Projetos',tour360:'Obras 360°',apresentacao:'Apresentação',despesas:'Despesas',assistente:'Catálogo de IA',organizacao:'Organização','estrutura-ia':'Agentes IA'};
   document.getElementById('header-secao-titulo').textContent=tit[secao]||'';
   const hr=document.getElementById('header-right-btns');
   hr.innerHTML='';
