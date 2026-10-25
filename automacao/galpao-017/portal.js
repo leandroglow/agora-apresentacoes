@@ -25,11 +25,13 @@
     }catch(e){if(current!==generation)return;reset(e.message);$('login').hidden=!!clerk.session;$('account').hidden=!clerk.session;timer=setTimeout(refresh,30000);}
   }
   async function start(){
+    const ui=document.createElement('script');ui.src='https://cdn.jsdelivr.net/npm/@clerk/ui@1/dist/ui.browser.js';ui.crossOrigin='anonymous';
+    await new Promise((resolve,reject)=>{ui.onload=resolve;ui.onerror=()=>reject(new Error('Não foi possível carregar a tela de login.'));document.head.append(ui);});
     const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/@clerk/clerk-js@6/dist/clerk.browser.js';script.crossOrigin='anonymous';script.setAttribute('data-clerk-publishable-key',config.clerkPublishableKey);
     await new Promise((resolve,reject)=>{script.onload=resolve;script.onerror=()=>reject(new Error('Não foi possível carregar o login.'));document.head.append(script);});
     clerk=window.Clerk;
     const destination=location.origin+location.pathname;
-    await clerk.load({signInForceRedirectUrl:destination,signUpForceRedirectUrl:destination});
+    await clerk.load({ui:{ClerkUI:window.__internal_ClerkUICtor},signInForceRedirectUrl:destination,signUpForceRedirectUrl:destination,appearance:{variables:{colorPrimary:'#b79b64',borderRadius:'16px'}}});
     $('login').onclick=()=>clerk.openSignIn({forceRedirectUrl:destination});
     $('logout').onclick=async()=>{reset('Sessão encerrada.');await clerk.signOut({redirectUrl:destination});};
     let sessionId;
