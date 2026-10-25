@@ -1,5 +1,6 @@
 import { createPublicKey } from 'node:crypto';
 import { createClerkClient, verifyToken } from '@clerk/backend';
+import { isSystemUser } from './system-access.mjs';
 
 // Public key of the Ágora Automação Clerk application. Never put a secret here.
 const AUTOMACAO_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuYXByZXNlbnRhY29lcy5hZ29yYWNvbnMuY29tLmJyJA';
@@ -73,6 +74,13 @@ export async function requireAuth(req, res) {
     res.status(503).json({ error: 'Login da Ágora temporariamente indisponível.' });
     return null;
   }
-  if (!session) res.status(401).json({ error: 'Sessão Clerk inválida ou expirada.' });
+  if (!session) {
+    res.status(401).json({ error: 'Sessão Clerk inválida ou expirada.' });
+    return null;
+  }
+  if (!isSystemUser(session.sub)) {
+    res.status(403).json({ code: 'SYSTEM_ACCESS_DENIED', error: 'Sua conta não tem acesso ao Sistema Ágora. Acesse o portal de automação do seu imóvel.' });
+    return null;
+  }
   return session;
 }

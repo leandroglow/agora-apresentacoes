@@ -58,7 +58,19 @@ window.AgoraSistemaAuth = (() => {
 
   return {
     ready,
-    async user() { await ready; return clerk.user || null; },
+    async user() {
+      await ready;
+      const user = clerk.user;
+      if (!user) return null;
+      const token = await clerk.session?.getToken();
+      if (!token) return null;
+      const response = await fetch('https://agora-apresentacoes.vercel.app/api/access', {
+        headers: { Authorization: 'Bearer ' + token }, cache: 'no-store'
+      });
+      if (response.status === 403) throw new Error('Sua conta não tem acesso ao Sistema Ágora. Acesse o portal de automação do seu imóvel.');
+      if (!response.ok || (await response.json()).allowed !== true) throw new Error('Não foi possível verificar a permissão do Sistema. Tente novamente.');
+      return user;
+    },
     async token() { await ready; return clerk.session?.getToken() || null; },
     async signIn() { await ready; clerk.openSignIn(); },
     async signOut() { await ready; await clerk.signOut({ redirectUrl: returnUrl }); }

@@ -26,6 +26,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/access",
+      "destination": "/api/service?_route=access"
+    },
+    {
       "source": "/api/cad-jobs",
       "destination": "/api/service?_route=cad-jobs"
     },
