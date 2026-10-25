@@ -17,5 +17,10 @@ test('dashboard signed authorization matrix and no Drive before auth', async () 
 
 test('dashboard sanitizer preserves nulls and only approved links', () => {
   const out = sanitizeDashboardData({ financial: { committed: null, paid: 12 }, agenda: [{ title: 'x', link: 'https://evil.example/x', url: 'https://drive.google.com/file/d/a/view' }], projects: [{ subtitle: 'ok', url: 'javascript:alert(1)', thumbUrl: 'https://docs.google.com/a' , secret: 'drop' }] });
-  assert.equal(out.financial.committed, null); assert.equal(out.financial.invoiced, undefined); assert.equal(out.projects[0].url, undefined); assert.equal(out.projects[0].secret, undefined); assert.match(out.projects[0].thumbUrl, /^https:\/\/docs\.google\.com/); assert.equal(out.agenda[0].link, undefined);
+  assert.equal(out.financial.committed, null); assert.equal(out.financial.invoiced, null); assert.equal(out.projects[0].url, undefined); assert.equal(out.projects[0].secret, undefined); assert.match(out.projects[0].thumbUrl, /^https:\/\/docs\.google\.com/); assert.equal(out.agenda[0].link, undefined);
+});
+
+test('nested fields and project links never pass unvalidated objects', () => {
+ const out=sanitizeDashboardData({projects:[{id:'019',links:[{label:'Pasta',url:'https://drive.google.com/drive/folders/x'},{label:'bad',url:'javascript:x'}],name:{password:'drop'}}],modules:[{items:[{title:'ok',items:[{items:[{secret:'drop'}],secret:'drop'}]}]}]});
+ assert.equal(out.projects[0].links.length,1);assert.equal(out.projects[0].links[0].label,'Pasta');assert.equal(out.projects[0].name,undefined);assert.ok(!JSON.stringify(out).includes('drop'));assert.equal(sanitizeDashboardData({}).financial.paid,null);
 });
