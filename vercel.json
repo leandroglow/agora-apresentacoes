@@ -26,6 +26,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/dashboard",
+      "destination": "/api/service?_route=dashboard"
+    },
+    {
       "source": "/api/access",
       "destination": "/api/service?_route=access"
     },

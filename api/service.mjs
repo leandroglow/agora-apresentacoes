@@ -1,5 +1,6 @@
 // Preserve public URLs while grouping lightweight endpoints into one function.
 const handlers = {
+  'dashboard': () => import('./_lib/routes/dashboard.mjs'),
   'access': () => import('./_lib/routes/access.mjs'),
   'cad-jobs': () => import('./_lib/routes/cad-jobs.mjs'),
   'cad-worker': () => import('./_lib/routes/cad-worker.mjs'),

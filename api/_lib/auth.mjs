@@ -84,3 +84,23 @@ export async function requireAuth(req, res) {
   }
   return session;
 }
+
+// Dashboard corporativo: autenticação Clerk não é autorização suficiente.
+// Esta rota é deliberadamente exclusiva da identidade Master.
+export async function requireMasterAuth(req, res) {
+  let session;
+  try { session = await authenticateClerkRequest(req); }
+  catch {
+    res.status(503).json({ error: 'Login da Ágora temporariamente indisponível.' });
+    return null;
+  }
+  if (!session) {
+    res.status(401).json({ error: 'Sessão Clerk inválida ou expirada.' });
+    return null;
+  }
+  if (session.sub !== 'user_3Jvm8LQLtHINAqVtQhagyoDC6nT') {
+    res.status(403).json({ code: 'MASTER_ACCESS_REQUIRED', error: 'Acesso restrito ao usuário Master.' });
+    return null;
+  }
+  return session;
+}
