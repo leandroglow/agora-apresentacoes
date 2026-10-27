@@ -9,6 +9,7 @@
 <script src="catalogos-ia-config.js"></script>
 <script src="catalogos-chat.js?v=3"></script>
 <script src="catalogos-images.js?v=1"></script>
+<script src="receipt-transfer.js?v=20261027-1"></script>
 <link rel="stylesheet" href="catalogos-images.css?v=1">
 <link rel="stylesheet" href="organizacao.css?v=20261022">
 <style>
@@ -1613,7 +1614,7 @@ async function garantirGoogleDrive(){
   catch(e) { return ''; }
 }
 
-async function openaiChat(messages, max_tokens=800){
+async function openaiChat(messages, max_tokens=800, fileId=null){
   const clerkToken=await AgoraSistemaAuth.token();
   if(!clerkToken) throw new Error('Sessão expirada. Entre novamente no sistema.');
   const requestOptions={
@@ -1623,18 +1624,49 @@ async function openaiChat(messages, max_tokens=800){
       'Content-Type':'application/json',
       'Authorization':'Bearer '+clerkToken
     },
-    body:JSON.stringify({model:'gpt-4o', max_tokens, messages})
+    body:JSON.stringify({model:'gpt-4o', max_tokens, messages, ...(fileId?{fileId}:{})})
   };
-  let resp=await fetch(OPENAI_PROXY,requestOptions);
-  if(resp.status===404) resp=await fetch('https://agora-apresentacoes.vercel.app/api/analyze-receipt',requestOptions);
-  if(!resp.ok) throw new Error('O serviço de IA retornou HTTP '+resp.status+'. Verifique a conexão e tente novamente.');
-  const data=await resp.json();
+  let resp;
+  try { resp=await fetch(OPENAI_PROXY,requestOptions); }
+  catch { throw new Error('A análise perdeu a conexão. Seus dados foram mantidos; tente novamente.'); }
+  const data=await resp.json().catch(()=>({}));
+  if(!resp.ok) throw new Error(typeof data.error==='string'?data.error:'Não foi possível analisar agora (HTTP '+resp.status+'). Tente novamente.');
   if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
   return data.choices?.[0]?.message?.content||'';
 }
 
 // ── DESPESAS ─────────────────────────────────────────────
 let despFotoFile=null, despItens=[];
+let despDraftId=null, despUploadState={}, despUploadPromise=null, despPhotoUrl=null;
+let despBusy=false;
+
+async function receiptApi(body){
+  const token=await AgoraSistemaAuth.token();
+  if(!token) throw new Error('Sessão expirada. Entre novamente no sistema.');
+  let response;
+  try { response=await fetch(API_BASE+'/api/upload-receipt',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body)}); }
+  catch { throw new Error('Não foi possível iniciar o envio. Seus dados continuam nesta tela; tente novamente.'); }
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok) {
+    const messages={DRIVE_AUTH_EXPIRED:'A conexão central do Drive precisa ser regularizada pelo administrador.',DRIVE_PERMISSION_DENIED:'A conta central não tem permissão de gravar o comprovante.',DRIVE_FOLDER_NOT_FOUND:'A pasta de comprovantes não foi encontrada.'};
+    throw new Error(messages[data.error]||data.error||'O serviço de comprovantes retornou HTTP '+response.status+'.');
+  }
+  return data;
+}
+
+async function garantirComprovanteDesp(){
+  if(!despFotoFile)return null;
+  if(despUploadPromise)return despUploadPromise;
+  despDraftId ||= Date.now();
+  const file=despFotoFile, state=despUploadState;
+  despUploadPromise=AgoraReceiptTransfer.upload(file,{
+    state,
+    init:info=>receiptApi({action:'init',...info,fileName:`desp_${despDraftId}_${info.fileName}`}),
+    onProgress:percent=>{document.getElementById('desp-status').textContent=`⏳ Enviando comprovante original: ${percent}%`;}
+  });
+  try { return (await despUploadPromise).id; }
+  finally { despUploadPromise=null; }
+}
 
 function escAttr(v){
   return String(v??'')
@@ -1776,6 +1808,10 @@ function normalizeDespesaIA(parsed){
 }
 
 function mostrarPreviewDesp(file){
+  if(despBusy){alert('Aguarde o envio ou análise do comprovante atual.');return;}
+  if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)){alert('Use uma foto JPEG, PNG, WebP ou GIF.');return;}
+  if(file.size>AgoraReceiptTransfer.MAX_BYTES){alert('Selecione uma foto de até 20 MB.');return;}
+  despDraftId=Date.now(); despUploadState={};
   despFotoFile=file;
   document.getElementById('desp-img-preview').src=URL.createObjectURL(file);
   document.getElementById('desp-foto-preview').style.display='block';
@@ -1797,7 +1833,9 @@ function popularSelectDesp(){
 });
 
 window.limparFotoDesp=function(){
+  if(despBusy)return;
   despFotoFile=null; despItens=[];
+  despDraftId=null; despUploadState={};
   document.getElementById('desp-input-camera').value='';
   document.getElementById('desp-input-galeria').value='';
   document.getElementById('desp-foto-preview').style.display='none';
@@ -1807,20 +1845,22 @@ window.limparFotoDesp=function(){
 };
 
 window.analisarDespesa=async function(){
-  if(!despFotoFile)return;
+  if(!despFotoFile||despBusy)return;
+  despBusy=true;
   const btn=document.getElementById('desp-btn-analisar');
   btn.disabled=true; btn.textContent='⏳ Analisando...';
+  document.getElementById('desp-btn-salvar').disabled=true;
   document.getElementById('desp-resultado').style.display='block';
   const st=document.getElementById('desp-status');
   st.className='sload'; st.textContent='⏳ Enviando imagem para análise...';
   try{
-    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(despFotoFile);});
+    const fileId=await garantirComprovanteDesp();
+    st.textContent='⏳ Analisando comprovante...';
     const txt=await openaiChat([
       {role:'system',content:'Você extrai dados de documentos brasileiros de compra. Responda somente JSON válido, sem markdown, sem comentários e sem texto extra. Não invente campos. Preserve a descrição dos itens o mais completa possível. Se a foto estiver girada, considere o documento na orientação correta antes de ler. Classifique o tipo pelo conteúdo principal do documento: nota fiscal => nota_fiscal; cupom fiscal/ECF/PDV => cupom; pedido, orçamento, proposta comercial ou orçamento válido por 1 dia => pedido.'},
       {role:'user',content:[
-      {type:'image_url',image_url:{url:`data:${despFotoFile.type};base64,${b64}`,detail:'high'}},
-      {type:'text',text:`Analise este documento (nota fiscal, cupom, pedido, orçamento ou proposta de material de construção) e retorne SOMENTE um JSON válido sem markdown com este formato:\n{"tipo":"nota_fiscal|pedido|cupom|outro","fornecedor":"","data":"YYYY-MM-DD","valor_total":null,"observacoes":"","itens":[{"descricao":"","quantidade":null,"unidade":"","valor_unitario":null}]}\nRegras:\n- use null quando não conseguir confirmar um valor;\n- mantenha a descrição dos itens o mais completa possível;\n- quantidade e valor_unitario devem refletir o documento, sem inventar;\n- para unidade, priorize unidades comuns de obra: m, m2, m3, un, kg, sc, cx, rl, pct;\n- quando aparecer MT, metro, metros ou metro linear, normalize como m;\n- quando aparecer unidade, und, unid, peça ou peças, normalize como un;\n- se houver vários itens, liste todos os que conseguir ler;\n- a data deve ser a data principal do documento; se estiver em formato DD/MM/AA, converta para 20AA;\n- se houver desconto, valor à vista, valor líquido, total com desconto ou valor final a pagar, em valor_total use o valor final após desconto;\n- se aparecerem preço bruto e preço com desconto, priorize o valor final efetivamente pagável;\n- se o comprovante for de combustível, procure placa do veículo e quilometragem/KM e registre ambos em observacoes; não invente se não estiverem legíveis;\n- se o documento estiver identificado como ORÇAMENTO, PEDIDO, PROPOSTA ou similar, não classifique como outro;\n- hoje é 2026-10-08, então datas com ano de dois dígitos como 26 normalmente significam 2026.`}
-    ]}], 1400);
+      {type:'text',text:`Analise este documento (nota fiscal, cupom, pedido, orçamento ou proposta de material de construção) e retorne SOMENTE um JSON válido sem markdown com este formato:\n{"tipo":"nota_fiscal|pedido|cupom|outro","fornecedor":"","data":"YYYY-MM-DD","valor_total":null,"observacoes":"","itens":[{"descricao":"","quantidade":null,"unidade":"","valor_unitario":null}]}\nRegras:\n- use null quando não conseguir confirmar um valor;\n- mantenha a descrição dos itens o mais completa possível;\n- quantidade e valor_unitario devem refletir o documento, sem inventar;\n- para unidade, priorize unidades comuns de obra: m, m2, m3, un, kg, sc, cx, rl, pct;\n- quando aparecer MT, metro, metros ou metro linear, normalize como m;\n- quando aparecer unidade, und, unid, peça ou peças, normalize como un;\n- se houver vários itens, liste todos os que conseguir ler;\n- a data deve ser a data principal do documento; se estiver em formato DD/MM/AA, converta para 20AA;\n- se houver desconto, valor à vista, valor líquido, total com desconto ou valor final a pagar, em valor_total use o valor final após desconto;\n- se aparecerem preço bruto e preço com desconto, priorize o valor final efetivamente pagável;\n- se o comprovante for de combustível, procure placa do veículo e quilometragem/KM e registre ambos em observacoes; não invente se não estiverem legíveis;\n- se o documento estiver identificado como ORÇAMENTO, PEDIDO, PROPOSTA ou similar, não classifique como outro;\n- hoje é ${new Date().toISOString().slice(0,10)}; interprete anos de dois dígitos pelo contexto do documento.`}
+    ]}], 1400, fileId);
     const cleaned=txt.replace(/```json|```/g,'').trim();
     const jsonText=(cleaned.match(/\{[\s\S]*\}/)||[])[0]||cleaned;
     const parsed=normalizeDespesaIA(JSON.parse(jsonText));
@@ -1836,6 +1876,8 @@ window.analisarDespesa=async function(){
     st.className='serr'; st.textContent='⚠ Não foi possível analisar: '+e.message;
   }
   btn.disabled=false; btn.textContent='✦ Analisar com IA';
+  document.getElementById('desp-btn-salvar').disabled=false;
+  despBusy=false;
 };
 
 // Vincula o botão também por JavaScript, evitando bloqueios de handlers inline em navegadores móveis.
@@ -1878,68 +1920,38 @@ function renderItensDesp(){
 async function despesasApi(body){
  const token=await AgoraSistemaAuth.token();
  if(!token) throw new Error('Entre novamente no sistema Ágora.');
- const r=await fetch('https://agora-apresentacoes.vercel.app/api/expenses',{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
- const data=await r.json(); if(!r.ok) throw new Error(data.error||'Falha ao acessar despesas.'); return data;
+ let r;
+ try { r=await fetch(API_BASE+'/api/expenses',{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}); }
+ catch { throw new Error('A conexão foi interrompida. Os dados continuam nesta tela; tente novamente.'); }
+ const data=await r.json().catch(()=>({})); if(!r.ok) throw new Error(data.error||'Falha ao acessar despesas (HTTP '+r.status+').'); return data;
 }
 window.salvarDespesa=async function(){
+  if(despBusy)return;
   const obra=document.getElementById('desp-obra').value;
   if(!obra){alert('Selecione a obra.');return;}
+  despBusy=true;
+  document.getElementById('desp-btn-analisar').disabled=true;
   const btn=document.getElementById('desp-btn-salvar');
   btn.disabled=true; btn.textContent='⏳ Salvando...';
   const st=document.getElementById('desp-status');
   st.className='sload'; st.textContent='⏳ Salvando...';
   try{
-    const despId=Date.now();
-    // Upload foto via Edge Function
-    let fotoDriveId=null;
-    if(despFotoFile){
-      st.textContent='⏳ Enviando foto para o Drive...';
-      const clerkToken=await AgoraSistemaAuth.token();
-      if(!clerkToken) throw new Error('Sessão expirada. Entre novamente no sistema.');
-      const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(despFotoFile);});
-      const ext=(despFotoFile.name && despFotoFile.name.includes('.')) ? despFotoFile.name.split('.').pop() : ((despFotoFile.type||'image/jpeg').split('/')[1]||'jpg');
-      const upResp=await fetch('https://agora-apresentacoes.vercel.app/api/upload-receipt',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+clerkToken},
-        body:JSON.stringify({
-          fileName:`${(obra||'geral').replace(/[^a-z0-9]+/gi,'_').replace(/^_|_$/g,'')}_desp_${despId}.${ext}`,
-          fileBase64:b64,
-          mimeType:despFotoFile.type||'image/jpeg',
-          folderId:GDRIVE_DESP_FOLDER,
-          // O Drive das despesas usa a credencial compartilhada do servidor.
-          // Não abrir o OAuth do Google no navegador de usuários finais.
-          googleAccessToken:''
-        })
-      });
-      const upData=await upResp.json();
-      const uploadError=getUploadErrorMessage(upData);
-      if(!upResp.ok || uploadError){
-        const msg=uploadError==='DRIVE_AUTH_EXPIRED'
-          ? 'A conexão central do Drive precisa ser regularizada pelo administrador. Não é necessário entrar no Google.'
-          : uploadError==='DRIVE_PERMISSION_DENIED'
-            ? 'A conta do Drive não tem permissão de gravação nessa pasta.'
-            : uploadError==='DRIVE_FOLDER_NOT_FOUND'
-              ? 'A pasta de despesas do Drive não foi encontrada.'
-              : (uploadError || `Falha no upload da foto (${upResp.status}).`);
-
-        throw new Error(msg);
-      }
-      fotoDriveId=extractDriveId(upData);
-      if(!fotoDriveId){
-        console.warn('Drive upload sem id reconhecível:', upData);
-        throw new Error('A foto foi enviada, mas o Drive não retornou um identificador reconhecível. A despesa não foi salva para evitar histórico sem foto.');
-      }
-    }
+    const despId=despDraftId ||= Date.now();
+    const fotoDriveId=await garantirComprovanteDesp();
+    st.textContent='⏳ Gravando despesa...';
     const desp={id:despId,obra,data:document.getElementById('desp-data').value||new Date().toISOString().split('T')[0],tipo:document.getElementById('desp-tipo').value,fornecedor:document.getElementById('desp-fornecedor').value.trim(),valor_total:parseFloat(document.getElementById('desp-valor').value)||0,itens:despItens,observacoes:document.getElementById('desp-observacoes').value.trim(),foto_drive_id:fotoDriveId};
     try { await despesasApi({action:'save',record:desp}); }
     catch(error){
       const locais=JSON.parse(localStorage.getItem('agora_despesas_pendentes')||'[]');
-      locais.unshift(desp); localStorage.setItem('agora_despesas_pendentes',JSON.stringify(locais)); throw error;
+      localStorage.setItem('agora_despesas_pendentes',JSON.stringify([desp,...locais.filter(d=>d.id!==desp.id)])); throw error;
     }
     st.className='sok'; st.textContent='✓ Despesa e comprovante salvos. Disponíveis no histórico.';
-    setTimeout(limparFotoDesp,2000);
+    localStorage.setItem('agora_despesas_pendentes',JSON.stringify(JSON.parse(localStorage.getItem('agora_despesas_pendentes')||'[]').filter(d=>d.id!==despId)));
+    setTimeout(()=>{if(despDraftId===despId)limparFotoDesp();},2000);
   }catch(e){st.className='serr';st.textContent='⚠ Erro: '+e.message;}
   btn.disabled=false; btn.textContent='💾 Salvar Despesa';
+  document.getElementById('desp-btn-analisar').disabled=false;
+  despBusy=false;
 };
 
 document.getElementById('desp-tab-nova').addEventListener('click',()=>{
@@ -2053,7 +2065,7 @@ window.toggleEditDesp=function(id){
 };
 
 window.verFotoDesp=async function(driveId){
- try{ const {url}=await despesasApi({action:'photo',fileId:driveId}); window.lbAbrir([{id:null,name:'Foto da despesa',url,thumb:url}],0,'foto'); }
+ try{ const url=await AgoraReceiptTransfer.readPhoto(despesasApi,driveId); if(despPhotoUrl?.startsWith('blob:'))URL.revokeObjectURL(despPhotoUrl); despPhotoUrl=url; window.lbAbrir([{id:null,name:'Foto da despesa',url,thumb:url}],0,'foto'); }
  catch(e){alert(e.message);}
 };
 window.editarDesp=function(id){ toggleEditDesp(id); };

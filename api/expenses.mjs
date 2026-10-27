@@ -1,6 +1,7 @@
 import { getGoogleDriveAccessToken } from './_lib/google.mjs';
 import { requireAuth } from './_lib/auth.mjs';
 import { handleOptions, json, readJsonBody, setCors } from './_lib/http.mjs';
+import { assertReceiptFile, readBoundedResponse, RECEIPT_CHUNK_BYTES, RECEIPT_LEGACY_MAX_BYTES, validReceiptId } from './_lib/receipt-files.mjs';
 
 const folder = () => process.env.GOOGLE_DRIVE_EXPENSE_FOLDER_ID || '1665zvQOtbulPR59zjFLr37mflu9n31Yo';
 export default async function handler(req, res) {
@@ -28,8 +29,8 @@ export default async function handler(req, res) {
     }
     async function scopedFile(id) {
       if(!/^[\w-]+$/.test(id)) throw new Error('Arquivo inválido.');
-      const file=await (await call(`drive/v3/files/${id}?fields=id,parents,mimeType,trashed`)).json();
-      if(file.trashed || !file.parents?.includes(folder())) throw new Error('Arquivo fora da pasta de despesas.');
+      const file=await (await call(`drive/v3/files/${id}?fields=id,parents,mimeType,size,trashed`)).json();
+      if(file.trashed || !file.parents?.includes(folder())) { const error=new Error('Arquivo fora da pasta de despesas.'); error.statusCode=403; throw error; }
       return file;
     }
     if(req.method==='GET') {
@@ -40,10 +41,29 @@ export default async function handler(req, res) {
     }
     const body=readJsonBody(req);
     if(body.action==='photo') {
-      const file=await scopedFile(String(body.fileId||''));
-      if(!/^image\//.test(file.mimeType)) throw new Error('Arquivo não é uma imagem.');
-      const data=await (await call(`drive/v3/files/${file.id}?alt=media`)).arrayBuffer();
-      return json(res,200,{url:`data:${file.mimeType};base64,${Buffer.from(data).toString('base64')}`});
+      const fileId=String(body.fileId||'');
+      if(!validReceiptId(fileId)) return json(res,400,{error:'Identificador de imagem inválido.'});
+      const file=assertReceiptFile(await scopedFile(fileId));
+      const hasOffset=Object.prototype.hasOwnProperty.call(body,'offset');
+      if(!hasOffset) {
+        if(file.size>RECEIPT_LEGACY_MAX_BYTES) return json(res,413,{error:'Use a leitura por blocos para imagens acima do limite legado.'});
+        const data=await (await call(`drive/v3/files/${file.id}?alt=media`)).arrayBuffer();
+        const base64=Buffer.from(data).toString('base64');
+        if(base64.length>4_500_000) return json(res,413,{error:'Imagem acima do limite de resposta.'});
+        return json(res,200,{url:`data:${file.mimeType};base64,${base64}`});
+      }
+      const offset=Number(body.offset);
+      if(!Number.isSafeInteger(offset)||offset<0||offset>=file.size) return json(res,400,{error:'Posição de leitura inválida.'});
+      const end=Math.min(offset+RECEIPT_CHUNK_BYTES,file.size)-1;
+      const response=await call(`drive/v3/files/${file.id}?alt=media`,{headers:{Range:`bytes=${offset}-${end}`}});
+      const expected=end-offset+1;
+      const contentRange=response.headers.get('content-range');
+      if(response.status!==206||contentRange!==`bytes ${offset}-${end}/${file.size}`) return json(res,502,{error:'Bloco de imagem incompleto.'});
+      const raw=await readBoundedResponse(response,expected);
+      if(raw.length!==expected) return json(res,502,{error:'Bloco de imagem incompleto.'});
+      const data=raw;
+      const nextOffset=end+1;
+      return json(res,200,{base64:data.toString('base64'),mimeType:file.mimeType,total:file.size,nextOffset,done:nextOffset>=file.size});
     }
     const id=Number(body.id || body.record?.id);
     if(!Number.isSafeInteger(id) || id<1) return json(res,400,{error:'Identificador inválido.'});
@@ -70,6 +90,6 @@ export default async function handler(req, res) {
     }
     return json(res,200,{ok:true,record});
   } catch(error) {
-    return json(res,502,{error:error.code==='DRIVE_AUTH_EXPIRED'?'A conexão central do Drive precisa ser regularizada pelo administrador. Seu login Google não é necessário.':error.message});
+    return json(res,error.statusCode||502,{error:error.code==='DRIVE_AUTH_EXPIRED'?'A conexão central do Drive precisa ser regularizada pelo administrador. Seu login Google não é necessário.':error.message});
   }
 }
