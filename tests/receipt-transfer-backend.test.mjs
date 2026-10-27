@@ -21,7 +21,7 @@ function response(body,{status=200,headers={}}={}){const bytes=Buffer.isBuffer(b
 test('resumable init returns only Google upload capability and bounded metadata',async()=>{
   const original=globalThis.fetch;let captured;
   globalThis.fetch=async(url,options)=>{captured={url:String(url),options};return response({}, {status:200,headers:{location:'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=opaque'}});};
-  try{const out=res();await uploadReceipt(req({action:'init',fileName:'receipt.png',mimeType:'image/png',size:20000000}),out);assert.equal(out.statusCode,200);assert.deepEqual(out.body,{uploadUrl:'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=opaque',maxBytes:20000000});assert.equal(captured.options.headers['X-Upload-Content-Length'],'20000000');assert.equal(captured.options.headers['X-Upload-Content-Type'],'image/png');const meta=JSON.parse(captured.options.body);assert.deepEqual(meta.parents,[FOLDER]);assert.deepEqual(meta.appProperties,{uploadedBy:MASTER});assert.ok(!JSON.stringify(out.body).includes('test-drive-token'));}
+  try{const out=res();await uploadReceipt(req({action:'init',fileName:'receipt.png',mimeType:'image/png',size:20000000}),out);assert.equal(out.statusCode,200);assert.deepEqual(out.body,{uploadUrl:'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=opaque',maxBytes:20000000});assert.equal(captured.options.headers.Origin,ORIGIN);assert.equal(captured.options.headers['X-Upload-Content-Length'],'20000000');assert.equal(captured.options.headers['X-Upload-Content-Type'],'image/png');const meta=JSON.parse(captured.options.body);assert.deepEqual(meta.parents,[FOLDER]);assert.deepEqual(meta.appProperties,{uploadedBy:MASTER});assert.ok(!JSON.stringify(out.body).includes('test-drive-token'));}
   finally{globalThis.fetch=original;}
 });
 
@@ -47,9 +47,3 @@ test('analyze fileId reads only an in-folder image then prepends it to last user
   try{const out=res();await analyzeReceipt(req({fileId:'receipt-file-123',messages:[{role:'user',content:'Leia este recibo.'}]}),out);assert.equal(out.statusCode,200);const content=openAiRequest.messages[0].content;assert.equal(content[0].type,'image_url');assert.equal(content[0].image_url.url,'data:image/png;base64,AQIDBA==');assert.deepEqual(content[1],{type:'text',text:'Leia este recibo.'});}
   finally{globalThis.fetch=original;}
 });
-
-
-
-
-
-

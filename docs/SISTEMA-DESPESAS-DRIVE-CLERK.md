@@ -6,7 +6,7 @@ Falha reproduzida no serviço publicado: POST de 5 MB para upload-receipt retorn
 
 Fonte vigente: raiz do repositório agora-apresentacoes, `api/`, `sistema/index.html` e `sistema/receipt-transfer.js`. A árvore `catalogos-ia-api/` é histórica e não deve ser usada automaticamente para publicar por cima da raiz atual.
 
-O envio atualizado usa uma sessão resumível do Google Drive, criada pela API após autenticação Clerk e autorização interna já existentes. O navegador recebe somente uma capacidade temporária para enviar aquele arquivo à pasta fixa; não recebe access token, refresh token ou segredo Google. Original de até20MB enviado em partes de1MiB, sem redução de resolução ou modificação dos bytes. A capacidade fica somente em memória.
+O envio atualizado usa uma sessão resumível do Google Drive, criada pela API após autenticação Clerk e autorização interna já existentes. O navegador recebe somente uma capacidade temporária para enviar aquele arquivo à pasta fixa; não recebe access token, refresh token ou segredo Google. Original de até20MB enviado em partes de1MiB, sem redução de resolução ou modificação dos bytes. A capacidade fica somente em memória. A criação da sessão deve incluir o Origin validado do Sistema: o teste real identificou que omitir esse cabeçalho remove o CORS nas respostas posteriores do Google, mesmo com OPTIONS correto. Esse cabeçalho foi corrigido e protegido por teste.
 
 A análise recebe fileId em uma requisição pequena; o servidor confere pasta, tipo, tamanho e lixeira antes de ler a imagem e enviá-la à IA. Assim, o original não atravessa o limite de4,5MB de entrada da Vercel. O histórico lê a foto em blocos de1MiB para não exceder o limite de resposta. Arquivos legados pequenos continuam compatíveis.
 
@@ -14,7 +14,7 @@ O mesmo ID de rascunho e o mesmo comprovante são reutilizados durante novas ten
 
 Testes locais:38 passaram, cobrindo envio de8MB com igualdade de bytes, retomada, conclusão após perda de resposta, histórico acima de4,5MB, limites, destino Google estrito, pasta autorizada, autenticação e bloqueio de Laerte. Esses testes são simulados e não comprovam o Safari físico.
 
-Validação real com arquivos sintéticos em pasta temporária e sessão Chrome: pendente de autorização/conexão do usuário. O teste opcional `scripts/verify-receipts-live.mjs` não roda automaticamente e exige AGORA_VERIFY_RECEIPTS=1, além de autorização operacional específica. Credenciais de produção não devem ser exportadas para arquivo local para essa finalidade. Nenhuma despesa real é criada pelo teste.
+Validação real autorizada por Leandro em27/10 e concluída às18:22UTC: imagem sintética >4,5MB preservada por hash, preflight/CORS Google, leitura por blocos, análise IA por fileId, gravação/consulta e repetição sem duplicidade passaram. A pasta temporária foi movida à lixeira e a limpeza foi relida. Nenhuma despesa real foi alterada. O teste executou os mesmos handlers dentro do build Vercel, com credenciais mantidas nesse ambiente; não é uma gravação pelo Safari físico. Chrome conectado: sessão autenticada e formulário atual aberto sem erros de console. O teste opcional scripts/verify-receipts-live.mjs exige AGORA_VERIFY_RECEIPTS=1 e autorização específica; não deve ser executado automaticamente em cada publicação.
 
 ## Regras permanentes
 

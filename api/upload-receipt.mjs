@@ -23,7 +23,9 @@ export default async function handler(req, res) {
       const token = await getGoogleDriveAccessToken();
       const metadata = { name: safeName(body.fileName), parents: [folderId], mimeType, appProperties: { uploadedBy: user.sub } };
       const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true&fields=id', {
-        method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8', 'X-Upload-Content-Type': mimeType, 'X-Upload-Content-Length': String(size) },
+        // Google binds resumable-session CORS to the initiating request. Auth
+        // above already restricts this origin to the Sistema frontend.
+        method: 'POST', headers: { Authorization: `Bearer ${token}`, Origin: req.headers.origin, 'Content-Type': 'application/json; charset=UTF-8', 'X-Upload-Content-Type': mimeType, 'X-Upload-Content-Length': String(size) },
         body: JSON.stringify(metadata), signal: AbortSignal.timeout(30000)
       });
       if (!response.ok) { const category = response.status === 401 ? 'DRIVE_AUTH_EXPIRED' : response.status === 403 ? 'DRIVE_PERMISSION_DENIED' : response.status === 404 ? 'DRIVE_FOLDER_NOT_FOUND' : 'DRIVE_UPLOAD_FAILED'; return json(res, response.status, { error: category }); }
