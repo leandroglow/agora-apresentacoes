@@ -221,7 +221,7 @@ function scene3(b){
  for(const p of b.items){const d=dims(p),z=baseZ(p,camera.explode),col=p.kind==='rail'?'#9ca8ac':p.kind==='duct'?'#939da2':p.kind==='bar'?'#b79c64':'#deded6';box(p.x,p.y,z,d.w,d.h,p.d,col,p.id);
   if(p.kind==='rail'){box(p.x,p.y,z+p.d,d.w,3,2,'#d2dcdf',p.id);box(p.x,p.y+d.h-3,z+p.d,d.w,3,2,'#d2dcdf',p.id)}
   if(p.kind==='duct'){const vertical=d.h>d.w;for(let t=6;t<(vertical?d.h:d.w)-5;t+=10)box(p.x+(vertical?0:t),p.y+(vertical?t:0),z+p.d+.1,vertical?d.w:2,vertical?2:d.h,.2,'#566169',p.id)}
-  if(p.kind==='tuya'){const q=localRotate(p,3,p.h-7);box(p.x+(p.rot%180?q.x-6:q.x),p.y+(p.rot===180?q.y-6:p.rot===270?q.y-(p.w-6):q.y),z+p.d-.3,p.rot%180?6:p.w-6,p.rot%180?p.w-6:6,.3,'#427c9e',p.id)}
+  if(p.kind==='tuya'){const corners=[[3,p.h-7],[p.w-3,p.h-7],[p.w-3,p.h-1],[3,p.h-1]].map(([x,y])=>{const q=localRotate(p,x,y);return {x:p.x+q.x,y:p.y+q.y,z:z+p.d+.1}});poly(corners,'#427c9e',p.id)}
   if(!['rail','duct','bar','tuya'].includes(p.kind)){const rot=p.rot%180;box(p.x+d.w*.17,p.y+d.h*.43,z+p.d,d.w*.66,d.h*.17,4,p.kind==='dps'?'#b67460':p.kind==='relay'?'#ad935d':'#414d58',p.id)}
   for(const q of ports(p)){const q3={x:q.x,y:q.y,z:z+p.d+.4};faces.push({depth:project(q3).depth+.1,html:`<circle data-id="${p.id}" cx="${project(q3).x}" cy="${project(q3).y}" r="2.1" fill="#a4a7a1" stroke="#5b6467" stroke-width=".6"/>`})}
   if(camera.labels&&!['rail','duct','bar'].includes(p.kind)){const q=project({x:p.x+d.w/2,y:p.y+d.h*.28,z:z+p.d+1});labels.push(`<text data-id="${p.id}" x="${q.x}" y="${q.y}" text-anchor="middle" font-size="${d.w<20?5:6}" fill="#192b35" paint-order="stroke" stroke="#edeee4" stroke-width="1">${esc(p.circuit||(p.kind==='tuya'?'AVATTO '+CATALOG[p.type].channels+'G':p.type.toUpperCase()))}</text>`)}
