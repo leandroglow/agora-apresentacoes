@@ -29,7 +29,12 @@
       if(result.energyConfig){
         if(!energy){energy=document.createElement('agora-energy-card');energy.id='energia';$('panel').append(energy);}
         energy.setConfig(result.energyConfig);
-        energy.hass={states:result.states,agoraEnergyHistory:hours=>request(null,'?history=1&hours='+hours)};
+        energy.hass={states:result.states,agoraEnergyHistory:hours=>request(null,'?history=1&hours='+hours),
+          agoraEnergyRead:()=>request(),
+          agoraEnergyCommand:(entity_id,service)=>{
+            if(!['switch.fase_1_switch','switch.trifasico_switch'].includes(entity_id)||!['turn_on','turn_off'].includes(service))throw new Error('Comando fora do escopo.');
+            return request({entity_id,service:'switch.'+service});
+          }};
       }
       $('panel').hidden=false;$('account').hidden=false;$('access').hidden=true;
       if(!document.hidden)timer=setTimeout(refresh,15000);

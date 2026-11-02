@@ -1,4 +1,4 @@
-/* Ágora Galpão 017 — leituras e diagnósticos reais. */
+/* Ágora Galpão 017 — leitura, diagnóstico e comandos explícitos. */
 (()=>{
   'use strict';
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -9,27 +9,71 @@
   const number=v=>v==null?'—':v.toLocaleString('pt-BR',{maximumFractionDigits:2});
   const stamp=t=>{const d=new Date(t);return Number.isFinite(+d)?new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short',timeZone:'America/Sao_Paulo'}).format(d):'—';};
   const state=s=>({on:'Ligado',off:'Desligado',unavailable:'Indisponível',unknown:'Sem leitura'})[s]||'Sem leitura';
+  const CONTROL_IDS=new Set(['switch.fase_1_switch','switch.trifasico_switch']);
+  const controlCss=`.energy-controls{padding:18px 20px;border-bottom:1px solid var(--line)}.power-buttons{display:flex;gap:10px}.power-buttons button,.energy-confirm button{min-height:44px;padding:10px 20px;border-radius:12px;border:1px solid #d8bd8366;font:600 13px system-ui;cursor:pointer;background:#d8bd83;color:#191816}.power-buttons button{flex:1}.power-buttons button[data-energy=off]{background:transparent;color:#e8d7b3}.power-buttons button:disabled{opacity:.35;cursor:default}.energy-controls button:focus-visible{outline:2px solid white;outline-offset:3px}.energy-confirm{margin-top:14px;padding:14px;background:#d8bd8310;border:1px solid #d8bd8344;border-radius:12px;line-height:1.6}.energy-confirm p{margin:0 0 10px}.energy-confirm button{margin:3px 6px 0 0}.energy-confirm [data-confirm=no]{background:transparent;color:#f4efe5;border-color:var(--line)}.command-message{font-size:12px;line-height:1.6;margin-top:12px;color:#d8bd83}.command-message.error{color:#edb9a7}`;
   const css=`:host{display:block;color:#f4efe5;font:14px system-ui,-apple-system,"Segoe UI",sans-serif;--gold:#d8bd83;--muted:#aea99f;--line:#ffffff1a}*{box-sizing:border-box}.wrap{background:linear-gradient(130deg,#292825,#161615);border:1px solid var(--line);border-radius:24px;padding:30px;box-shadow:0 16px 50px #0003}.head{display:flex;justify-content:space-between;gap:18px;align-items:start;margin-bottom:24px}.eyebrow{font-size:10px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:9px}h1,h2{font:400 34px Georgia,serif;margin:0}h2{font-size:23px}.sub{color:var(--muted);font-size:12px;line-height:1.6}.head .sub{text-align:right}.devices{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}.device{border:1px solid var(--line);border-radius:18px;background:#ffffff04;overflow:hidden}.device-head{padding:20px;display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid var(--line)}.device h2{font-size:25px}.pill{font-size:11px;border:1px solid var(--line);border-radius:30px;padding:6px 10px;color:var(--muted);white-space:nowrap}.pill.on{color:var(--gold);border-color:#d8bd8366}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:22px 20px;gap:22px 14px}.metric span{display:block;color:var(--muted);font-size:11px;margin-bottom:7px}.metric strong{font-size:21px;letter-spacing:-.03em;font-weight:500;white-space:nowrap}.metric small{color:var(--muted);font-size:11px;margin-left:4px}.details{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:18px 20px;border-top:1px solid var(--line)}.detail span{display:block;font-size:10px;color:var(--muted);margin-bottom:5px}.detail b{font-weight:500;font-size:13px}.note{padding:18px 20px;color:var(--muted);line-height:1.7;font-size:12px;margin:0}.alarm{padding:12px 20px;background:#d8bd830a;font-size:12px;color:#dfcfaa;border-top:1px solid var(--line)}.chart{margin-top:26px;border-top:1px solid var(--line);padding-top:25px}.chart-head{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:17px}.controls{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.controls button{font:12px system-ui;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:30px;padding:8px 13px;cursor:pointer}.controls button[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:#191816}.controls button:focus-visible{outline:2px solid #fff;outline-offset:3px}.chart-body{min-height:220px}svg{width:100%;height:240px;display:block;overflow:visible}.grid{stroke:#ffffff12;stroke-width:1}.axis{fill:#aaa69e;font:11px system-ui}.legend{display:flex;gap:18px;font-size:11px;color:var(--muted);flex-wrap:wrap}.key{display:inline-block;width:16px;border-top:2px solid var(--gold);margin-right:5px;vertical-align:middle}.foot{display:flex;justify-content:space-between;gap:16px;color:var(--muted);font-size:11px;margin-top:18px;line-height:1.7}.empty{padding:50px 15px;text-align:center;color:var(--muted);line-height:1.8}@media(max-width:1000px){.devices{grid-template-columns:1fr}}@media(max-width:600px){.wrap{padding:18px;border-radius:18px}.head{display:block}.head .sub{text-align:left;margin-top:12px}h1{font-size:28px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.chart-head{display:block}.foot{display:block}.metric strong{font-size:25px}.device-head,.details{padding:17px}}`;
   class AgoraEnergyCard extends HTMLElement{
-    constructor(){super();this.attachShadow({mode:'open'});this.config={devices:[]};this._range=24;this._metric='power';this._hass=null;this._request=0;this._lastFetch=0;this._history={};this._end=Date.now();this._historyStatus='aguardando dados';}
+    constructor(){super();this.attachShadow({mode:'open'});this.config={devices:[]};this._range=24;this._metric='power';this._hass=null;this._request=0;this._lastFetch=0;this._history={};this._end=Date.now();this._historyStatus='aguardando dados';this._confirm=null;this._pending={};this._messages={};this._controlEpoch=0;}
     setConfig(c){this.config={...c,devices:Array.isArray(c?.devices)?c.devices:[]};this._render();}
-    set hass(v){this._hass=v;this._render();if(v&&!this._loading&&Date.now()-this._lastFetch>60000)this._loadHistory();}
+    set hass(v){this._hass=v;this._syncCommands();this._render();if(v&&!this._loading&&Date.now()-this._lastFetch>60000)this._loadHistory();}
     get hass(){return this._hass;}
     getCardSize(){return 9;}
-    disconnectedCallback(){this._request++;this._hass=null;this._loading=false;this._history={};this._lastFetch=0;}
+    disconnectedCallback(){this._request++;this._controlEpoch++;Object.values(this._pending).forEach(p=>clearTimeout(p.timer));this._pending={};this._confirm=null;this._messages={};this._hass=null;this._loading=false;this._history={};this._lastFetch=0;}
     _state(id){return this._hass?.states?.[id];}
     _device(d){
       const e=d.entities||{},metrics=Object.keys(M).filter(k=>e[k]);
       const available=Object.values(e).some(id=>{const s=this._state(id)?.state;return s!==undefined&&!['unknown','unavailable'].includes(s);});
       const relay=this._state(e.switch)?.state,details=[...(d.details||[])];
+      const controls=CONTROL_IDS.has(e.switch)?this._controls(e.switch,relay,d.name):'';
       if(e.child_lock&&!details.some(x=>x.label==='Bloqueio de teclas'))details.push({label:'Bloqueio de teclas',value:state(this._state(e.child_lock)?.state)});
-      return `<article class="device"><div class="device-head"><div><div class="eyebrow">${esc(d.model||'Medição e diagnóstico')}</div><h2>${esc(d.name)}</h2></div><span class="pill ${relay==='on'?'on':''}">${available?esc(state(relay)):'Indisponível'}</span></div>${metrics.length?`<div class="metrics">${metrics.map(k=>{const s=this._state(e[k]),u=s?.attributes?.unit_of_measurement??M[k][1];return `<div class="metric"><span>${esc(M[k][0])}</span><strong>${number(convert(s?.state,u,k))}</strong><small>${esc(unitFor(u,k))}</small></div>`;}).join('')}</div>`:`<p class="note">Estado do aparelho e diagnósticos disponíveis.<br>Este modelo não fornece medições elétricas pela integração atual.</p>`}${details.length?`<div class="details">${details.map(x=>`<div class="detail"><span>${esc(x.label)}</span><b>${esc(x.value)}</b></div>`).join('')}</div>`:''}${d.alarm?`<div class="alarm">${esc(d.alarm)}</div>`:''}</article>`;
+      return `<article class="device"><div class="device-head"><div><div class="eyebrow">${esc(d.model||'Medição e diagnóstico')}</div><h2>${esc(d.name)}</h2></div><span class="pill ${relay==='on'?'on':''}">${available?esc(state(relay)):'Indisponível'}</span></div>${controls}${metrics.length?`<div class="metrics">${metrics.map(k=>{const s=this._state(e[k]),u=s?.attributes?.unit_of_measurement??M[k][1];return `<div class="metric"><span>${esc(M[k][0])}</span><strong>${number(convert(s?.state,u,k))}</strong><small>${esc(unitFor(u,k))}</small></div>`;}).join('')}</div>`:`<p class="note">Estado do aparelho e diagnósticos disponíveis.<br>Este modelo não fornece medições elétricas pela integração atual.</p>`}${details.length?`<div class="details">${details.map(x=>`<div class="detail"><span>${esc(x.label)}</span><b>${esc(x.value)}</b></div>`).join('')}</div>`:''}${d.alarm?`<div class="alarm">${esc(d.alarm)}</div>`:''}</article>`;
+    }
+    _canControl(id,service){
+      return CONTROL_IDS.has(id)&&this.config.devices.some(d=>d.entities?.switch===id)&&
+        ['turn_on','turn_off'].includes(service)&&['on','off'].includes(this._state(id)?.state)&&
+        this._state(id)?.state!==(service==='turn_on'?'on':'off')&&
+        !this._pending[id]&&(typeof this._hass?.agoraEnergyCommand==='function'||typeof this._hass?.callService==='function');
+    }
+    _controls(id,relay,name){
+      const p=this._pending[id],c=this._confirm?.entity_id===id,m=this._messages[id];
+      return `<div class="energy-controls"><div class="power-buttons" role="group" aria-label="Controle de ${esc(name)}"><button data-energy="on" data-entity="${esc(id)}" aria-label="Ligar ${esc(name)}" ${this._canControl(id,'turn_on')?'':'disabled'}>⏻ Ligar</button><button data-energy="off" data-entity="${esc(id)}" aria-label="Desligar ${esc(name)}" ${this._canControl(id,'turn_off')?'':'disabled'}>⏻ Desligar</button></div>${p?`<div class="command-message" role="status">${p.phase==='sending'?'Enviando comando…':'Comando enviado. Aguardando o estado do aparelho…'}</div>`:m?`<div class="command-message ${m.error?'error':''}" role="status">${esc(m.text)}</div>`:''}${c?`<div class="energy-confirm" role="group" aria-label="Confirmar comando"><p>${this._confirm.service==='turn_on'?'Ligar':'Desligar'} <strong>${esc(name)}</strong> agora?</p><button data-confirm="yes">Confirmar ${this._confirm.service==='turn_on'?'ligar':'desligar'}</button><button data-confirm="no">Cancelar</button></div>`:''}</div>`;
+    }
+    _beginCommand(id,service){if(!this._canControl(id,service))return;this._confirm={entity_id:id,service};delete this._messages[id];this._render();}
+    _cancelCommand(){this._confirm=null;this._render();}
+    _bindControls(){
+      this.shadowRoot.querySelectorAll('[data-energy]').forEach(b=>b.onclick=()=>this._beginCommand(b.dataset.entity,b.dataset.energy==='on'?'turn_on':'turn_off'));
+      const cancel=this.shadowRoot.querySelector('[data-confirm="no"]'),confirm=this.shadowRoot.querySelector('[data-confirm="yes"]');
+      if(cancel)cancel.onclick=()=>this._cancelCommand();if(confirm)confirm.onclick=()=>this._sendCommand();
+    }
+    _finishCommand(id,p,text,error=false){if(this._pending[id]!==p)return;clearTimeout(p.timer);delete this._pending[id];this._messages[id]={text,error};this._render();}
+    _syncCommands(){for(const [id,p] of Object.entries(this._pending)){if(p.phase==='waiting'&&this._state(id)?.state===(p.service==='turn_on'?'on':'off'))this._finishCommand(id,p,'Estado confirmado: '+state(this._state(id).state).toLowerCase()+'.');}}
+    _commandTimeout(id,p){this._finishCommand(id,p,'Não houve confirmação do aparelho. Confira o estado atual antes de tentar novamente.',true);}
+    async _sendCommand(){
+      const c=this._confirm;this._confirm=null;
+      if(!c||!this._canControl(c.entity_id,c.service)){this._render();return;}
+      const id=c.entity_id,epoch=this._controlEpoch,h=this._hass,p={service:c.service,phase:'sending'};
+      this._pending[id]=p;p.timer=setTimeout(()=>this._commandTimeout(id,p),25000);this._render();
+      const active=()=>epoch===this._controlEpoch&&this._pending[id]===p;
+      try{
+        if(h.agoraEnergyCommand)await h.agoraEnergyCommand(id,c.service);
+        else await h.callService('switch',c.service,{entity_id:id});
+        if(!active())return;
+        p.phase='waiting';clearTimeout(p.timer);p.timer=setTimeout(()=>this._commandTimeout(id,p),20000);
+        this._syncCommands();this._render();
+        if(active()){
+          try{
+            const result=h.agoraEnergyRead?await h.agoraEnergyRead():h.callApi?{states:{[id]:await h.callApi('GET','states/'+id)}}:null;
+            if(active()&&result?.states)this.hass={...this._hass,states:{...this._hass.states,...result.states}};
+          }catch{/* A atualização periódica pode confirmar; nenhuma repetição automática de comando. */}
+        }
+      }catch(e){if(active())this._finishCommand(id,p,'Não foi possível confirmar o comando: '+(e?.message||'falha na conexão')+'. Confira o estado atual.',true);}
     }
     _render(){
       const times=this.config.devices.flatMap(d=>Object.values(d.entities||{}).map(id=>this._state(id)?.last_updated)).filter(t=>t&&Number.isFinite(Date.parse(t))).sort();
-      this.shadowRoot.innerHTML=`<style>${css}</style><section class="wrap" aria-label="Monitoramento elétrico Galpão 017"><header class="head"><div><div class="eyebrow">Galpão 017 / Energia</div><h1>Monitoramento elétrico</h1></div><div class="sub">Dados do Home Assistant<br>Última atualização de estado: ${stamp(times.at(-1))}</div></header><div class="devices">${this.config.devices.map(d=>this._device(d)).join('')}</div><section class="chart"><div class="chart-head"><h2>Histórico elétrico</h2><div class="controls" role="group" aria-label="Período">${[1,24,168].map(h=>`<button data-range="${h}" aria-pressed="${h===this._range}">${h===168?'7 dias':h+' h'}</button>`).join('')}</div></div><div class="controls" role="group" aria-label="Métrica">${['power','voltage','current','energy'].map(k=>`<button data-metric="${k}" aria-pressed="${k===this._metric}">${esc(M[k][0])}</button>`).join('')}</div><div class="chart-body" data-chart aria-live="polite"></div></section><footer class="foot"><span>Histórico: ${esc(this._historyStatus)}. Lacunas indicam ausência de leitura.<br>Energia acumulada é o contador do aparelho, não o consumo do período selecionado.</span><span>Consulta de dados e diagnósticos.<br>Os ajustes permanecem no Smart Life.</span></footer></section>`;
+      this.shadowRoot.innerHTML=`<style>${css}${controlCss}</style><section class="wrap" aria-label="Monitoramento elétrico Galpão 017"><header class="head"><div><div class="eyebrow">Galpão 017 / Energia</div><h1>Monitoramento elétrico</h1></div><div class="sub">Dados do Home Assistant<br>Última atualização de estado: ${stamp(times.at(-1))}</div></header><div class="devices">${this.config.devices.map(d=>this._device(d)).join('')}</div><section class="chart"><div class="chart-head"><h2>Histórico elétrico</h2><div class="controls" role="group" aria-label="Período">${[1,24,168].map(h=>`<button data-range="${h}" aria-pressed="${h===this._range}">${h===168?'7 dias':h+' h'}</button>`).join('')}</div></div><div class="controls" role="group" aria-label="Métrica">${['power','voltage','current','energy'].map(k=>`<button data-metric="${k}" aria-pressed="${k===this._metric}">${esc(M[k][0])}</button>`).join('')}</div><div class="chart-body" data-chart aria-live="polite"></div></section><footer class="foot"><span>Histórico: ${esc(this._historyStatus)}. Lacunas indicam ausência de leitura.<br>Energia acumulada é o contador do aparelho, não o consumo do período selecionado.</span><span>Comandos com confirmação.<br>Ajustes de proteção permanecem no Smart Life.</span></footer></section>`;
       this.shadowRoot.querySelectorAll('[data-metric]').forEach(b=>b.onclick=()=>{this._metric=b.dataset.metric;this._render();});
       this.shadowRoot.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{this._range=Number(b.dataset.range);this._history={};this._loadHistory();});
+      this._bindControls();
       this._draw();
     }
     async _loadHistory(){
