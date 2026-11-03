@@ -164,7 +164,9 @@ test('Drive adapter sends If-Match and signals a readback when upload omits ETag
   const calls = [];
   const fakeFetch = async (url, init = {}) => {
     calls.push({ url:String(url), init });
-    if (!init.method) return new Response(JSON.stringify({ version:1, state:engine.createEmpty(), mutationIds:[], updatedBy:'' }), { status:200, headers:{ etag:'"drive-v1"' } });
+    if (init.method === 'PUT') return new Response('', { status:200 });
+    if (String(url).includes('/drive/v2/files/')) return new Response(JSON.stringify({ etag:'"drive-v1"', version:'7', fileSize:'200' }), { status:200 });
+    if (String(url).includes('/drive/v3/files/')) return new Response(JSON.stringify({ version:1, state:engine.createEmpty(), mutationIds:[], updatedBy:'' }), { status:200 });
     return new Response('', { status:200 });
   };
   const store = new DriveInventoryStore({ fileId:'drive_file_id_123', tokenProvider:async()=> 'test-token', fetchImpl:fakeFetch });
@@ -173,5 +175,41 @@ test('Drive adapter sends If-Match and signals a readback when upload omits ETag
   assert.equal(saved.conflict, false);
   assert.equal(saved.etag, null);
   assert.equal(saved.readbackRequired, true);
-  assert.equal(calls[1].init.headers['If-Match'], '"drive-v1"');
+  const upload = calls.find(x => x.init.method === 'PUT');
+  assert.equal(upload.init.headers['If-Match'], '"drive-v1"');
+  assert.match(upload.url, /drive\/v2\/files/);
+});
+
+test('Drive read retries when metadata ETag changes around the media download', async () => {
+  let metadataNumber = 0, mediaNumber = 0;
+  const stableEnvelope = { version:1, state:engine.createEmpty(), mutationIds:[], updatedBy:'' };
+  const fakeFetch = async url => {
+    const value = String(url);
+    if (value.includes('/drive/v2/files/')) {
+      metadataNumber++;
+      const etag = metadataNumber === 1 ? '"old"' : '"new"';
+      return new Response(JSON.stringify({ etag, fileSize:'200' }), { status:200 });
+    }
+    mediaNumber++;
+    return new Response(JSON.stringify(stableEnvelope), { status:200 });
+  };
+  const store = new DriveInventoryStore({ fileId:'drive_file_id_123', tokenProvider:async()=> 'test-token', fetchImpl:fakeFetch });
+  const result = await store.get();
+  assert.equal(result.etag, '"new"');
+  assert.equal(mediaNumber, 2);
+});
+
+test('Drive read fails as conflict after three unstable metadata snapshots', async () => {
+  let metadataNumber = 0;
+  const fakeFetch = async url => String(url).includes('/drive/v2/files/')
+    ? new Response(JSON.stringify({ etag:`"v${++metadataNumber}"`, fileSize:'200' }), { status:200 })
+    : new Response(JSON.stringify({ version:1, state:engine.createEmpty(), mutationIds:[], updatedBy:'' }), { status:200 });
+  const store = new DriveInventoryStore({ fileId:'drive_file_id_123', tokenProvider:async()=> 'test-token', fetchImpl:fakeFetch });
+  await assert.rejects(store.get(), error => error.code === 'INVENTORY_READ_CONFLICT' && error.status === 409);
+  assert.equal(metadataNumber, 6);
+});
+
+test('Drive upload maps HTTP 412 to conditional-write conflict', async () => {
+  const store = new DriveInventoryStore({ fileId:'drive_file_id_123', tokenProvider:async()=> 'test-token', fetchImpl:async()=>new Response('',{status:412}) });
+  assert.deepEqual(await store.put({ version:1 }, '"old"'), { conflict:true });
 });
