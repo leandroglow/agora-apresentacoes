@@ -76,3 +76,19 @@ Misturador - 3 un
 Lista de compras`,engine.createEmpty());
  assert.equal(parsed.rows.length,2);assert.equal(parsed.ignored.length,0);
 });
+test('text rows with explicit headers stay deterministic when a header is ignored',async()=>{
+ let calls=0;const handler=createInventoryRecognizeHandler({authorize:async()=>({sub:'user_test'}),vision:async()=>{calls++;return{items:[]}}});const res=response();
+ await handler({method:'POST',body:{text:`40mm
+Joelho 45° - 2
+Conexão
+50mm
+Joelho 45° - 3`},headers:{}},res);
+ assert.equal(res.code,200);assert.equal(calls,0);assert.equal(res.body.items.length,2);
+ assert.equal(res.body.items[0].description,'40mm Joelho 45°');assert.equal(res.body.items[0].sourceContext,'40mm');
+ assert.equal(res.body.items[1].description,'50mm Joelho 45°');assert.equal(res.body.items[1].sourceContext,'50mm');
+});
+test('image output retains separate diameter context in candidate name and rejects mismatched catalog item',async()=>{
+ const handler=createInventoryRecognizeHandler({authorize:async()=>({sub:'user_test'}),vision:async()=>({intention:'purchase',items:[{description:'Joelho 45°',sourceContext:'50mm',itemId:'item40',quantity:3,unit:'un',confidence:.99}],warnings:[]})});const res=response();
+ await handler({method:'POST',body:{image:'data:image/png;base64,YQ==',items:[{id:'item40',name:'40mm Joelho 45°',unit:'un',aliases:[]}]},headers:{}},res);
+ assert.equal(res.body.items[0].itemId,null);assert.equal(res.body.items[0].status,'needs_review');assert.equal(res.body.items[0].candidateName,'50mm Joelho 45°');assert.equal(res.body.items[0].sourceContext,'50mm');
+});

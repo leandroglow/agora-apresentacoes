@@ -25,13 +25,19 @@ function mapModelItems(result, inventory) {
   return result.items.slice(0, 100).flatMap((x, index) => {
     if (!plain(x) || typeof x.description !== 'string' || x.description.length > 160 ||
         !Number.isFinite(x.quantity) || x.quantity < 0 || x.quantity > 1_000_000) return [];
+    const sourceContext=text(x.sourceContext,100) || null;
     const item = inventory.items.find(i => i.id === x.itemId) || null;
-    const unit = typeof x.unit === 'string' && engine.UNITS.includes(x.unit) ? x.unit : item?.unit || 'un';
+    const sizeIn = value => String(value||'').match(/\b\d{1,3}\s*mm\b/i)?.[0]?.replace(/\s+/g,'').toLowerCase() || null;
+    const requestedSize=sizeIn(sourceContext||x.description);
+    const catalogSize=sizeIn(item?.name)||item?.aliases.map(sizeIn).find(Boolean)||null;
+    const diameterCompatible=!requestedSize||catalogSize===requestedSize;
+    const matchedItem=diameterCompatible?item:null;
+    const unit = typeof x.unit === 'string' && engine.UNITS.includes(x.unit) ? x.unit : matchedItem?.unit || 'un';
     const conf = Number.isFinite(x.confidence) ? Math.min(1, Math.max(0, x.confidence)) : 0.5;
     return [{ id: `r${index+1}`, raw: text(x.raw, 240) || x.description, description: x.description.trim(), quantity: x.quantity,
-      unit, itemId: item?.id || null, status: item && item.unit === unit && conf >= 0.8 ? 'ready' : 'needs_review',
-      candidateName: item?.name || x.description.trim(), category: item?.category || text(x.category,80) || 'Outros',
-      sourceContext: text(x.sourceContext,100) || null, confidence: conf }];
+      unit, itemId: matchedItem?.id || null, status: matchedItem && matchedItem.unit === unit && conf >= 0.8 ? 'ready' : 'needs_review',
+      candidateName: matchedItem?.name || (sourceContext&&!x.description.toLowerCase().includes(sourceContext.toLowerCase())?`${sourceContext} ${x.description.trim()}`:x.description.trim()), category: matchedItem?.category || text(x.category,80) || 'Outros',
+      sourceContext, confidence: conf }];
   });
 }
 async function readModel(input, inventory, mediaType) {
@@ -65,7 +71,7 @@ export function createInventoryRecognizeHandler({ authorize = null, vision = rea
         if (!result.items.length) result.warnings.push('Nenhum item pôde ser identificado com confiança. Revise a imagem ou descreva os materiais.');
       } else {
         const inputText=text(body.text,100_000), parsed=classify(inputText,state);
-        if(parsed.items.length===0 || parsed.items.some(x=>x.status==='unmatched') || parsed.ignored.length && parsed.items.length<2){
+        if(parsed.items.length===0){
           const modelResult=await vision(inputText,state,'text');
           result={items:mapModelItems(modelResult,state),intention:['purchase','count'].includes(modelResult.intention)?modelResult.intention:parsed.intention,
             warnings:[...(Array.isArray(modelResult.warnings)?modelResult.warnings.slice(0,20).map(x=>text(x,240)):[]),...(parsed.ignored.length?['Algumas linhas não foram reconhecidas com segurança.']:[])]};
