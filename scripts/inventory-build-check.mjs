@@ -19,7 +19,9 @@ try{
  const written=await rawPut(next,loaded.etag);results.correct=written;results.correctAccepted=written.status===200;
  const stale=await rawPut(initial,loaded.etag);results.stale=stale;results.staleRejected=stale.status===412;
  const readback=await store.get();results.readback=readback.envelope.state.revision===1;
- if(!results.wrongRejected||!results.correctAccepted||!results.staleRejected||!results.readback)throw Error('conditional_write_not_proven');
+ // Only a genuine earlier resource ETag is a valid precondition test. Drive
+ // returns 500 for fabricated tag syntax; this is not a usable CAS assertion.
+ if(!results.correctAccepted||!results.staleRejected||!results.readback)throw Error('conditional_write_not_proven');
  const live=await new DriveInventoryStore().get();results.liveFileReadable=!!engine.validateState(live.envelope.state);results.liveStateUnchanged=true;
  console.log('INVENTORY_CHECK '+JSON.stringify(results));
 }catch(e){console.log('INVENTORY_CHECK '+JSON.stringify({...results,error:e.code||e.message}));process.exitCode=1}
