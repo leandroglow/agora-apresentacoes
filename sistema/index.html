@@ -25,7 +25,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Montserrat',system-ui,sans-serif;background:var(--argamassa);color:var(--ardosia);min-height:100vh}
 
-/* LOGIN */
+#card-inventario[hidden]{display:none!important} /* LOGIN */
 #tela-login{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--ardosia);padding:2rem}
 .login-box{background:var(--white);border-radius:12px;padding:2.5rem 2rem;width:100%;max-width:340px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.25)}
 .login-marca{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:500;color:var(--ardosia);letter-spacing:.05em;margin-bottom:2px}
@@ -517,7 +517,7 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
         <span class="organizacao-card-description">Conheça quem cuida de cada área, como o trabalho acontece e onde ficam os sistemas e a memória da Ágora.</span>
         <span class="organizacao-card-action">Explorar o painel <span aria-hidden="true">→</span></span>
       </button>
-      <button type="button" class="organizacao-card" id="card-organizacao-despesas">
+      <button type="button" class="organizacao-card" id="card-inventario" hidden><span class="organizacao-symbol" aria-hidden="true">▤</span><span class="organizacao-card-title">Inventário</span><span class="organizacao-card-description">Consulte e atualize o inventário de materiais da Ágora.</span><span class="organizacao-card-action">Abrir inventário <span aria-hidden="true">→</span></span></button><button type="button" class="organizacao-card" id="card-organizacao-despesas">
         <span class="organizacao-symbol" aria-hidden="true">▣</span>
         <span class="organizacao-card-title">Despesas</span>
         <span class="organizacao-card-description">Registre comprovantes, combustível e custos de obras com fotos armazenadas no Drive.</span>
@@ -1235,14 +1235,14 @@ async function atualizarLoginClerk(){
   try{
     const user=await AgoraSistemaAuth.user();
     if(!user){
-      if(usuarioClerkId){limparChatPrivado();usuarioClerkId=null;usuarioLogado=null;catalogosToken='';}
+      if(usuarioClerkId){limparChatPrivado();usuarioClerkId=null;usuarioLogado=null;catalogosToken='';}document.getElementById('card-inventario').hidden=true;
       mostrarTela('login');return;
     }
     const token=await AgoraSistemaAuth.token();
     if(!token)throw new Error('Sessão Clerk indisponível. Tente entrar novamente.');
     if(usuarioClerkId===user.id)return;
     usuarioClerkId=user.id;
-    usuarioLogado=nomeClerk(user);
+    usuarioLogado=nomeClerk(user);document.getElementById('card-inventario').hidden=usuarioClerkId!=='user_3Jvm8LQLtHINAqVtQhagyoDC6nT';
     catalogosToken=token;
     erro.style.display='none';
     document.getElementById('hub-username').textContent=usuarioLogado;
@@ -1253,7 +1253,7 @@ async function atualizarLoginClerk(){
     setTimeout(()=>{carregarConfigDrive();carregarConfigApresentacoes();},500);
   }catch(e){
     limparChatPrivado();usuarioClerkId=null;usuarioLogado=null;catalogosToken='';
-    erro.textContent=e.message||'Não foi possível validar a sessão.';
+    document.getElementById('card-inventario').hidden=true;erro.textContent=e.message||'Não foi possível validar a sessão.';
     erro.style.display='block';mostrarTela('login');
   }
 }
@@ -1274,7 +1274,7 @@ document.getElementById('card-360').addEventListener('click',()=>abrirSecao('tou
 document.getElementById('card-organizacao').addEventListener('click',()=>abrirSecao('organizacao'));
 document.getElementById('card-catalogos-ia').addEventListener('click',()=>abrirSecao('assistente'));
 document.getElementById('card-estrutura-ia').addEventListener('click',()=>abrirSecao('estrutura-ia'));
-document.getElementById('card-organizacao-despesas').addEventListener('click',()=>abrirSecao('despesas'));
+document.getElementById('card-organizacao-despesas').addEventListener('click',()=>abrirSecao('despesas'));document.getElementById('card-inventario').addEventListener('click',()=>window.open('https://apresentacoes.agoracons.com.br/inventario/','_blank','noopener,noreferrer'));
 document.getElementById('btn-voltar-hub').addEventListener('click',()=>{
   // Para o iframe 360 ao sair
   document.getElementById('iframe-360').src='';
