@@ -1,0 +1,63 @@
+THIRD-PARTY-NOTICES — Inventário Ágora (assets locais)
+
+SheetJS Community Edition 0.20.3
+- Arquivo: assets/xlsx.full.min.js
+- Origem oficial: https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js
+- Licença: Apache License 2.0 (ver https://github.com/SheetJS/sheetjs/blob/master/LICENSE)
+
+Tesseract.js 7.0.0
+- Arquivos: assets/ocr/tesseract.min.js, assets/ocr/worker.min.js
+- Origem: pacote oficial npm tesseract.js; cópias runtime do pacote instalado localmente.
+- Licença: Apache License 2.0, texto em assets/ocr/LICENSE-tesseract.js.txt.
+- Avisos dos bundles: assets/ocr/LICENSE-tesseract-bundle.txt e assets/ocr/LICENSE-worker-bundle.txt.
+
+Tesseract.js-core 7.0.0
+- Arquivos: assets/ocr/core/tesseract-core-*.js e *.wasm, incluindo variantes padrão, LSTM, SIMD e Relaxed SIMD.
+- Origem: pacote oficial npm tesseract.js-core; cópias do pacote instalado localmente.
+- Licença: Apache License 2.0, texto em assets/ocr/LICENSE-tesseract.js-core.txt.
+
+Modelo Tesseract Portuguese (por), tessdata 4.0.0
+- Arquivo: assets/ocr/lang/por.traineddata.gz
+- Origem publicada pelo projeto naptha/tessdata, versão/tag 4.0.0, servida por jsDelivr:
+  https://cdn.jsdelivr.net/gh/naptha/tessdata@gh-pages/4.0.0/por.traineddata.gz
+- Licença do projeto tessdata: Apache License 2.0; fonte: https://github.com/naptha/tessdata/blob/gh-pages/LICENSE
+- Nota: o download direto alternativo de tessdata_fast falhou; este pacote de dados é uma origem distinta e fica fixado no inventário acima.
+
+Fontes UI locais
+- Montserrat: assets/fonts/Montserrat.woff2, subconjunto latin (A-Z/a-z, caracteres Latin-1 e acentos portugueses), Google Fonts, SIL Open Font License 1.1 em assets/fonts/OFL-Montserrat.txt.
+- Cormorant Garamond: assets/fonts/CormorantGaramond.woff2, subconjunto latin (A-Z/a-z, caracteres Latin-1 e acentos portugueses), Google Fonts, SIL Open Font License 1.1 em assets/fonts/OFL-CormorantGaramond.txt.
+- URLs oficiais CSS: https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap e https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap. WOFF2 servido por fonts.gstatic.com.
+
+Hashes SHA-256 e tamanhos dos arquivos empacotados seguem abaixo.
+assets/xlsx.full.min.js | 951904 bytes | SHA256 CC015130AA8521E7F088F88898EBA949CCDCBFB38DF0BD129B44B7273C3A6F41
+assets/fonts/CormorantGaramond-latin-temp.woff2 | 39760 bytes | SHA256 6A769A3526CA8A9E2176E5988AF7EAAF22BE0EBA3F1378A649A7C332DA02691E
+assets/fonts/CormorantGaramond.woff2 | 63572 bytes | SHA256 8DF95F72D5F0B03BDEA51772F7986BEB299F1B331464BB81A64C3EABE26B9060
+assets/fonts/Montserrat-latin-temp.woff2 | 37956 bytes | SHA256 06B16DB7A969135D48D38C49183BE7FB88D4452E2A3011957C7851941F4E4879
+assets/fonts/Montserrat.woff2 | 37956 bytes | SHA256 06B16DB7A969135D48D38C49183BE7FB88D4452E2A3011957C7851941F4E4879
+assets/fonts/OFL-CormorantGaramond.txt | 4387 bytes | SHA256 60700D351CAC4650C51F3F9DB318D2A420F8B45052DBA2715EB5FEC41F0F6956
+assets/fonts/OFL-Montserrat.txt | 4400 bytes | SHA256 8B7141C03FA4F8D44E6345D5D4931709290F0F67875E452E95AC1FD3A027802E
+assets/ocr/LICENSE-tesseract-bundle.txt | 149 bytes | SHA256 CDF963CED7D25A0F98901A547647B4D6E2DBE0197FD78C87A059A87B0E542FE2
+assets/ocr/LICENSE-tesseract.js-core.txt | 11358 bytes | SHA256 C6596EB7BE8581C18BE736C846FB9173B69ECCF6EF94C5135893EC56BD92BA08
+assets/ocr/LICENSE-tesseract.js.txt | 11357 bytes | SHA256 B40930BBCF80744C86C46A12BC9DA056641D722716C378F5659B9E555EF833E1
+assets/ocr/LICENSE-worker-bundle.txt | 466 bytes | SHA256 45F54171AEAA1D10C0C1A66F374B7BBA1F02472B1487FBE892EEC04F840002AC
+assets/ocr/tesseract.min.js | 62961 bytes | SHA256 000C27D9CD0DEF655F77B36C72A389C0AB13793AA31CB4D7AAB56D09C0AFBC7E
+assets/ocr/worker.min.js | 111307 bytes | SHA256 576B7DF7E3393E137E51849357C9ADB53FE7AC1BB69BFA06CF3D61520F182C6D
+assets/ocr/core/tesseract-core-lstm.js | 89261 bytes | SHA256 6510EFC4E8B45C5465DF30679B9911FFE0071CD2EE982FA064E6F5136EF2DE85
+assets/ocr/core/tesseract-core-lstm.wasm | 2855361 bytes | SHA256 66B17DF6E20C5329A17FFA9C202A47EAA3E32500B253D4C7F38E7F2BC01457C3
+assets/ocr/core/tesseract-core-lstm.wasm.js | 3896484 bytes | SHA256 EEF5F8B2F8E20E150680B20ADAEC4A60BABAFEE3ADBE8A94583C81FEE46E8680
+assets/ocr/core/tesseract-core-relaxedsimd-lstm.js | 89360 bytes | SHA256 A37AC78B707E8D5D3D2E532CC3C4E69B04D127EA44A608F1E7DE17640402AA5C
+assets/ocr/core/tesseract-core-relaxedsimd-lstm.wasm | 2862266 bytes | SHA256 7985C92D4C64E7267D24CADFFE1B2A1DA6BF8AA55FDCAF953FE94FE122A24545
+assets/ocr/core/tesseract-core-relaxedsimd-lstm.wasm.js | 3905767 bytes | SHA256 861A536CF9EF8E63CB644D57BAB39C388F37F7D6B6F60024B741C5F6B39A59B3
+assets/ocr/core/tesseract-core-relaxedsimd.js | 89066 bytes | SHA256 716BE037611F21B568347421F582F1E1A6456B6D5C3A7C2406C8A2A6C0136427
+assets/ocr/core/tesseract-core-relaxedsimd.wasm | 3456075 bytes | SHA256 45F8C9B516DF326B6AE6B493ED3A6289DF5CBD10490E7B6FF8BF5B12EA42D1DA
+assets/ocr/core/tesseract-core-relaxedsimd.wasm.js | 4697227 bytes | SHA256 843074AA5BAD1CC6421B74A86201768CED9F244795E4D81435435A61A40CE535
+assets/ocr/core/tesseract-core-simd-lstm.js | 89271 bytes | SHA256 E48E2F02DDAE3716C8DD24BF41CD290D4EFA96892D689CDC4013C2545D63F469
+assets/ocr/core/tesseract-core-simd-lstm.wasm | 2857601 bytes | SHA256 34E8D50CAC216427D86BF397D610FDD9F49492539BBCDFBFCCC4EDA20C810BEA
+assets/ocr/core/tesseract-core-simd-lstm.wasm.js | 3899472 bytes | SHA256 C58B46A4C796C0B8AFCCF77591D5B875B6896B45D402BBCE8CAA6F5362447B38
+assets/ocr/core/tesseract-core-simd.js | 88977 bytes | SHA256 DA428FD7989BA749855EA16718A83B23E7CE04016FE31866AD2735813EFC7133
+assets/ocr/core/tesseract-core-simd.wasm | 3451410 bytes | SHA256 7D237A13EDFEB0FA2F104744FCCDE0A00E0C076C3E23B7A8FC7AF75EC9AF2C3E
+assets/ocr/core/tesseract-core-simd.wasm.js | 4690932 bytes | SHA256 6B61EF4E911B5CF57E656BBFE983D6E2B3711A02DD164154DDDA064566E8E09D
+assets/ocr/core/tesseract-core.js | 88967 bytes | SHA256 A824C1B99A19E122D87E4467FE16AABB56C495D6CC9A08BC58CB8A7342636B43
+assets/ocr/core/tesseract-core.wasm | 3449168 bytes | SHA256 C7F5ACE62AC0AD065E71E9C6725F1D7CDF82E7EDA8FBA532CBB9563964DA7098
+assets/ocr/core/tesseract-core.wasm.js | 4687944 bytes | SHA256 0BC6CE3E5FBBD0CD89706CF2FD70960E3372F4F01EE24265B26990808AAEB286
+assets/ocr/lang/por.traineddata.gz | 6755162 bytes | SHA256 3F5FEEA9DFC39106C92348089097A39BEC66E9D6D09CA49BEFEBB0BB60947374
