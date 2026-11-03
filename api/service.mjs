@@ -1,6 +1,7 @@
 // Preserve public URLs while grouping lightweight endpoints into one function.
 const handlers = {
   'inventory': () => import('./_lib/routes/inventory.mjs'),
+  'inventory-recognize': () => import('./_lib/routes/inventory-recognize.mjs'),
   'dashboard': () => import('./_lib/routes/dashboard.mjs'),
   'access': () => import('./_lib/routes/access.mjs'),
   'cad-jobs': () => import('./_lib/routes/cad-jobs.mjs'),

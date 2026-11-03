@@ -104,3 +104,28 @@ export async function requireMasterAuth(req, res) {
   }
   return session;
 }
+
+// Shared company inventory is available to the two documented internal users.
+// Keep this permission scoped to inventory; other modules may remain Master-only.
+const INVENTORY_USERS = new Set([
+  'user_3Jvm8LQLtHINAqVtQhagyoDC6nT', // Master
+  'user_3JvmAhiGPCh3w3nDMB3pPJOyIN9'  // Wiliam
+]);
+
+export async function requireInventoryAuth(req, res, authenticate = authenticateClerkRequest) {
+  let session;
+  try { session = await authenticate(req); }
+  catch {
+    res.status(503).json({ error: 'Login da Ágora temporariamente indisponível.' });
+    return null;
+  }
+  if (!session) {
+    res.status(401).json({ error: 'Sessão Clerk inválida ou expirada.' });
+    return null;
+  }
+  if (!INVENTORY_USERS.has(session.sub)) {
+    res.status(403).json({ code: 'INVENTORY_ACCESS_DENIED', error: 'Sua conta não tem acesso ao Inventário da Ágora.' });
+    return null;
+  }
+  return session;
+}

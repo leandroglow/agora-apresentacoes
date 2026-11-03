@@ -16,3 +16,12 @@ dialog{width:min(1450px,calc(100% - 48px))}.table-scroll{max-width:100%}.field i
 
 /* Private login gate */
 #inventoryGate{display:none;max-width:480px;margin:12vh auto;padding:36px;background:white;border:1px solid #e5dece;border-radius:18px;text-align:center}.inventory-locked>#inventoryGate{display:block}.inventory-locked>.top,.inventory-locked>main,.inventory-locked>dialog{display:none!important}#inventoryGate .brand{display:inline-flex;align-items:center}#inventorySignIn{display:flex;justify-content:center;margin-top:25px}#gateActions{display:flex;gap:8px;justify-content:center;margin-top:24px}#syncStatus[data-state="error"]{color:#8f351a}#syncStatus[data-state="saving"]{color:#8a6b2f}.inventory-locked{pointer-events:auto}.category-create[hidden]{display:none!important}
+
+/* Ajuste confirmado: kit visual oficial de operação Ágora */
+:root{--ink:#191919;--gold:#C4AD71;--gold2:#DFCA8F;--paper:#F6F5F0;--line:#D7D3CA;--muted:#625F58;--white:#FFFEFA}
+body{font-family:Mont,Montserrat,system-ui,sans-serif;background:var(--paper);color:var(--ink)}
+.heading h1,.subhead,.locations h2,.metrics strong,.dialog-shell h2{font-family:Mont,Montserrat,system-ui,sans-serif;font-weight:600;color:var(--ink)}
+.heading h1{font-size:30px;line-height:1.25}.metrics strong{font-size:30px;font-variant-numeric:tabular-nums}.heading{border-left-color:var(--gold)}.primary{background:#191919;border-color:#191919;color:#fff}.tabs .active{border-bottom-color:var(--gold)}.metric-icon,.shortcuts button>b,.location-row span:first-child{color:var(--gold)}.demo,.link-button{color:#8c7440}.warn{border-color:#D8C18C;background:#F9F5EB}.step.active{background:#F9F5EB;color:#191919}
+
+/* Import review: keep six columns and show inline item fields on a full row */
+.import-review-row .review-association{min-width:0;display:grid;gap:4px}.new-item-fields{grid-column:1/-1;display:grid;grid-template-columns:minmax(180px,2fr) minmax(130px,1fr) minmax(95px,.7fr);gap:8px;padding:8px;background:#f6f4ef;border:1px solid var(--line);border-radius:8px}.new-item-fields .field{margin:0}.new-item-fields input,.new-item-fields select{width:100%}.button:disabled{opacity:.48;cursor:not-allowed;filter:grayscale(.35)}.purchase-confirm{display:flex;align-items:flex-start;gap:8px}.purchase-confirm input{width:auto;margin-top:3px;flex:none}@media(max-width:650px){.import-review-row .review-association{grid-column:1/-1}.new-item-fields{grid-template-columns:1fr}.new-item-fields .field{grid-column:1/-1}}

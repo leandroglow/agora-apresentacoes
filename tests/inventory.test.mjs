@@ -32,7 +32,7 @@ function addOne(state) {
 }
 const mutation = (state, options = {}) => ({ state, baseRevision: options.baseRevision ?? state.revision, etag: options.etag ?? '"rev-0"', mutationId: options.mutationId || 'mutation_0001', action: options.action || 'import' });
 
-test('Master-only handler, origin CORS and no-store', async () => {
+test('inventory handler denies unauthorized requests, sets origin CORS and no-store', async () => {
   const h = harness({ authorize: async (_req,res) => { res.status(403).json({ error:'denied' }); return null; } });
   const r = await h.call('GET');
   assert.equal(r.statusCode, 403);

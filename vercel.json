@@ -30,6 +30,10 @@
       "destination": "/api/service?_route=inventory"
     },
     {
+      "source": "/api/inventory-recognize",
+      "destination": "/api/service?_route=inventory-recognize"
+    },
+    {
       "source": "/api/dashboard",
       "destination": "/api/service?_route=dashboard"
     },

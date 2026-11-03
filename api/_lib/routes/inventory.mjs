@@ -98,7 +98,7 @@ export function createInventoryHandler({ authorize = null, store = null } = {}) 
     cors(req, res);
     if (req.method === 'OPTIONS') return res.status(204).end();
     if (!['GET','PUT'].includes(req.method)) { res.setHeader('Allow', 'GET, PUT, OPTIONS'); return res.status(405).json({ error: 'method_not_allowed' }); }
-    const auth = authorize || (await import('../auth.mjs')).requireMasterAuth;
+    const auth = authorize || (await import('../auth.mjs')).requireInventoryAuth;
     const session = await auth(req, res);
     if (!session) return;
     try {

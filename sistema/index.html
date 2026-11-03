@@ -1242,7 +1242,7 @@ async function atualizarLoginClerk(){
     if(!token)throw new Error('Sessão Clerk indisponível. Tente entrar novamente.');
     if(usuarioClerkId===user.id)return;
     usuarioClerkId=user.id;
-    usuarioLogado=nomeClerk(user);document.getElementById('card-inventario').hidden=usuarioClerkId!=='user_3Jvm8LQLtHINAqVtQhagyoDC6nT';
+    usuarioLogado=nomeClerk(user);document.getElementById('card-inventario').hidden=!['user_3Jvm8LQLtHINAqVtQhagyoDC6nT','user_3JvmAhiGPCh3w3nDMB3pPJOyIN9'].includes(usuarioClerkId);
     catalogosToken=token;
     erro.style.display='none';
     document.getElementById('hub-username').textContent=usuarioLogado;
