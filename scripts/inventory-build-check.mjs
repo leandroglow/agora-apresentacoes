@@ -13,10 +13,11 @@ try{
  const seeded=await fetch('https://www.googleapis.com/upload/drive/v3/files/'+id+'?uploadType=media',{method:'PATCH',headers,body:JSON.stringify(initial)});if(!seeded.ok)throw Error('probe_seed_http_'+seeded.status);
  const store=new DriveInventoryStore({fileId:id,tokenProvider:async()=>token});
  const loaded=await store.get();results.read=true;
- const invalid=await store.put(initial,'"invalid-inventory-check"');results.wrongRejected=invalid.conflict===true;
+ async function rawPut(value,tag){const r=await fetch('https://www.googleapis.com/upload/drive/v2/files/'+id+'?uploadType=media',{method:'PUT',headers:{...headers,'If-Match':tag},body:JSON.stringify(value)});let j={};try{j=await r.json()}catch{}return {status:r.status,reason:j.error?.errors?.map(e=>e.reason),message:j.error?.message?.slice(0,250)}}
+ const invalid=await rawPut(initial,'"invalid-inventory-check"');results.wrong=invalid;results.wrongRejected=invalid.status===412||invalid.status===400;
  const next=structuredClone(initial);next.state.revision=1;next.state.updatedAt=new Date().toISOString();next.updatedBy='deployment-check';
- const written=await store.put(next,loaded.etag);results.correctAccepted=written.conflict===false;
- const stale=await store.put(initial,loaded.etag);results.staleRejected=stale.conflict===true;
+ const written=await rawPut(next,loaded.etag);results.correct=written;results.correctAccepted=written.status===200;
+ const stale=await rawPut(initial,loaded.etag);results.stale=stale;results.staleRejected=stale.status===412;
  const readback=await store.get();results.readback=readback.envelope.state.revision===1;
  if(!results.wrongRejected||!results.correctAccepted||!results.staleRejected||!results.readback)throw Error('conditional_write_not_proven');
  const live=await new DriveInventoryStore().get();results.liveFileReadable=!!engine.validateState(live.envelope.state);results.liveStateUnchanged=true;
