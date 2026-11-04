@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Evidências K21 · Ágora Automação</title>
-  <link rel="stylesheet" href="portal.css"><link rel="stylesheet" href="irrigacao.css?v=1">
+  <link rel="stylesheet" href="portal.css"><link rel="stylesheet" href="irrigacao.css?v=20261104">
 </head>
 <body>
   <div id="access"><h1>ÁGORA <small>AUTOMAÇÃO</small></h1><h2>Evidências K21</h2><p id="message" role="status">Carregando acesso seguro…</p><button id="login" hidden>Entrar com conta Ágora</button></div>
   <div id="account" hidden><span>Evidências K21 · acesso restrito</span><div class="k21-account-actions"><a class="k21-jump" href="#irrigacao">Irrigação</a><button id="logout">Sair</button></div></div>
   <main id="panel" hidden></main>
-  <section id="irrigacao" class="k21-irrigacao" aria-labelledby="titulo-irrigacao" hidden>
+  <section id="irrigacao" slot="irrigacao" class="k21-irrigacao" aria-labelledby="titulo-irrigacao" hidden>
     <span class="k21-kicker">Área externa · Rain Bird</span>
     <h2 id="titulo-irrigacao">Irrigação</h2>
     <div id="irrigacao-zonas"></div>
-    <p class="k21-note">Os estados vêm do controlador. Em uma rega manual, a duração exibida pela Rain Bird pode ser estimada.</p>
+    <div id="irrigacao-programas"></div><p class="k21-note">Os estados vêm do controlador. Em uma rega manual, a duração exibida pela Rain Bird pode ser estimada.</p>
   </section>
-  <script src="config.js"></script><script src="card.js?v=20261025-rotinas"></script><script type="module" src="portal.js?v=20261103-rega1"></script>
+  <script src="config.js"></script><script src="card.js?v=20261104-k21b"></script><script type="module" src="portal.js?v=20261104-k21b"></script>
 </body>
 </html>

@@ -19,3 +19,9 @@
 .k21-irrigacao button[data-action="stop"]{background:transparent;color:#eeeae1;border-color:#c9b58950}
 .k21-irrigacao .k21-note,.k21-irrigacao .k21-feedback{font-size:13px;color:#c9c3b8;margin:12px 0 0}
 .k21-irrigacao .k21-feedback:empty{display:none}
+#irrigacao-programas{margin-top:24px;padding-top:20px;border-top:1px solid #c9b58944}
+#irrigacao-programas h3{margin:0 0 12px;color:#eeeae0;font:600 20px/1.2 Arial,sans-serif}
+.k21-program-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:10px}
+.k21-program{display:grid;gap:6px;padding:12px 14px;border-left:2px solid #ad9664;color:#eee9df;background:#ffffff05}
+.k21-program span{font-size:13px;color:#d5cec1}
+#irrigacao-programas a{display:inline-block;padding:11px 0 4px;color:#e6cf99;text-underline-offset:3px}

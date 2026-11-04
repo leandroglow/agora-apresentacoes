@@ -1,9 +1,9 @@
 'use strict';
 (()=>{
   const $=id=>document.getElementById(id), config=window.GALPAO_CONFIG;
-  let clerk,card,energy,timer,generation=0;
+  let clerk,card,timer,generation=0;
   const requests=new Set();
-  const reset=message=>{clearTimeout(timer);generation++;requests.forEach(c=>c.abort());requests.clear();$('panel').replaceChildren();card=null;energy=null;$('panel').hidden=true;$('account').hidden=true;$('access').hidden=false;$('message').textContent=message;};
+  const reset=message=>{clearTimeout(timer);generation++;requests.forEach(c=>c.abort());requests.clear();$('panel').replaceChildren();card=null;$('panel').hidden=true;$('account').hidden=true;$('access').hidden=false;$('message').textContent=message;};
   async function request(body,query=''){
     const current=generation,controller=new AbortController();requests.add(controller);
     const timeout=setTimeout(()=>controller.abort(),20000);
@@ -26,16 +26,6 @@
         await request({entity_id:data.entity_id,service:domain+'.'+service});
         await refresh();
       }};
-      if(result.energyConfig){
-        if(!energy){energy=document.createElement('agora-energy-card');energy.id='energia';$('panel').append(energy);}
-        energy.setConfig(result.energyConfig);
-        energy.hass={states:result.states,agoraEnergyHistory:hours=>request(null,'?history=1&hours='+hours),
-          agoraEnergyRead:()=>request(),
-          agoraEnergyCommand:(entity_id,service)=>{
-            if(!['switch.fase_1_switch','switch.trifasico_switch'].includes(entity_id)||!['turn_on','turn_off'].includes(service))throw new Error('Comando fora do escopo.');
-            return request({entity_id,service:'switch.'+service});
-          }};
-      }
       $('panel').hidden=false;$('account').hidden=false;$('access').hidden=true;
       if(!document.hidden)timer=setTimeout(refresh,15000);
     }catch(e){if(current!==generation)return;reset(e.message);$('login').hidden=!!clerk.session;$('account').hidden=!clerk.session;timer=setTimeout(refresh,30000);}

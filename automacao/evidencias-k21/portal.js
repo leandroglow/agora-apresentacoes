@@ -1,9 +1,48 @@
+import {renderPrograms} from './programas.js?v=20261104';
 'use strict';
 import {mountIrrigation} from './irrigacao.js?v=1';
 (()=>{
   const $=id=>document.getElementById(id), config=window.K21_CONFIG;
-  let clerk,card,irrigation,timer,generation=0;
-  const reset=message=>{clearTimeout(timer);generation++;irrigation?.destroy();irrigation=null;$('panel').replaceChildren();card=null;$('panel').hidden=true;$('irrigacao').hidden=true;$('account').hidden=true;$('access').hidden=false;$('message').textContent=message;};
+  let clerk,card,irrigation,timer,generation=0,programKey;
+  const section=$('irrigacao'), covers=new Map();
+  function dropCover(entity){
+    const entry=covers.get(entity);
+    if(entry?.url)URL.revokeObjectURL(entry.url);
+    entry?.controller.abort();
+    covers.delete(entity);
+  }
+  function loadArt(entity,revision){
+    if(covers.get(entity)?.revision===revision)return covers.get(entity).promise;
+    dropCover(entity);
+    const entry={revision,controller:new AbortController()};
+    covers.set(entity,entry);
+    entry.promise=(async()=>{
+      const token=await clerk.session?.getToken();
+      if(!token||entry.controller.signal.aborted)return null;
+      const url=new URL(config.api);
+      url.search=new URLSearchParams({art:entity,rev:revision}).toString();
+      const response=await fetch(url,{headers:{Authorization:'Bearer '+token},cache:'no-store',signal:entry.controller.signal});
+      if(!response.ok)return null;
+      const blob=await response.blob();
+      if(covers.get(entity)!==entry || !blob.type.startsWith('image/'))return null;
+      entry.url=URL.createObjectURL(blob);
+      return entry.url;
+    })().catch(()=>null);
+    return entry.promise;
+  }
+  function reset(message){
+    clearTimeout(timer);generation++;irrigation?.destroy();irrigation=null;
+    section.hidden=true;document.body.appendChild(section);programKey=null;$('irrigacao-programas').replaceChildren();
+    for(const entity of covers.keys())dropCover(entity);
+    $('panel').replaceChildren();card=null;$('panel').hidden=true;$('account').hidden=true;
+    $('access').hidden=false;$('message').textContent=message;
+  }
+  function goToIrrigation(){
+    if(!card)return;
+    card.showIrrigation();section.scrollIntoView({block:'start'});
+  }
+  $('account').querySelector('.k21-jump').addEventListener('click',goToIrrigation);
+  window.addEventListener('hashchange',()=>{if(location.hash==='#irrigacao')goToIrrigation();});
   async function request(body){
     const token=await clerk.session?.getToken();
     if(!token)throw new Error('Entre com sua conta Ágora.');
@@ -18,9 +57,11 @@ import {mountIrrigation} from './irrigacao.js?v=1';
       const result=await request();if(current!==generation)return;
       const firstRender=!card;
       if(firstRender){
-        card=document.createElement('agora-property-card');card.setConfig(config.card);$('panel').replaceChildren(card);
+        card=document.createElement('agora-property-card');card.loadArt=loadArt;card.setConfig(config.card);
+        card.appendChild(section);$('panel').replaceChildren(card);
         irrigation=mountIrrigation($('irrigacao-zonas'),{request,refresh});
       }
+      for(const [id,entry] of covers)if(result.states?.[id]?.attributes?.art_revision!==entry.revision)dropCover(id);
       card.hass={states:result.states,callService:async(domain,service,data)=>{
         const command={entity_id:data.entity_id,service:domain+'.'+service};
         if(service==='volume_set')command.volume_level=data.volume_level;
@@ -28,10 +69,12 @@ import {mountIrrigation} from './irrigacao.js?v=1';
         await refresh();
       }};
       irrigation.setStates(result.states);
+      const nextKey=JSON.stringify([result.programs,result.programEditor]);
+      if(nextKey!==programKey){renderPrograms($('irrigacao-programas'),result.programs,result.programEditor);programKey=nextKey;}
       $('irrigacao').hidden=false;
       $('account').querySelector('.k21-jump').hidden=false;
       $('panel').hidden=false;$('account').hidden=false;$('access').hidden=true;
-      if(firstRender && location.hash==='#irrigacao') $('irrigacao').scrollIntoView({block:'start'});
+      if(firstRender && location.hash==='#irrigacao')goToIrrigation();
       clearTimeout(timer);
       timer=setTimeout(refresh,15000);
     }catch(e){if(current!==generation)return;reset(e.message);$('login').hidden=!!clerk.session;$('account').hidden=!clerk.session;$('account').querySelector('.k21-jump').hidden=true;timer=setTimeout(refresh,30000);}
