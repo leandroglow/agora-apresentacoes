@@ -1,0 +1,21 @@
+#account .k21-account-actions{display:flex;align-items:center;gap:14px}
+#account .k21-jump{color:#e5ce9d;text-decoration:none;font-weight:650;border:1px solid #ac966555;border-radius:12px;padding:7px 12px}
+#account .k21-jump:hover,#account .k21-jump:focus-visible{background:#c8ae7722}
+.k21-irrigacao{box-sizing:border-box;max-width:1200px;margin:0 auto;padding:30px clamp(18px,4vw,52px) 54px;color:#eeeae1;font:15px/1.5 Arial,sans-serif;scroll-margin-top:16px}
+.k21-irrigacao *{box-sizing:border-box}
+.k21-irrigacao .k21-kicker,.k21-irrigacao .k21-zone small{color:#d4bb88;font-weight:650;font-size:11px;text-transform:uppercase;letter-spacing:1.5px}
+.k21-irrigacao h2{margin:3px 0 22px;font:600 clamp(26px,3.4vw,38px)/1.14 Arial,sans-serif}
+.k21-irrigacao #irrigacao-zonas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(235px,100%),1fr));gap:14px}
+.k21-irrigacao .k21-zone{background:linear-gradient(150deg,#2c2a25,#201f1e);border:1px solid #c9b58932;border-radius:18px;padding:18px;box-shadow:0 10px 26px #0002}
+.k21-irrigacao .k21-zone-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:7px;flex-wrap:wrap}
+.k21-irrigacao h3{font:600 19px/1.25 Arial,sans-serif;margin:4px 0;color:#f4f0e7}
+.k21-irrigacao .k21-state{font-size:12px;color:#d8d4ca;background:#ffffff0a;border:1px solid #ffffff16;border-radius:20px;padding:4px 9px}
+.k21-irrigacao .k21-state[data-state="running"]{color:#ffe1a1;border-color:#c8ae7788}
+.k21-irrigacao .k21-state[data-state="unavailable"]{color:#d3b9af}
+.k21-irrigacao label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:20px 0 12px;font-size:14px;color:#d5cfc2}
+.k21-irrigacao input{width:64px;border:1px solid #c9b58955;color:#f4f0e7;background:#191918;padding:8px;border-radius:8px;font:inherit}
+.k21-irrigacao .k21-actions{display:flex;gap:8px}
+.k21-irrigacao button{flex:1;min-height:40px;padding:8px 14px;border-radius:10px;color:#201e19;background:#ceb582;border:1px solid transparent;font:600 14px Arial,sans-serif}
+.k21-irrigacao button[data-action="stop"]{background:transparent;color:#eeeae1;border-color:#c9b58950}
+.k21-irrigacao .k21-note,.k21-irrigacao .k21-feedback{font-size:13px;color:#c9c3b8;margin:12px 0 0}
+.k21-irrigacao .k21-feedback:empty{display:none}

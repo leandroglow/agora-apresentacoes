@@ -1,8 +1,9 @@
 'use strict';
+import {mountIrrigation} from './irrigacao.js?v=1';
 (()=>{
   const $=id=>document.getElementById(id), config=window.K21_CONFIG;
-  let clerk,card,timer,generation=0;
-  const reset=message=>{clearTimeout(timer);generation++;$('panel').replaceChildren();card=null;$('panel').hidden=true;$('account').hidden=true;$('access').hidden=false;$('message').textContent=message;};
+  let clerk,card,irrigation,timer,generation=0;
+  const reset=message=>{clearTimeout(timer);generation++;irrigation?.destroy();irrigation=null;$('panel').replaceChildren();card=null;$('panel').hidden=true;$('irrigacao').hidden=true;$('account').hidden=true;$('access').hidden=false;$('message').textContent=message;};
   async function request(body){
     const token=await clerk.session?.getToken();
     if(!token)throw new Error('Entre com sua conta Ágora.');
@@ -15,16 +16,25 @@
     clearTimeout(timer);const current=generation;
     try{
       const result=await request();if(current!==generation)return;
-      if(!card){card=document.createElement('agora-property-card');card.setConfig(config.card);$('panel').replaceChildren(card);}
+      const firstRender=!card;
+      if(firstRender){
+        card=document.createElement('agora-property-card');card.setConfig(config.card);$('panel').replaceChildren(card);
+        irrigation=mountIrrigation($('irrigacao-zonas'),{request,refresh});
+      }
       card.hass={states:result.states,callService:async(domain,service,data)=>{
         const command={entity_id:data.entity_id,service:domain+'.'+service};
         if(service==='volume_set')command.volume_level=data.volume_level;
         await request(command);
         await refresh();
       }};
+      irrigation.setStates(result.states);
+      $('irrigacao').hidden=false;
+      $('account').querySelector('.k21-jump').hidden=false;
       $('panel').hidden=false;$('account').hidden=false;$('access').hidden=true;
+      if(firstRender && location.hash==='#irrigacao') $('irrigacao').scrollIntoView({block:'start'});
+      clearTimeout(timer);
       timer=setTimeout(refresh,15000);
-    }catch(e){if(current!==generation)return;reset(e.message);$('login').hidden=!!clerk.session;$('account').hidden=!clerk.session;timer=setTimeout(refresh,30000);}
+    }catch(e){if(current!==generation)return;reset(e.message);$('login').hidden=!!clerk.session;$('account').hidden=!clerk.session;$('account').querySelector('.k21-jump').hidden=true;timer=setTimeout(refresh,30000);}
   }
   async function start(){
     const ui=document.createElement('script');ui.src='https://cdn.jsdelivr.net/npm/@clerk/ui@1/dist/ui.browser.js';ui.crossOrigin='anonymous';
@@ -32,7 +42,7 @@
     const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/@clerk/clerk-js@6/dist/clerk.browser.js';script.crossOrigin='anonymous';script.setAttribute('data-clerk-publishable-key',config.clerkPublishableKey);
     await new Promise((resolve,reject)=>{script.onload=resolve;script.onerror=()=>reject(new Error('Não foi possível carregar o login.'));document.head.append(script);});
     clerk=window.Clerk;
-    const destination=location.origin+location.pathname;
+    const destination=location.origin+location.pathname+(location.hash==='#irrigacao'?'#irrigacao':'');
     await clerk.load({ui:{ClerkUI:window.__internal_ClerkUICtor},signInForceRedirectUrl:destination,signUpForceRedirectUrl:destination,appearance:{variables:{colorPrimary:'#b79b64',borderRadius:'16px'}}});
     $('login').onclick=()=>clerk.openSignIn({forceRedirectUrl:destination});
     $('logout').onclick=async()=>{reset('Sessão encerrada.');await clerk.signOut({redirectUrl:destination});};
