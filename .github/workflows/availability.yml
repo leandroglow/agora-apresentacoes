@@ -1,0 +1,29 @@
+name: Public availability
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/check-availability.mjs'
+      - '.github/workflows/availability.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  availability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2, verified GitHub release
+        with:
+          sparse-checkout: |
+            scripts
+          persist-credentials: false
+      - name: Run public availability checks
+        run: node scripts/check-availability.mjs
+

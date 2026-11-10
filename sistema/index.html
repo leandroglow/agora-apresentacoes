@@ -10,6 +10,8 @@
 <script src="catalogos-chat.js?v=3"></script>
 <script src="catalogos-images.js?v=1"></script>
 <script src="receipt-transfer.js?v=20261027-1"></script>
+<link rel="stylesheet" href="expense-workflow.css?v=20261109-1">
+<script src="expense-workflow.js?v=20261109-1" defer></script>
 <link rel="stylesheet" href="catalogos-images.css?v=1">
 <link rel="stylesheet" href="organizacao.css?v=20261022">
 <style>
@@ -1148,7 +1150,7 @@ function resetarTimer(){
   clearTimeout(timerInatividade);
   if(!usuarioClerkId)return;
   timerInatividade=setTimeout(()=>{
-    limparChatPrivado();
+    limparChatPrivado();limparAcompanhamentoPrivado();
     usuarioLogado=null;usuarioClerkId=null;catalogosToken='';mostrarTela('login');
     AgoraSistemaAuth.signOut().catch(()=>{});
     alert('Sessão encerrada por inatividade. Faça login novamente.');
@@ -1235,7 +1237,7 @@ async function atualizarLoginClerk(){
   try{
     const user=await AgoraSistemaAuth.user();
     if(!user){
-      if(usuarioClerkId){limparChatPrivado();usuarioClerkId=null;usuarioLogado=null;catalogosToken='';}document.getElementById('card-inventario').hidden=true;
+      if(usuarioClerkId){limparChatPrivado();limparAcompanhamentoPrivado();usuarioClerkId=null;usuarioLogado=null;catalogosToken='';}document.getElementById('card-inventario').hidden=true;
       mostrarTela('login');return;
     }
     const token=await AgoraSistemaAuth.token();
@@ -1248,11 +1250,11 @@ async function atualizarLoginClerk(){
     document.getElementById('hub-username').textContent=usuarioLogado;
     mostrarTela('hub');resetarTimer();
     const destino=new URLSearchParams(location.search).get('area');
-    if(['organizacao','estrutura-ia','assistente'].includes(destino))abrirSecao(destino);
+    if(['organizacao','estrutura-ia','assistente','despesas'].includes(destino))abrirSecao(destino);
     if(!appIniciado){iniciarApp();appIniciado=true;}
     setTimeout(()=>{carregarConfigDrive();carregarConfigApresentacoes();},500);
   }catch(e){
-    limparChatPrivado();usuarioClerkId=null;usuarioLogado=null;catalogosToken='';
+    limparChatPrivado();limparAcompanhamentoPrivado();usuarioClerkId=null;usuarioLogado=null;catalogosToken='';
     document.getElementById('card-inventario').hidden=true;erro.textContent=e.message||'Não foi possível validar a sessão.';
     erro.style.display='block';mostrarTela('login');
   }
@@ -1284,7 +1286,7 @@ document.getElementById('btn-voltar-hub').addEventListener('click',()=>{
   mostrarTela('hub');
 });
 document.getElementById('btn-logout').addEventListener('click',async()=>{
-  limparChatPrivado();
+  limparChatPrivado();limparAcompanhamentoPrivado();
   usuarioLogado=null;usuarioClerkId=null;clearTimeout(timerInatividade);mostrarTela('login');
   catalogosToken='';
   try{await AgoraSistemaAuth.signOut();}
@@ -1346,7 +1348,7 @@ window.abrirInfoObra=async function(){
       </div>
       <div id="proj-info-status" style="margin-top:8px;font-size:12px;text-align:right"></div>`;
   }catch(e){
-    cont.innerHTML=`<div class="proj-empty"><div class="proj-empty-icon">⚠️</div><p>${e.message}</p></div>`;
+    cont.innerHTML=`<div class="proj-empty"><div class="proj-empty-icon">⚠️</div><p>${escAttr(e.message)}</p></div>`;
   }
 };
 
@@ -1895,7 +1897,7 @@ function renderItensDesp(){
       <div class="desp-item-meta">
         <div class="desp-item-field">
           <label>Quantidade</label>
-          <input type="number" value="${it.quantidade??''}" placeholder="Qtd" data-i="${i}" data-c="quantidade" class="dii" />
+          <input type="number" value="${escAttr(it.quantidade??'')}" placeholder="Qtd" data-i="${i}" data-c="quantidade" class="dii" />
         </div>
         <div class="desp-item-field">
           <label>Unidade</label>
@@ -1903,7 +1905,7 @@ function renderItensDesp(){
         </div>
         <div class="desp-item-field">
           <label>Valor unitário</label>
-          <input type="number" value="${it.valor_unitario??''}" placeholder="R$" data-i="${i}" data-c="valor_unitario" class="dii" step="0.01" />
+          <input type="number" value="${escAttr(it.valor_unitario??'')}" placeholder="R$" data-i="${i}" data-c="valor_unitario" class="dii" step="0.01" />
         </div>
         <button onclick="despItens.splice(${i},1);renderItensDesp()" class="desp-item-rm" title="Remover">×</button>
       </div>
@@ -1923,7 +1925,7 @@ async function despesasApi(body){
  let r;
  try { r=await fetch(API_BASE+'/api/expenses',{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}); }
  catch { throw new Error('A conexão foi interrompida. Os dados continuam nesta tela; tente novamente.'); }
- const data=await r.json().catch(()=>({})); if(!r.ok) throw new Error(data.error||'Falha ao acessar despesas (HTTP '+r.status+').'); return data;
+ const data=await r.json().catch(()=>({})); if(!r.ok){const error=new Error(data.error||'Falha ao acessar despesas (HTTP '+r.status+').');error.statusCode=r.status;throw error;} return data;
 }
 window.salvarDespesa=async function(){
   if(despBusy)return;
@@ -1945,7 +1947,7 @@ window.salvarDespesa=async function(){
       const locais=JSON.parse(localStorage.getItem('agora_despesas_pendentes')||'[]');
       localStorage.setItem('agora_despesas_pendentes',JSON.stringify([desp,...locais.filter(d=>d.id!==desp.id)])); throw error;
     }
-    st.className='sok'; st.textContent='✓ Despesa e comprovante salvos. Disponíveis no histórico.';
+    st.className='sok'; st.textContent='✓ Recebido no Drive. A identificação e o lançamento financeiro podem ser acompanhados no histórico.';
     localStorage.setItem('agora_despesas_pendentes',JSON.stringify(JSON.parse(localStorage.getItem('agora_despesas_pendentes')||'[]').filter(d=>d.id!==despId)));
     setTimeout(()=>{if(despDraftId===despId)limparFotoDesp();},2000);
   }catch(e){st.className='serr';st.textContent='⚠ Erro: '+e.message;}
@@ -1968,7 +1970,13 @@ document.getElementById('desp-tab-hist').addEventListener('click',async()=>{
   carregarHistDesp();
 });
 
+const expenseHistory = new Map();
+const expenseEditVersions = new Map();
+let expenseGeneration=0;
+function limparAcompanhamentoPrivado(){expenseGeneration++;window.AgoraExpenseWorkflow?.clear();expenseHistory.clear();expenseEditVersions.clear();document.getElementById('desp-hist-conteudo')?.replaceChildren();}
+window.abrirAcompanhamentoDesp = id => { const record=expenseHistory.get(id); if(record) window.AgoraExpenseWorkflow.open(record,despesasApi,carregarHistDesp); };
 async function carregarHistDesp(){
+  const expenseRequest=expenseGeneration, expenseUser=usuarioClerkId;
   const cont=document.getElementById('desp-hist-conteudo');
   cont.innerHTML='<div class="proj-empty"><div class="big-spinner"></div><p>Carregando...</p></div>';
   try{
@@ -1978,6 +1986,8 @@ async function carregarHistDesp(){
       localStorage.setItem('agora_despesas_pendentes',JSON.stringify(JSON.parse(localStorage.getItem('agora_despesas_pendentes')||'[]').filter(d=>d.id!==record.id)));
     }
     const despesas=await despesasApi();
+    if(expenseRequest!==expenseGeneration||!expenseUser||expenseUser!==usuarioClerkId)return;
+    expenseHistory.clear(); despesas.forEach(d=>expenseHistory.set(d.id,d));
     if(!despesas.length){cont.innerHTML='<div class="proj-empty"><div class="proj-empty-icon">📭</div><p>Nenhuma despesa registrada</p></div>';return;}
     const tipos={nota_fiscal:'Nota Fiscal',pedido:'Pedido',cupom:'Cupom',outro:'Outro'};
 
@@ -1992,7 +2002,7 @@ async function carregarHistDesp(){
           <div class="desp-item-meta">
             <div class="desp-item-field">
               <label>Quantidade</label>
-              <input type="number" value="${it.quantidade??''}" placeholder="Qtd" class="ei-qtd" data-id="${d.id}" data-i="${i}" />
+              <input type="number" value="${escAttr(it.quantidade??'')}" placeholder="Qtd" class="ei-qtd" data-id="${d.id}" data-i="${i}" />
             </div>
             <div class="desp-item-field">
               <label>Unidade</label>
@@ -2000,7 +2010,7 @@ async function carregarHistDesp(){
             </div>
             <div class="desp-item-field">
               <label>Valor unitário</label>
-              <input type="number" value="${it.valor_unitario??''}" placeholder="R$" class="ei-vl" data-id="${d.id}" data-i="${i}" step="0.01" />
+              <input type="number" value="${escAttr(it.valor_unitario??'')}" placeholder="R$" class="ei-vl" data-id="${d.id}" data-i="${i}" step="0.01" />
             </div>
           </div>
         </div>`).join('');
@@ -2008,14 +2018,14 @@ async function carregarHistDesp(){
       return `<div class="desp-hist-card" id="dhc-${d.id}">
         <div class="desp-hist-head">
           <div>
-            <span class="desp-hist-badge">${tipos[d.tipo]||d.tipo}</span>
+            <span class="desp-hist-badge">${escAttr(tipos[d.tipo]||d.tipo)}</span><span class="desp-hist-badge">${d.acompanhamento_documental?.bloqueio?.ativo?'Aguardando revisão':d.acompanhamento_documental?.etapas?.conferido?.concluida?'Conferido pelo responsável':'Em conferência'}</span>
             <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--ardosia);margin-top:3px">${escAttr(d.fornecedor||'—')}</div>
-            <div style="font-size:11px;color:var(--concreto);margin-top:2px">${escAttr(d.obra||'')} · ${d.data?d.data.split('-').reverse().join('/'):'—'}</div>
+            <div style="font-size:11px;color:var(--concreto);margin-top:2px">${escAttr(d.obra||'')} · ${escAttr(d.data?String(d.data).split('-').reverse().join('/'):'—')}</div>
           </div>
           <div style="text-align:right">
             <div class="desp-hist-valor">R$ ${(d.valor_total||0).toFixed(2).replace('.',',')}</div>
-            <div class="desp-hist-actions">
-              ${d.foto_drive_id?`<button class="btn-sm" onclick="verFotoDesp('${d.foto_drive_id}')">📷 Foto</button>`:''}
+            <div class="desp-hist-actions"><button class="btn-sm" onclick="abrirAcompanhamentoDesp(${d.id})">Acompanhar</button>
+              ${/^[\w-]+$/.test(d.foto_drive_id||'')?`<button class="btn-sm" onclick="verFotoDesp('${d.foto_drive_id}')">📷 Foto</button>`:''}
               <button class="btn-sm" onclick="toggleEditDesp(${d.id})">✏️ Editar</button>
               <button class="btn-sm" style="color:#a93226;border-color:rgba(169,50,38,.25)" onclick="excluirDesp(${d.id})">🗑 Excluir</button>
             </div>
@@ -2025,11 +2035,11 @@ async function carregarHistDesp(){
         <!-- Painel de edição (oculto por padrão) -->
         <div id="desp-edit-${d.id}" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
           <div class="grid-2" style="margin-bottom:10px">
-            <div><label class="label">Fornecedor</label><input type="text" id="ef-fornecedor-${d.id}" value="${(d.fornecedor||'').replace(/"/g,'&quot;')}" /></div>
+            <div><label class="label">Fornecedor</label><input type="text" id="ef-fornecedor-${d.id}" value="${escAttr(d.fornecedor||'')}" /></div>
             <div><label class="label">Valor Total</label><input type="number" id="ef-valor-${d.id}" value="${d.valor_total||''}" step="0.01" /></div>
           </div>
           <div class="grid-2" style="margin-bottom:12px">
-            <div><label class="label">Data</label><input type="date" id="ef-data-${d.id}" value="${d.data||''}" /></div>
+            <div><label class="label">Data</label><input type="date" id="ef-data-${d.id}" value="${escAttr(d.data||'')}" /></div>
             <div><label class="label">Obra</label>
               <select id="ef-obra-${d.id}" style="height:36px;width:100%;font-family:'Montserrat',sans-serif;font-size:12px;border:1px solid var(--border-strong);border-radius:4px;padding:0 8px;color:var(--ardosia)">
                 ${CATEGORIAS_DESPESAS.map(o=>`<option${o===d.obra?' selected':''}>${o}</option>`).join('')}
@@ -2056,12 +2066,14 @@ async function carregarHistDesp(){
       inp.addEventListener('input',()=>{}); // mantém valor para coleta no salvar
     });
 
-  }catch(e){cont.innerHTML=`<div class="proj-empty"><div class="proj-empty-icon">⚠️</div><p>${e.message}</p></div>`;}
+  }catch(e){cont.innerHTML=`<div class="proj-empty"><div class="proj-empty-icon">⚠️</div><p>${escAttr(e.message)}</p></div>`;}
 }
 
-window.toggleEditDesp=function(id){
+window.toggleEditDesp=async function(id){
   const el=document.getElementById('desp-edit-'+id);
-  el.style.display=el.style.display==='none'?'block':'none';
+  if(el.style.display!=='none'){el.style.display='none';return;}
+  try{const current=await despesasApi({action:'workflow-read',id});if(!usuarioClerkId)return;const prior=expenseHistory.get(id);const fields=['obra','data','tipo','fornecedor','valor_total','observacoes','foto_drive_id','itens'];if(!prior||fields.some(k=>JSON.stringify(prior[k])!==JSON.stringify(current.record[k]))){await carregarHistDesp();alert('O registro foi atualizado. Confira os dados novos e abra Editar novamente.');return;}expenseEditVersions.set(id,current.etag);el.style.display='block';}
+  catch(e){alert(e.message);}
 };
 
 window.verFotoDesp=async function(driveId){
@@ -2103,7 +2115,7 @@ window.salvarEdicaoDesp=async function(id){
     };
     if(itensNovos!==null) patch.itens=itensNovos;
 
-    await despesasApi({action:'update',id,record:patch});
+    await despesasApi({action:'update',id,record:patch,etag:expenseEditVersions.get(id)});
     carregarHistDesp();
   }catch(e){alert('Erro ao salvar: '+e.message);}
 };
@@ -2164,7 +2176,7 @@ async function catalogosFetch(path,options={}){
   });
   const data=await res.json().catch(()=>({}));
   if(res.status===401){
-    limparChatPrivado();
+    limparChatPrivado();limparAcompanhamentoPrivado();
     catalogosToken='';
     catalogosSetStatus('Sessão expirada','offline');
   }

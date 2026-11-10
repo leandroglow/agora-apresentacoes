@@ -28,7 +28,7 @@ const safeUrl = v => {
 function item(v, depth = 0) {
   if (!record(v)) return null;
   const out = {};
-  for (const key of ['id','name','label','title','subtitle','status','owner','description','date','asOf','source','projectId','category']) {
+  for (const key of ['id','name','label','title','subtitle','status','owner','description','date','asOf','source','projectId','category','waitingFor','nextAction','priority']) {
     const value = text(v[key]);
     if (value !== undefined) out[key] = value;
   }
@@ -51,7 +51,10 @@ export function sanitizeDashboardData(raw) {
   const f = record(src.financial) ? src.financial : {};
   const financial = {status:text(f.status,100) || 'A consolidar',committed:number(f.committed),invoiced:number(f.invoiced),paid:number(f.paid)};
   const meta = record(src.meta) ? {asOf:text(src.meta.asOf,80),sourcesCoverage:text(src.meta.sourcesCoverage,500)} : {};
-  return {projects:arr('projects'),modules:arr('modules'),decisions:arr('decisions'),automation:arr('automation'),agenda:arr('agenda'),financial,meta,user:{displayName:'Leandro'}};
+  const w = record(src.workday) ? src.workday : {};
+  const wm = record(w.meta) ? w.meta : {};
+  const workday = {items:Array.isArray(w.items)?w.items.slice(0,200).map(x=>item(x)).filter(Boolean):[],meta:{asOf:text(wm.asOf,80),coverage:text(wm.coverage,1500),queueUpdatedAt:text(wm.queueUpdatedAt,80)}};
+  return {workday,projects:arr('projects'),modules:arr('modules'),decisions:arr('decisions'),automation:arr('automation'),agenda:arr('agenda'),financial,meta,user:{displayName:'Leandro'}};
 }
 
 export default async function handler(req, res) {

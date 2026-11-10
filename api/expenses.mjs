@@ -2,6 +2,7 @@ import { getGoogleDriveAccessToken } from './_lib/google.mjs';
 import { requireAuth } from './_lib/auth.mjs';
 import { handleOptions, json, readJsonBody, setCors } from './_lib/http.mjs';
 import { assertReceiptFile, readBoundedResponse, RECEIPT_CHUNK_BYTES, RECEIPT_LEGACY_MAX_BYTES, validReceiptId } from './_lib/receipt-files.mjs';
+import { createExpenseRepository, handleExpenseWorkflow, preserveWorkflow } from './_lib/expense-followup.mjs';
 
 const folder = () => process.env.GOOGLE_DRIVE_EXPENSE_FOLDER_ID || '1665zvQOtbulPR59zjFLr37mflu9n31Yo';
 export default async function handler(req, res) {
@@ -34,12 +35,12 @@ export default async function handler(req, res) {
       return file;
     }
     if(req.method==='GET') {
-      const files=await list("mimeType='application/json' and name contains 'agora_despesa_'");
-      const records=[];
-      for(let i=0;i<files.length;i+=10) records.push(...await Promise.all(files.slice(i,i+10).map(async f=> (await call(`drive/v3/files/${f.id}?alt=media`)).json())));
+      const records=await createExpenseRepository(token).records();
       return json(res,200,records.filter(d=>Number.isSafeInteger(d.id)).sort((a,b)=>b.id-a.id));
     }
     const body=readJsonBody(req);
+    if(Buffer.byteLength(JSON.stringify(body))>250000) return json(res,413,{error:'Dados da despesa excedem o limite.'});
+    if(['workflow-read','workflow'].includes(body.action)) return json(res,200,await handleExpenseWorkflow(body,user,token));
     if(body.action==='photo') {
       const fileId=String(body.fileId||'');
       if(!validReceiptId(fileId)) return json(res,400,{error:'Identificador de imagem inválido.'});
@@ -69,20 +70,30 @@ export default async function handler(req, res) {
     if(!Number.isSafeInteger(id) || id<1) return json(res,400,{error:'Identificador inválido.'});
     const name=`agora_despesa_${id}.json`;
     const files=await list(`name='${name}'`);
+    if(files.length>1) return json(res,409,{error:'Há registros duplicados com este identificador. Concilie antes de editar.'});
     const existing=files[0];
     if(body.action==='delete') {
       if(existing) await call(`drive/v3/files/${existing.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})});
       return json(res,200,{ok:true});
     }
     if(!['save','update'].includes(body.action)) return json(res,400,{error:'Ação inválida.'});
-    const previous=existing ? await (await call(`drive/v3/files/${existing.id}?alt=media`)).json() : {};
+    const repository=createExpenseRepository(token);
+    const current=existing?await repository.read(id):null;
+    const previous=current?.record||{};
     if(body.action==='update'&&!existing) return json(res,404,{error:'Despesa não encontrada.'});
     const input={...previous,...body.record};
     if(input.foto_drive_id) await scopedFile(String(input.foto_drive_id));
-    const record={id,obra:String(input.obra||'').slice(0,200),data:String(input.data||'').slice(0,10),tipo:String(input.tipo||'outro').slice(0,40),fornecedor:String(input.fornecedor||'').slice(0,500),valor_total:Number(input.valor_total)||0,observacoes:String(input.observacoes||'').slice(0,10000),foto_drive_id:input.foto_drive_id||null,itens:(Array.isArray(input.itens)?input.itens:[]).slice(0,500).map(i=>({descricao:String(i.descricao||'').slice(0,1000),quantidade:Number(i.quantidade)||0,unidade:String(i.unidade||'').slice(0,40),valor_unitario:Number(i.valor_unitario)||0})),criado_em:previous.criado_em||new Date().toISOString(),atualizado_por:user.sub};
+    const record={...previous,id,obra:String(input.obra||'').slice(0,200),data:String(input.data||'').slice(0,10),tipo:String(input.tipo||'outro').slice(0,40),fornecedor:String(input.fornecedor||'').slice(0,500),valor_total:Number(input.valor_total??0),observacoes:String(input.observacoes||'').slice(0,10000),foto_drive_id:input.foto_drive_id||null,itens:(Array.isArray(input.itens)?input.itens:[]).slice(0,500).map(i=>({descricao:String(i.descricao||'').slice(0,1000),quantidade:Number(i.quantidade)||0,unidade:String(i.unidade||'').slice(0,40),valor_unitario:Number(i.valor_unitario)||0})),criado_em:previous.criado_em||new Date().toISOString(),atualizado_por:user.sub};
     if(!record.obra) return json(res,400,{error:'Selecione a obra.'});
+    if(!Number.isFinite(record.valor_total)||record.valor_total<0) return json(res,400,{error:'Informe um valor total válido.'});
+    record.acompanhamento_documental=preserveWorkflow(previous,record,user.sub);
     if(existing) {
-      await call(`upload/drive/v3/files/${existing.id}?uploadType=media`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(record)});
+      if(body.action==='save') {
+        const fields=['obra','data','tipo','fornecedor','valor_total','observacoes','foto_drive_id','itens'];
+        if(fields.every(k=>JSON.stringify(previous[k])===JSON.stringify(record[k]))) return json(res,200,{ok:true,record:previous,reused:true});
+        return json(res,409,{error:'Esta despesa já existe com outros dados. Abra o histórico para conferir antes de editar.'});
+      }
+      await repository.put(current,record,body.etag);
     } else {
       const boundary='agora_expense_record';
       const payload=`--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify({name,parents:[folder()],mimeType:'application/json'})}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(record)}\r\n--${boundary}--`;
@@ -90,6 +101,6 @@ export default async function handler(req, res) {
     }
     return json(res,200,{ok:true,record});
   } catch(error) {
-    return json(res,error.statusCode||502,{error:error.code==='DRIVE_AUTH_EXPIRED'?'A conexão central do Drive precisa ser regularizada pelo administrador. Seu login Google não é necessário.':error.message});
+    return json(res,error.statusCode||error.status||502,{error:error.code==='DRIVE_AUTH_EXPIRED'?'A conexão central do Drive precisa ser regularizada pelo administrador. Seu login Google não é necessário.':error.message});
   }
 }

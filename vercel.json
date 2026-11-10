@@ -26,6 +26,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/operations",
+      "destination": "/api/service?_route=operations"
+    },
+    {
       "source": "/api/inventory",
       "destination": "/api/service?_route=inventory"
     },
