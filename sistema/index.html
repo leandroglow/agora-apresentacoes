@@ -2024,7 +2024,7 @@ async function carregarHistDesp(){
           </div>
           <div style="text-align:right">
             <div class="desp-hist-valor">R$ ${(d.valor_total||0).toFixed(2).replace('.',',')}</div>
-            <div class="desp-hist-actions"><button class="btn-sm" onclick="abrirAcompanhamentoDesp(${d.id})">Acompanhar</button>
+            <div class="desp-hist-actions">${d.acompanhamento_documental?`<button class="btn-sm" onclick="abrirAcompanhamentoDesp(${d.id})">Acompanhar</button>`:''}
               ${/^[\w-]+$/.test(d.foto_drive_id||'')?`<button class="btn-sm" onclick="verFotoDesp('${d.foto_drive_id}')">📷 Foto</button>`:''}
               <button class="btn-sm" onclick="toggleEditDesp(${d.id})">✏️ Editar</button>
               <button class="btn-sm" style="color:#a93226;border-color:rgba(169,50,38,.25)" onclick="excluirDesp(${d.id})">🗑 Excluir</button>
@@ -2072,6 +2072,7 @@ async function carregarHistDesp(){
 window.toggleEditDesp=async function(id){
   const el=document.getElementById('desp-edit-'+id);
   if(el.style.display!=='none'){el.style.display='none';return;}
+  if(!expenseHistory.get(id)?.acompanhamento_documental){el.style.display='block';return;}
   try{const current=await despesasApi({action:'workflow-read',id});if(!usuarioClerkId)return;const prior=expenseHistory.get(id);const fields=['obra','data','tipo','fornecedor','valor_total','observacoes','foto_drive_id','itens'];if(!prior||fields.some(k=>JSON.stringify(prior[k])!==JSON.stringify(current.record[k]))){await carregarHistDesp();alert('O registro foi atualizado. Confira os dados novos e abra Editar novamente.');return;}expenseEditVersions.set(id,current.etag);el.style.display='block';}
   catch(e){alert(e.message);}
 };
