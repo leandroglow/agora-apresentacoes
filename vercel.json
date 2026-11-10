@@ -26,6 +26,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/client-portal",
+      "destination": "/api/service?_route=client-portal"
+    },
+    {
       "source": "/api/operations",
       "destination": "/api/service?_route=operations"
     },
