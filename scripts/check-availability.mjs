@@ -5,8 +5,7 @@ const DEFAULT_CHECKS = [
   { name: 'Sistema HTML', url: 'https://apresentacoes.agoracons.com.br/sistema/', mode: 'html', marker: 'Apresentações Sistema' },
   { name: 'Montador Galpão 017', url: 'https://apresentacoes.agoracons.com.br/galpao-017-quadros/', mode: 'html', marker: 'Galpão 017' },
   { name: 'Autenticação HA', url: 'https://ha.agoracons.com.br/auth/providers', mode: 'ha-providers' },
-  // Add operations after its production release; a preview-only route is not a production outage.
-  ...['dashboard', 'expenses'].map((endpoint) => ({
+  ...['dashboard', 'expenses', 'operations'].map((endpoint) => ({
     name: `API ${endpoint}`,
     url: `https://agora-apresentacoes.vercel.app/api/${endpoint}`,
     mode: 'anonymous-denied',

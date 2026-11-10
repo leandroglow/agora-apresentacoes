@@ -5,7 +5,7 @@ const EXPENSES_URL='/sistema/?area=despesas';
 const ALLOWED_HOSTS=new Set(['drive.google.com','docs.google.com','apresentacoes.agoracons.com.br','agora-apresentacoes.vercel.app','ha.agoracons.com.br']);
 let generation=0;
 const esc=v=>String(v??'');
-const safeUrl=value=>{try{const u=new URL(value,location.origin);if(u.protocol!=='https:'||u.username||u.password||!ALLOWED_HOSTS.has(u.hostname))return null;return u.href}catch{return null}};
+const safeUrl=value=>{if(typeof value!=='string'||!/^https:\/\//i.test(value.trim()))return null;try{const u=new URL(value);if(u.protocol!=='https:'||u.username||u.password||!ALLOWED_HOSTS.has(u.hostname))return null;return u.href}catch{return null}};
 const dayStamp=value=>{if(!value)return null;const d=new Date(typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)?value+'T12:00:00-03:00':value);return Number.isNaN(d.getTime())?null:d};
 const formatDate=(value,opts={day:'2-digit',month:'short',year:'numeric'})=>{const d=dayStamp(value);return d?new Intl.DateTimeFormat('pt-BR',{...opts,timeZone:'America/Sao_Paulo'}).format(d):'Data não informada'};
 const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
