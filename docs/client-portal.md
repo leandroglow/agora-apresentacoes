@@ -17,7 +17,7 @@ Primeira versão para revisão: 10/11/2026. Rota prevista `/cliente/`, gestão M
 
 Envelope: `schemaVersion`, `revision`, `projects`, `clients`, `requests`, `audit`. Cada projeto contém módulos, publicação, versões de orçamento, recebimentos confirmados, marcos e documentos selecionados. Piloto começa com `published:false`, sem clientes autorizados; ativação exige revisão e ação Master. Solicitação de acesso registra o ID da sessão autenticada, sem conceder qualquer permissão. Nome informado pelo solicitante é declaração, não verificação de identidade.
 
-Arquivos disponíveis somente por identificador lógico previamente selecionado no projeto; não aceitar IDs Drive ou URLs fornecidos pelo cliente. Download autenticado, lista permitida, PDF conferido, limite30MB e cache privado/no-store. URLs públicas do Drive não substituem autorização.
+Arquivos disponíveis somente por identificador lógico previamente selecionado no projeto; não aceitar IDs Drive ou URLs fornecidos pelo cliente. Download autenticado em blocos de até 1 MiB, com autorização em cada requisição, limite total de 30 MB, verificação de versão/tamanho/ordem e assinatura PDF no primeiro bloco. O navegador monta o arquivo somente após receber todos os blocos da mesma versão. Isso evita ultrapassar o limite de resposta da hospedagem. Cache privado/no-store; URLs públicas do Drive não substituem autorização.
 
 ## Operação
 
@@ -25,6 +25,7 @@ GET `/api/client-portal`: lista somente projetos autorizados. Master pode listar
 GET `?project=ID`: projeção autorizada por módulos.
 GET `?project=ID&preview=1`: prévia restrita ao Master; mesmos campos destinados ao cliente.
 GET `?project=ID&asUser=USER`: visão exata de permissões da conta, restrita ao Master.
+GET `?project=ID&document=ID&offset=0`: primeiro bloco de PDF selecionado. Blocos seguintes incluem `offset` e `fileVersion` recebidos do servidor. Resposta JSON contém `offset`, `nextOffset`, `totalSize`, `fileVersion`, `mimeType`, `dataBase64` e `done`.
 GET `?admin=1`: gestão exclusiva Master, com revisão e ETag.
 POST `request-access`: registra solicitação própria, sem autorização.
 POST `set-access` / `set-publication`: exclusivas Master, exigem versão/ETag atual, gravação condicional e releitura. Auditoria identifica ator e horário. Nenhuma operação ativa automação, paga, compra ou envia mensagens.

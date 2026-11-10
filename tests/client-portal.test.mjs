@@ -16,6 +16,18 @@ function memoryStore(state=initial()) {let data=structuredClone(state),revision=
 async function request({user=A,url='/api/client-portal',method='GET',body,store=memoryStore(),fetchImpl,authenticate}={}) {
   const response=res();await createClientPortalHandler({store,authenticate:authenticate|| (async()=>user?{sub:user}:null),fetchImpl,tokenProvider:async()=>'synthetic-token'})({url,method,body,headers:{origin:ORIGIN}},response);return response;
 }
+function rangedPdfFetch({bytes=Buffer.from('%PDF-1.7\ntest'),version='v1',postVersion=version,metaSize=bytes.length,rangeOverride,versionOverride}={}) {
+  const calls=[];let metadataCalls=0;
+  const fetchImpl=async(url,options={})=>{
+    calls.push({url,options});
+    if(url.includes('fields=size,mimeType,version')){metadataCalls++;return new Response(JSON.stringify({size:String(metaSize),mimeType:'application/pdf',version:metadataCalls===1?(versionOverride??version):postVersion}),{status:200,headers:{'Content-Type':'application/json'}});}
+    const match=/^bytes=(\d+)-(\d+)$/.exec(options.headers?.Range||'');assert.ok(match,'Drive media request must carry an exact byte range');
+    const start=Number(match[1]),end=Number(match[2]);const chunk=bytes.subarray(start,end+1);
+    const contentRange=rangeOverride||`bytes ${start}-${end}/${metaSize}`;
+    return new Response(chunk,{status:206,headers:{'Content-Range':contentRange,'Content-Length':String(chunk.length),'Content-Type':'application/pdf'}});
+  };
+  return {fetchImpl,calls};
+}
 test('parent and version totals do not double-count; strips source cost fields',()=>{
   const b=budgetProjection(project('019').budgets[0]);assert.equal(b.totalCents,35000);assert.equal(b.nodes[0].totalCents,35000);assert.equal(b.reconciled,true);
   assert.ok(!JSON.stringify(b).includes('SECRET'));assert.equal(b.nodes[0].children[0].costCents,undefined);
@@ -86,14 +98,52 @@ test('HTTP unauthenticated and non-Master admin requests never read Drive',async
   assert.equal((await request({url:'/api/client-portal?admin=1',store})).code,403);assert.equal(store.reads,0);
   assert.equal((await request({method:'POST',body:{action:'set-publication'},store})).code,403);assert.equal(store.writes,0);
 });
+test('HTTP Master with missing client portal data ID fails before store or network fallback',async()=>{
+  const previous=process.env.CLIENT_PORTAL_DATA_FILE_ID;delete process.env.CLIENT_PORTAL_DATA_FILE_ID;process.env.INVENTORY_DATA_FILE_ID='validInventoryFallbackId123';let network=0;
+  try{const r=await request({user:MASTER,store:null,fetchImpl:async()=>{network++;throw Error('network must not be called')},authenticate:async()=>({sub:MASTER})});assert.equal(r.code,503);assert.equal(network,0);}
+  finally{if(previous===undefined)delete process.env.CLIENT_PORTAL_DATA_FILE_ID;else process.env.CLIENT_PORTAL_DATA_FILE_ID=previous;}
+});
 test('HTTP denies horizontal access and documents outside curated list before external fetch',async()=>{
   let called=0;const f=async()=>{called++;throw Error('Should not fetch')};
   for(const url of ['/api/client-portal?project=008','/api/client-portal?project=019&document=invoice','/api/client-portal?project=019&document=../privateId','/api/client-portal?project=019&preview=1'])assert.ok([403,404].includes((await request({url,fetchImpl:f})).code));
   assert.equal(called,0);
 });
-test('HTTP allowed PDF resolved from curated ID, returns attachment and no-store',async()=>{
-  const r=await request({url:'/api/client-portal?project=019&document=proposal',fetchImpl:async url=>{assert.match(url,/privateDriveFileId1/);return new Response('%PDF-1.7\ntest',{headers:{'Content-Type':'application/pdf'}})}});
-  assert.equal(r.code,200);assert.match(r.headers['Content-Disposition'],/^attachment/);assert.match(r.headers['Cache-Control'],/no-store/);
+test('HTTP PDF returns exact 1 MiB base64 ranges from curated Drive ID with no-store',async()=>{
+  const bytes=Buffer.alloc(2*1024*1024+123,0x61);Buffer.from('%PDF-1.7').copy(bytes);
+  const {fetchImpl,calls}=rangedPdfFetch({bytes});
+  const first=await request({url:'/api/client-portal?project=019&document=proposal',fetchImpl});
+  assert.equal(first.code,200);assert.match(first.headers['Cache-Control'],/no-store/);
+  assert.deepEqual(Object.keys(first.body).sort(),['dataBase64','done','fileVersion','mimeType','nextOffset','offset','totalSize'].sort());
+  assert.equal(first.body.offset,0);assert.equal(first.body.nextOffset,1024*1024);assert.equal(first.body.totalSize,bytes.length);assert.equal(first.body.mimeType,'application/pdf');assert.equal(first.body.fileVersion,'v1');assert.equal(first.body.done,false);
+  assert.deepEqual(Buffer.from(first.body.dataBase64,'base64'),bytes.subarray(0,1024*1024));
+  assert.equal(calls.length,3);assert.match(calls[0].url,/privateDriveFileId1/);assert.match(calls[0].url,/fields=size,mimeType,version/);assert.equal(calls[1].options.headers.Range,'bytes=0-1048575');assert.match(calls[2].url,/fields=size,mimeType,version/);
+  const second=await request({url:'/api/client-portal?project=019&document=proposal&offset=1048576&fileVersion=v1',fetchImpl});
+  assert.equal(second.code,200);assert.equal(second.body.offset,1048576);assert.equal(second.body.nextOffset,2*1024*1024);assert.equal(second.body.done,false);assert.equal(calls.filter(c=>c.options.headers?.Range).at(-1).options.headers.Range,'bytes=1048576-2097151');
+  const third=await request({url:'/api/client-portal?project=019&document=proposal&offset=2097152&fileVersion=v1',fetchImpl});
+  assert.equal(third.code,200);assert.equal(third.body.nextOffset,bytes.length);assert.equal(third.body.done,true);assert.deepEqual(Buffer.from(third.body.dataBase64,'base64'),bytes.subarray(2097152));
+});
+test('HTTP PDF rejects invalid offsets, oversized metadata and mismatched range length',async()=>{
+  for(const offset of ['-1','1','1048577','30000001','1.5','abc'])assert.equal((await request({url:`/api/client-portal?project=019&document=proposal&offset=${offset}`,fetchImpl:rangedPdfFetch().fetchImpl})).code,400);
+  assert.equal((await request({url:'/api/client-portal?project=019&document=proposal&offset=1048576',fetchImpl:rangedPdfFetch().fetchImpl})).code,400);
+  assert.equal((await request({url:'/api/client-portal?project=019&document=proposal',fetchImpl:rangedPdfFetch({metaSize:30_000_001}).fetchImpl})).code,413);
+  const mismatch=rangedPdfFetch({rangeOverride:'bytes 0-4/9'});assert.equal((await request({url:'/api/client-portal?project=019&document=proposal',fetchImpl:mismatch.fetchImpl})).code,503);
+});
+test('HTTP PDF rejects changed version, non-PDF metadata and invalid first-block magic',async()=>{
+  const bytes=Buffer.alloc(1024*1024+1,0x61);Buffer.from('%PDF-').copy(bytes);
+  const changed=rangedPdfFetch({bytes,version:'v2'});
+  const r=await request({url:'/api/client-portal?project=019&document=proposal&offset=1048576&fileVersion=v1',fetchImpl:changed.fetchImpl});assert.equal(r.code,409);
+  const changedDuringBlock=rangedPdfFetch({bytes:Buffer.from('%PDF-1.7\nlast'),postVersion:'v2'});
+  const last=await request({url:'/api/client-portal?project=019&document=proposal',fetchImpl:changedDuringBlock.fetchImpl});assert.equal(last.code,409);
+  assert.equal((await request({url:'/api/client-portal?project=019&document=proposal',fetchImpl:rangedPdfFetch({versionOverride:''}).fetchImpl})).code,503);
+  const bad=Buffer.alloc(6,0x41);assert.equal((await request({url:'/api/client-portal?project=019&document=proposal',fetchImpl:rangedPdfFetch({bytes:bad}).fetchImpl})).code,503);
+});
+test('HTTP PDF requires authentication each chunk and never resolves foreign document IDs',async()=>{
+  let called=0;const fetchImpl=async()=>{called++;throw Error('should not fetch')};const store=memoryStore();
+  assert.equal((await request({user:null,url:'/api/client-portal?project=019&document=proposal',store,fetchImpl})).code,401);
+  assert.equal((await request({url:'/api/client-portal?project=008&document=proposal',store,fetchImpl})).code,404);
+  assert.equal((await request({url:'/api/client-portal?project=019&document=privateDriveId',store,fetchImpl})).code,404);
+  assert.equal((await request({url:'/api/client-portal?project=019&document=proposal&offset=1048576&fileVersion=v1',authenticate:async()=>null,store,fetchImpl})).code,401);
+  assert.equal(called,0);
 });
 test('writes require fresh revision and readback; conflict cannot overwrite',async()=>{
   const store=memoryStore(),body={action:'set-access',projectId:'019',userId:A,active:false,modules:[],etag:'"0"',baseRevision:1};
