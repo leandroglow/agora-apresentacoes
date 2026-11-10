@@ -83,5 +83,3 @@ test('HTML endpoint requires its expected marker', async () => {
   });
   assert.equal(result.ok, false);
 });
-
-

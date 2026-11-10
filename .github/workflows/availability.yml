@@ -26,4 +26,3 @@ jobs:
           persist-credentials: false
       - name: Run public availability checks
         run: node scripts/check-availability.mjs
-
