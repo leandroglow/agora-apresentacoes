@@ -19,6 +19,12 @@ Envelope: `schemaVersion`, `revision`, `projects`, `clients`, `requests`, `audit
 
 Arquivos disponíveis somente por identificador lógico previamente selecionado no projeto; não aceitar IDs Drive ou URLs fornecidos pelo cliente. Download autenticado em blocos de até 1 MiB, com autorização em cada requisição, limite total de 30 MB, verificação de versão/tamanho/ordem e assinatura PDF no primeiro bloco. O navegador monta o arquivo somente após receber todos os blocos da mesma versão. Isso evita ultrapassar o limite de resposta da hospedagem. Cache privado/no-store; URLs públicas do Drive não substituem autorização.
 
+## Entrada por perfil
+
+Master entra sempre na central **Portais dos clientes**, mesmo com apenas um projeto cadastrado e mesmo pelo atalho `?gestao=1`. Nenhum projeto é aberto implicitamente. A central identifica cliente/projeto, diferencia rascunhos e oferece abrir a prévia ou gerenciar acessos. O botão **Voltar a todos os portais** permite trocar de projeto. A lista vem da base privada, sem cadastrar obras ou contas por inferência.
+
+Cliente com um único projeto autorizado entra diretamente nele. Com mais de um, escolhe somente entre seus projetos; sem autorização, vê a tela de solicitação. Login na Automação não cria permissão financeira. Retornar à aba revalida sessão e acesso, preservando a seleção somente na mesma sessão e se ainda autorizada; troca de conta limpa a seleção anterior. A prévia de permissões de um cliente não pode virar prévia irrestrita após atualizar.
+
 ## Operação
 
 GET `/api/client-portal`: lista somente projetos autorizados. Master pode listar rascunhos.
@@ -35,6 +41,8 @@ POST `set-access` / `set-publication`: exclusivas Master, exigem versão/ETag at
 Testar acesso cruzado entre obras, revogação, prévias, ausência de fontes privadas no payload, documentos não liberados, autorização realJWT, origem/expiração, concorrência e cálculos em centavos. Usar fixtures sintéticas apenas nos testes. `node --test tests/*.test.mjs`; `node --test` sem filtro também encontra scripts antigos de navegador que não integram esta suíte.
 
 Frontend: sessão encerrada ou trocada limpa dados e aborta consultas; nenhuma base financeira é salva em localStorage. Conferir desktop/celular, impressão, subitens, troca de versão e administração. Fonte HTML/HTTP200 não prova isolamento nem gravação.
+
+Revogação bloqueia novas consultas no servidor. Dados já apresentados numa aba ativa podem permanecer na memória até a próxima revalidação (atualizar, retornar à aba ou mudar a sessão); não há polling nem apagamento remoto instantâneo de conteúdo já visto.
 
 ## Referências de produto
 
