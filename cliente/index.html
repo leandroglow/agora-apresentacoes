@@ -8,8 +8,8 @@
   <meta name="robots" content="noindex, nofollow, noarchive">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://*.clerk.accounts.dev https://*.clerk.com https://clerk.apresentacoes.agoracons.com.br; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://img.clerk.com; font-src 'self' data:; connect-src 'self' https://agora-apresentacoes.vercel.app https://*.clerk.accounts.dev https://*.clerk.com https://clerk.apresentacoes.agoracons.com.br https://challenges.cloudflare.com; frame-src https://*.clerk.accounts.dev https://*.clerk.com https://clerk.apresentacoes.agoracons.com.br https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests">
   <title>Portal do Cliente | Ágora</title>
-  <link rel="stylesheet" href="portal.css?v=20261110-portais">
-  <script defer src="portal.js?v=20261110-portais"></script>
+  <link rel="stylesheet" href="portal.css?v=20261110-visual">
+  <script defer src="portal.js?v=20261110-visual"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Pular para o conteúdo</a>
@@ -32,7 +32,7 @@
 
   <div id="app" class="app-shell" hidden>
     <aside id="sidebar" class="sidebar" aria-label="Navegação do portal">
-      <a class="brand" href="#resumo" aria-label="Ágora, início do portal"><span class="brand-mark" aria-hidden="true">A</span><span><b>ÁGORA</b><small>PORTAL DO CLIENTE</small></span></a>
+      <a class="brand" href="#budget" aria-label="Ágora, início do portal"><span class="brand-mark" aria-hidden="true">A</span><span><b>ÁGORA</b><small>PORTAL DO CLIENTE</small></span></a>
       <div class="sidebar-project"><span class="eyebrow">SEU ESPAÇO</span><strong id="side-project-name">Selecione um projeto</strong><select id="project-select" aria-label="Selecionar projeto"></select></div>
       <nav id="nav" class="nav" aria-label="Seções do projeto"></nav>
       <div class="sidebar-bottom"><span class="security-mark" aria-hidden="true">◆</span><span>Acesso protegido<br><small>Informações autorizadas</small></span></div>
@@ -41,7 +41,7 @@
     <div class="workspace">
       <header class="topbar">
         <button id="mobile-menu" class="icon-button mobile-menu" type="button" aria-label="Abrir navegação" aria-expanded="false"><span></span><span></span><span></span></button>
-        <div class="breadcrumbs"><span>Ágora</span><span aria-hidden="true">/</span><strong id="crumb-title">Resumo</strong></div>
+        <div class="breadcrumbs"><span>Ágora</span><span aria-hidden="true">/</span><strong id="crumb-title">Portal</strong></div>
         <div class="top-actions"><span id="user-name" class="user-name"></span><button id="refresh" class="button button-quiet" type="button">Atualizar</button><button id="logout" class="button button-quiet" type="button">Sair</button></div>
       </header>
       <main id="main" class="main-content" tabindex="-1">

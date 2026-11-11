@@ -27,6 +27,14 @@ Cliente com um único projeto autorizado entra diretamente nele. Com mais de um,
 
 ## Operação
 
+### Interface visual — 10/11/2026
+
+A aba Resumo foi retirada. Ao abrir um projeto, a entrada passa a Orçamentos, ou à primeira área autorizada quando Orçamentos não estiver permitido. A central de escolha do Master permanece separada; clientes continuam restritos aos seus projetos.
+
+Tema grafite escuro com tipografia sans-serif, off-white e dourado. Cartões de total, quantidade de etapas e pagamentos confirmados; gráfico circular da composição e barras de valores por etapa. Os gráficos representam participação no orçamento, nunca progresso físico ou percentual pago. Usam exclusivamente totais das etapas raiz da versão selecionada, sem somar pais e filhos, versões ou opcionais. Acima de oito etapas, a legenda circular agrega as menores como Demais etapas; as barras preservam todas.
+
+Gráficos exigem totais inteiros, não negativos, positivos no conjunto e reconciliados. Pagamentos sem confirmação aparecem como A conferir; registros parciais não geram saldo. Os detalhes ficam recolhidos por padrão, abrem na pesquisa e podem ser expandidos. Notas contratuais continuam disponíveis em seções recolhíveis; impressão abre todos os itens e notas e usa fundo claro.
+
 GET `/api/client-portal`: lista somente projetos autorizados. Master pode listar rascunhos.
 GET `?project=ID`: projeção autorizada por módulos.
 GET `?project=ID&preview=1`: prévia restrita ao Master; mesmos campos destinados ao cliente.
