@@ -84,9 +84,34 @@ export function projectProjection(project, modules) {
   return result;
 }
 
+// This projection is exclusively for the authenticated Master, never a client grant.
+// Totals are derived from unique accounting events, not document copies or supplied totals.
+export function internalCostsProjection(raw) {
+  if (!object(raw)) return null;
+  const records=list(raw.items);
+  if (records.length>5000 || !unique(records.map(r=>r.id)) || records.some(r=>!key(r.id))) throw fail('Confira o índice de custos deste projeto.',503);
+  const amount=x=>Number.isSafeInteger(x)&&Math.abs(x)<=100_000_000_000?x:null;
+  const count=x=>Number.isSafeInteger(x)&&x>=0?x:0;
+  const items=records.map(r=>({id:r.id,date:date(r.date),category:text(r.category,160)||'A classificar',supplier:text(r.supplier,200),description:text(r.description,1000),
+    costCents:amount(r.costCents),paidCents:amount(r.paidCents),status:text(r.status,160),sourceLabel:text(r.sourceLabel,1000)}));
+  const documents={total:count(raw.documents?.total),reviewed:count(raw.documents?.reviewed),pending:count(raw.documents?.pending),duplicateCopies:count(raw.documents?.duplicateCopies)};
+  const complete=raw.coverage==='complete'&&documents.pending===0&&documents.reviewed===documents.total&&items.every(r=>r.costCents!==null);
+  const coverage=complete?'complete':items.length?'partial':'unconfirmed';
+  const known=field=>{const values=items.map(r=>r[field]).filter(v=>v!==null);return values.length?sum(values):complete?0:null;};
+  const totals={costCents:known('costCents'),paidCents:known('paidCents')};
+  const grouped=new Map();
+  for(const r of items)if(r.costCents!==null)grouped.set(r.category,(grouped.get(r.category)||0)+r.costCents);
+  const categories=[...grouped].map(([name,costCents])=>({name,costCents:Number.isSafeInteger(costCents)?costCents:null}));
+  return {asOf:date(raw.asOf),coverage,source:{title:text(raw.source?.title,240),format:text(raw.source?.format,80),updatedAt:text(raw.source?.updatedAt,80)},
+    totals,categories,items,documents,note:text(raw.note,3000)};
+}
+
 export function listPortalProjects(state, userId) {
   const master=userId===PORTAL_MASTER;
-  return {role:master?'master':'client',userId,projects:state.projects.filter(p=>master||permittedModules(state,userId,p)?.length).map(p=>({id:p.id,name:text(p.name,200),code:text(p.code,50),...(master?{published:p.published}:{})})),
+  return {role:master?'master':'client',userId,projects:state.projects.filter(p=>master||permittedModules(state,userId,p)?.length).map(p=>{
+    const internal=master?internalCostsProjection(p.internalCosts):null;
+    return {id:p.id,name:text(p.name,200),code:text(p.code,50),...(master?{published:p.published,...(internal?{internalCostsSummary:{coverage:internal.coverage,asOf:internal.asOf,...internal.totals,pendingDocuments:internal.documents.pending}}:{})}:{})};
+  }),
     accessRequested:state.requests.some(r=>r.userId===userId&&r.status==='pending')};
 }
 
@@ -95,8 +120,11 @@ export function readProject(state,userId,projectId,{preview=false,asUserId}={}) 
   if(!project)throw fail('Projeto indisponível para esta conta.',404);
   if((preview||asUserId)&&userId!==PORTAL_MASTER)throw fail('Acesso não autorizado.',403);
   const modules=permittedModules(state,asUserId||userId,project,preview&&!asUserId);
-  if(!modules?.length)throw fail('Projeto indisponível para esta conta.',404);
-  return projectProjection(project,modules);
+  const internalPreview=userId===PORTAL_MASTER&&preview&&!asUserId;
+  if(!modules?.length&&!internalPreview)throw fail('Projeto indisponível para esta conta.',404);
+  const result=projectProjection(project,modules||[]);
+  if(internalPreview&&object(project.internalCosts))result.internalCosts=internalCostsProjection(project.internalCosts);
+  return result;
 }
 
 export function mutatePortal(state, input, actor, now = new Date().toISOString()) {
