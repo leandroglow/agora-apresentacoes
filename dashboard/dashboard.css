@@ -29,6 +29,29 @@
   text-decoration: none;
 }
 .dashboard-shortcuts a span[aria-hidden] { color: var(--gold); }
+.rh-heading {display:flex;justify-content:space-between;align-items:center;gap:16px;margin:24px 0 18px}
+.rh-heading p,.rh-notes p {color:var(--muted);font-size:13px;line-height:1.65}
+.rh-heading h2 {font-family:inherit;font-size:22px}
+.rh-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.rh-card {min-width:0;padding:24px}
+.rh-date {color:var(--gold);font-size:12px;letter-spacing:.08em;font-weight:700}
+.rh-total {display:block;font-family:inherit;font-size:clamp(27px,2.8vw,38px);margin:15px 0;font-variant-numeric:tabular-nums}
+.rh-table-scroll {overflow-x:auto;margin-top:20px}
+.rh-table {width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+.rh-table th {text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;padding:10px 6px;white-space:nowrap}
+.rh-table td {padding:12px 6px 4px;vertical-align:top}
+.rh-table tr:nth-child(even) td {padding-top:0;padding-bottom:13px;border-bottom:1px solid #ffffff12}
+.rh-table td:last-child,.rh-table th:last-child {text-align:right;white-space:nowrap}
+.rh-table td[colspan] {text-align:left;white-space:normal}
+.rh-table small {display:block;color:var(--muted);margin-top:5px;font-size:10px}
+.rh-detail {margin-top:3px;color:var(--muted);font-size:11px;line-height:1.6}
+.rh-detail summary {cursor:pointer;width:max-content;color:var(--gold)}
+.rh-detail p {margin:6px 0;max-width:54ch}
+.rh-warning {font-size:12px;line-height:1.6;padding:10px 12px;border-left:2px solid var(--gold);background:#b997540b;color:#cfc5ae}
+.rh-notes {margin-top:20px;padding:24px}
+.rh-notes h3 {font-family:inherit;font-size:16px}
+@media(max-width:1200px){.rh-grid{grid-template-columns:1fr}.rh-heading{align-items:flex-start;flex-direction:column}}
+@media(max-width:480px){.rh-card,.rh-notes{padding:16px}.rh-table{min-width:470px}}
 .dashboard-shortcuts a:hover { border-color: var(--gold); }
 .dashboard-shortcuts a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 @media (max-width: 420px) {

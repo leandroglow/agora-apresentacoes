@@ -54,7 +54,18 @@ export function sanitizeDashboardData(raw) {
   const w = record(src.workday) ? src.workday : {};
   const wm = record(w.meta) ? w.meta : {};
   const workday = {items:Array.isArray(w.items)?w.items.slice(0,200).map(x=>item(x)).filter(Boolean):[],meta:{asOf:text(wm.asOf,80),coverage:text(wm.coverage,1500),queueUpdatedAt:text(wm.queueUpdatedAt,80)}};
-  return {workday,projects:arr('projects'),modules:arr('modules'),decisions:arr('decisions'),automation:arr('automation'),agenda:arr('agenda'),financial,meta,user:{displayName:'Leandro'}};
+  const rf = record(src.rhForecast) ? src.rhForecast : {};
+  const rows = (v, n=200) => Array.isArray(v) ? v.filter(record).slice(0,n) : [];
+  const rhForecast = {
+    asOf:text(rf.asOf,20), source:text(rf.source,800), sourceUrl:safeUrl(rf.sourceUrl),
+    groups:rows(rf.groups,20).map(g=>({id:text(g.id,80),label:text(g.label,200),anchor:text(g.anchor,20),
+      people:rows(g.people,100).map(p=>({id:text(p.id,80),name:text(p.name,160),dailyLabor:number(p.dailyLabor),dailyCar:number(p.dailyCar)}))})),
+    events:rows(rf.events).map(e=>({id:text(e.id,120),personId:text(e.personId,80),date:text(e.date,20),type:text(e.type,30),days:number(e.days),projectId:text(e.projectId,80),status:text(e.status,40),source:text(e.source,800)})),
+    adjustments:rows(rf.adjustments).map(a=>({id:text(a.id,120),personId:text(a.personId,80),paymentDate:text(a.paymentDate,20),amount:number(a.amount),status:text(a.status,30),kind:text(a.kind,40),source:text(a.source,800)})),
+    notes:Array.isArray(rf.notes)?rf.notes.slice(0,30).map(x=>text(x,1000)).filter(Boolean):[],
+    calendarNotes:rows(rf.calendarNotes,30).map(n=>({date:text(n.date,20),text:text(n.text,800)}))
+  };
+  return {workday,rhForecast,projects:arr('projects'),modules:arr('modules'),decisions:arr('decisions'),automation:arr('automation'),agenda:arr('agenda'),financial,meta,user:{displayName:'Leandro'}};
 }
 
 export default async function handler(req, res) {
