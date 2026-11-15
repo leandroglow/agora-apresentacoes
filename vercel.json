@@ -26,6 +26,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/purchase-requests",
+      "destination": "/api/service?_route=purchase-requests"
+    },
+    {
       "source": "/api/client-portal",
       "destination": "/api/service?_route=client-portal"
     },

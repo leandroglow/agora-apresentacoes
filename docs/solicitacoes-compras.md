@@ -1,0 +1,22 @@
+# Solicitações de compras
+
+Entrada: primeiro cartão de Organização no Sistema → `/compras/`.
+
+Fluxo: texto informal ou fotos → revisão opcional dos itens → solicitação → cotação → pedido → recebimento. Projeto é opcional; destinos também incluem estoque, gastos gerais e a definir. A IA organiza especificações sem presumir quantidade ou preço. O texto original é preservado. Copiar para WhatsApp copia apenas texto; não envia mensagens nem compra materiais. Estados não geram despesas ou lançamentos financeiros.
+
+## Acesso e armazenamento
+
+- Clerk autentica e a API autoriza exclusivamente as identidades internas já permitidas pelo Sistema. Clientes não têm acesso à fila nem às fotos.
+- Master acompanha todos os pedidos, edita e altera o andamento. William pode registrar e editar seus pedidos ainda solicitados/em cotação.
+- Índice JSON privado no Drive; fotos privadas na mesma pasta. Referências e credenciais permanecem no backend. Variáveis opcionais `PURCHASE_DATA_FILE_ID` e `PURCHASE_FOLDER_ID` permitem substituir os IDs canônicos configurados no módulo de armazenamento.
+- O cadastro não muda compartilhamento de arquivos. As fotos só são servidas com autenticação e vínculo válido ao pedido, proprietário e pasta.
+- A escrita usa ETag do Drive, comparação condicional e leitura de confirmação. Um pedido tem UUID estável; repetição idêntica não duplica. Edição com versão desatualizada é recusada.
+- Rascunho de texto local por usuário; fotos só persistem após upload. Até seis imagens por pedido, JPEG/PNG/WebP de até 900 KiB após compressão. IA usa até duas fotos por chamada. Fotos podem perder resolução; este módulo não substitui o arquivo fiscal original.
+
+## Manutenção
+
+Implementação: `compras/`, `api/_lib/purchase-requests.mjs`, `purchase-store.mjs`, `routes/purchase-requests.mjs`, dispatcher `api/service.mjs` e rewrite no `vercel.json`. Dependências e segredos existentes do Sistema são reutilizados. Organizar usa `OPENAI_VISION_MODEL` ou o modelo padrão já empregado pelo inventário; falha da IA não impede registro manual.
+
+Limites atuais: 80 itens/pedido, 2.000 pedidos e índice de até 3 MiB. Antes de atingir o limite, ampliar armazenamento ou arquivar preservando referências. Uploads abandonados podem deixar fotos sem pedido; só descartar após cruzar IDs, idade e índice, nunca pela aparência do nome. Não há monitoramento em segundo plano nem envio automático aos fornecedores.
+
+Validação: testes de contrato e concorrência em `tests/purchase-requests.test.mjs`, acesso real do middleware em `tests/system-access.test.mjs`, além da conferência visual e funcional no navegador. Não colocar dados reais de pedidos, imagens privadas, tokens ou credenciais no repositório.

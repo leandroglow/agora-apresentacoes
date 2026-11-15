@@ -506,6 +506,7 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
   <section id="secao-organizacao" class="organizacao-page" style="display:none" aria-labelledby="organizacao-title">
     <div class="organizacao-intro"><p>ÁGORA CONSTRUTORA</p><h1 id="organizacao-title">Organização</h1><span>Recursos de IA e a estrutura que apoia o trabalho da empresa.</span></div>
     <div class="organizacao-grid">
+      <button type="button" class="organizacao-card" id="card-compras"><span class="organizacao-symbol" aria-hidden="true">＋</span><span class="organizacao-card-title">Solicitação de compras</span><span class="organizacao-card-description">Registre materiais e acompanhe cotações, pedidos e recebimentos.</span><span class="organizacao-card-action">Abrir solicitações →</span></button>
       <button type="button" class="organizacao-card" id="card-cad"><span class="organizacao-symbol" aria-hidden="true">▧</span><span class="organizacao-card-title">Arquivos CAD</span><span class="organizacao-card-description">Abra DWG e DXF com zoom e navegação pelo celular.</span><span class="organizacao-card-action">Abrir desenho →</span></button>
       <button type="button" class="organizacao-card" id="card-catalogos-ia">
         <span class="organizacao-symbol" aria-hidden="true">✦</span>
@@ -1277,6 +1278,7 @@ document.getElementById('card-organizacao').addEventListener('click',()=>abrirSe
 document.getElementById('card-catalogos-ia').addEventListener('click',()=>abrirSecao('assistente'));
 document.getElementById('card-estrutura-ia').addEventListener('click',()=>abrirSecao('estrutura-ia'));
 document.getElementById('card-organizacao-despesas').addEventListener('click',()=>abrirSecao('despesas'));document.getElementById('card-inventario').addEventListener('click',()=>window.open('https://apresentacoes.agoracons.com.br/inventario/','_blank','noopener,noreferrer'));
+document.getElementById('card-compras').addEventListener('click',()=>{location.href='/compras/'});
 document.getElementById('btn-voltar-hub').addEventListener('click',()=>{
   // Para o iframe 360 ao sair
   document.getElementById('iframe-360').src='';

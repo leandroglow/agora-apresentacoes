@@ -12,6 +12,7 @@ import driveFiles from '../api/drive-files.mjs';
 import driveMedia from '../api/drive-media.mjs';
 import rh from '../api/rh.mjs';
 import config from '../api/_lib/routes/system-config.mjs';
+import purchases from '../api/_lib/routes/purchase-requests.mjs';
 
 const MASTER='user_3Jvm8LQLtHINAqVtQhagyoDC6nT';
 const WILIAM='user_3JvmAhiGPCh3w3nDMB3pPJOyIN9';
@@ -31,5 +32,5 @@ test('changing username or organization claims cannot grant system access',async
 test('Master and Wiliam retain backend access',async()=>{for(const id of[MASTER,WILIAM])assert.deepEqual(await requireAuth(req(id),res()),{sub:id});});
 test('anonymous requests remain 401 and foreign origins are refused',async()=>{for(const headers of[{origin},{origin:'https://evil.example',authorization:'Bearer '+token(MASTER)}]){const r=res();assert.equal(await requireAuth({...req(),headers},r),null);assert.equal(r.code,401);}});
 test('access route rejects client and accepts both staff users',async()=>{for(const id of[LAERTE,MASTER,WILIAM]){const r=res();await access(req(id),r);assert.equal(r.code,id===LAERTE?403:200);assert.equal(r.body.allowed,id===LAERTE?undefined:true);}});
-test('company data endpoints reject Laerte before any external request',async()=>{const original=globalThis.fetch;let calls=0;globalThis.fetch=()=>{calls++;throw Error('External request must not happen');};try{for(const handler of[expenses,files,file,driveFiles,driveMedia,rh,config]){const r=res();await handler(req(LAERTE,'/api/project-file?id=123456789012345'),r);assert.equal(r.code,403,handler.name);assert.equal(r.body.code,'SYSTEM_ACCESS_DENIED');}assert.equal(calls,0);}finally{globalThis.fetch=original;}});
+test('company data endpoints reject Laerte before any external request',async()=>{const original=globalThis.fetch;let calls=0;globalThis.fetch=()=>{calls++;throw Error('External request must not happen');};try{for(const handler of[expenses,files,file,driveFiles,driveMedia,rh,config,purchases]){const r=res();await handler(req(LAERTE,'/api/project-file?id=123456789012345'),r);assert.equal(r.code,403,handler.name);assert.equal(r.body.code,'SYSTEM_ACCESS_DENIED');}assert.equal(calls,0);}finally{globalThis.fetch=original;}});
 test('previously issued client video tickets are also denied',()=>{assert.equal(verifyTicket(issueTicket('123456789012345',LAERTE),'123456789012345'),false);assert.equal(verifyTicket(issueTicket('123456789012345',MASTER),'123456789012345'),true);assert.equal(verifyTicket(issueTicket('123456789012345',WILIAM),'other-file'),false);});
