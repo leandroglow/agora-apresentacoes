@@ -27,7 +27,7 @@ export function itemsOf(items) {
   return items.map(i=> {
     if(!plain(i))throw new PurchaseError('Item inválido.');
     const quantity=str(i.quantity,40,'Quantidade'),notes=str(i.notes,1000,'Observação do item');
-    return {description:str(i.description,300,'Descrição',false),quantity,unit:str(i.unit,30,'Unidade'),notes:quantity?notes.replace(/(^|\s)Quantidade não informada\.(?=\s|$)/g,' ').trim():notes};
+    return {description:str(i.description,300,'Descrição',false),quantity,unit:str(i.unit,30,'Unidade'),notes:quantity?notes.replace(/(^|\s)Quantidade não informada(?:\.(?=\s|$)|$)/g,' ').trim():notes};
   });
 }
 export function destinationOf(v) {

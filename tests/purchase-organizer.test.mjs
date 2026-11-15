@@ -14,10 +14,10 @@ test('only explicit extraction images reach the organizer; reference and legacy 
 });
 test('confirmed references included without source financial data; input stays intact',async()=>{
  const input={rawText:'25 mm cotovelo 45',images:[]};let captured;
- const organize=createOrganizer({catalog:async()=>[entry],complete:async p=>{captured=p;return result([{description:entry.name,quantity:'',unit:'',notes:'Quantidade não informada.'}]);}});
+ const organize=createOrganizer({catalog:async()=>[entry],complete:async p=>{captured=p;return result([{description:'Joelho 45° — 25 mm',quantity:'',unit:'',notes:'Quantidade não informada.'}]);}});
  const out=await organize(input);assert.equal(out.referenceCount,1);assert.equal(input.rawText,'25 mm cotovelo 45');
  const data=JSON.parse(captured.messages[1].content[0].text);assert.equal(data.referenciasConfirmadas[0].name,entry.name);assert.equal(data.referenciasConfirmadas[0].source,undefined);
- assert.equal(out.items[0].quantity,'');
+ assert.equal(out.items[0].quantity,'');assert.equal(out.items[0].description,entry.name);
  assert.equal(referencesFor('Joelho 90 25mm',[entry]).length,0);
 });
 test('catalog failure is explicit and does not prevent manual-content organization',async()=>{
@@ -26,6 +26,7 @@ test('catalog failure is explicit and does not prevent manual-content organizati
 });
 test('quantity cleanup only removes known automatic sentence and preserves unknown quantity/notes',()=>{
  assert.equal(itemsOf([{description:'a',quantity:'5',notes:'Quantidade não informada. Confirmar cor.'}])[0].notes,'Confirmar cor.');
+ assert.equal(itemsOf([{description:'a',quantity:'5',notes:'Quantidade não informada'}])[0].notes,'');
  assert.equal(itemsOf([{description:'a',quantity:'',notes:'Quantidade não informada.'}])[0].notes,'Quantidade não informada.');
  assert.equal(itemsOf([{description:'a',quantity:'5',notes:'Quantidade não informada pelo fornecedor.'}])[0].notes,'Quantidade não informada pelo fornecedor.');
 });

@@ -49,6 +49,10 @@ export function createOrganizer({catalog=loadNomenclature,complete=null}={}) {
   let parsed;try{parsed=JSON.parse(result.choices[0].message.content);}catch{throw new PurchaseError('A IA não conseguiu organizar. Edite e salve manualmente.',502,'organize_failed');}
   if(!plain(parsed)||!Array.isArray(parsed.items))throw new PurchaseError('Resposta de organização inválida.',502,'organize_failed');
   const items=itemsOf(parsed.items.map(i=>({...i,quantity:i.quantity==null?'':String(i.quantity)})));
+  // Only an exact, single-item user alias permits deterministic enrichment.
+  const exact=refs.filter(e=>e.aliases.some(a=>nameKey(a)===nameKey(input.rawText)));
+  if(items.length===1&&exact.length===1&&!photos.length)items[0].description=exact[0].name;
+  for(const item of items)if(!item.quantity&&item.notes==='Quantidade não informada')item.notes+='.';
   return {items,warnings:[...warnings,...(Array.isArray(parsed.warnings)?parsed.warnings.filter(x=>typeof x==='string').slice(0,12).map(x=>x.slice(0,300)):[]),'Revise a lista antes de salvar ou enviar ao fornecedor.'],referenceCount:refs.length};
  };
 }
