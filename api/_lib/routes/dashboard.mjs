@@ -25,6 +25,38 @@ const safeUrl = v => {
       ? u.href : undefined;
   } catch { return undefined; }
 };
+const readDriveJsonDefault = async (id, token) => {
+  const response = await fetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media&supportsAllDrives=true`, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30000) });
+  if (!response.ok) throw new Error(`RH source unavailable (${response.status})`);
+  return response.json();
+};
+export async function loadRhForecast(raw, readDriveJson) {
+  const pointer = record(raw?.rhForecast) ? raw.rhForecast : {};
+  const fileId = String(pointer.rhForecastFileId || '').trim();
+  if (!ID_RE.test(fileId)) return { error: 'RH_FORECAST_SOURCE_MISSING' };
+  try {
+    const base = await readDriveJson(fileId);
+    const ledgerId = String(base?.adjustmentsFileId || '').trim();
+    if (!ID_RE.test(ledgerId)) return { error: 'RH_LEDGER_SOURCE_MISSING' };
+    const ledger = await readDriveJson(ledgerId);
+    if (!record(base) || !record(ledger) || !Array.isArray(ledger.compensacoes) || !Array.isArray(ledger.adiantamentos)) throw Error('Invalid RH ledger');
+    const adjustments = [];
+    const seen = new Map();
+    const add = (x, kind, status) => {
+      if (!record(x) || !x.id || !x.pessoa_id || !/^\d{4}-\d{2}-\d{2}$/.test(x.pagamento || '') || number(x.valor) === null || x.valor < 0) throw Error('Invalid RH event');
+      const id = String(x.id).trim();
+      const a = { id, personId: String(x.pessoa_id), paymentDate: x.pagamento, amount: x.valor, status, kind,
+        source: [x.origem, x.fonte, kind === 'advance' && x.aplicar_na_previsao === true && x.transferencia_comprovada !== true ? 'Desconto previsto autorizado; transferência ainda não comprovada.' : ''].filter(Boolean).join(' · ') };
+      if (seen.has(id)) { if (JSON.stringify(seen.get(id)) !== JSON.stringify(a)) throw Error('Conflicting RH event'); return; }
+      seen.set(id,a); adjustments.push(a);
+    };
+    for (const x of ledger.compensacoes) add(x, 'compensation', x?.liquidada === true ? 'settled' : x?.confirmada === true ? 'open' : 'planned');
+    for (const x of ledger.adiantamentos) add(x, 'advance', x?.liquidada === true ? 'settled' : x?.aplicar_na_previsao === true || x?.transferencia_comprovada === true ? 'open' : 'planned');
+    if(adjustments.length > 200) throw Error('RH ledger exceeds forecast limit');
+    const dates=[base.asOf,ledger.atualizado_em].filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x||'')).sort();
+    return { asOf: dates.at(-1), source: text(base.source, 800), sourceUrl: `https://drive.google.com/file/d/${ledgerId}/view`, groups: Array.isArray(base.groups) ? base.groups : [], events: Array.isArray(base.events) ? base.events : [], notes: Array.isArray(base.notes) ? base.notes : [], calendarNotes: Array.isArray(base.calendarNotes) ? base.calendarNotes : [], adjustments };
+  } catch (error) { return { error: 'RH_FORECAST_UNAVAILABLE' }; }
+}
 function item(v, depth = 0) {
   if (!record(v)) return null;
   const out = {};
@@ -57,7 +89,7 @@ export function sanitizeDashboardData(raw) {
   const rf = record(src.rhForecast) ? src.rhForecast : {};
   const rows = (v, n=200) => Array.isArray(v) ? v.filter(record).slice(0,n) : [];
   const rhForecast = {
-    asOf:text(rf.asOf,20), source:text(rf.source,800), sourceUrl:safeUrl(rf.sourceUrl),
+    error:text(rf.error,120), asOf:text(rf.asOf,20), source:text(rf.source,800), sourceUrl:safeUrl(rf.sourceUrl),
     groups:rows(rf.groups,20).map(g=>({id:text(g.id,80),label:text(g.label,200),anchor:text(g.anchor,20),
       people:rows(g.people,100).map(p=>({id:text(p.id,80),name:text(p.name,160),dailyLabor:number(p.dailyLabor),dailyCar:number(p.dailyCar)}))})),
     events:rows(rf.events).map(e=>({id:text(e.id,120),personId:text(e.personId,80),date:text(e.date,20),type:text(e.type,30),days:number(e.days),projectId:text(e.projectId,80),status:text(e.status,40),source:text(e.source,800)})),
@@ -80,6 +112,8 @@ export default async function handler(req, res) {
     const token = await getGoogleDriveAccessToken();
     const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&supportsAllDrives=true`, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30000) });
     if (!response.ok) return res.status(503).json({ error: 'DASHBOARD_DATA_UNAVAILABLE' });
-    return res.status(200).json(sanitizeDashboardData(await response.json()));
+    const raw = await response.json();
+    const rhForecast = await loadRhForecast(raw, id => readDriveJsonDefault(id, token));
+    return res.status(200).json(sanitizeDashboardData({ ...raw, rhForecast }));
   } catch { return res.status(503).json({ error: 'DASHBOARD_DATA_UNAVAILABLE' }); }
 }
