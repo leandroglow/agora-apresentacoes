@@ -26,7 +26,8 @@ export function itemsOf(items) {
   if(!Array.isArray(items)||items.length>80)throw new PurchaseError('Use até 80 itens por solicitação.');
   return items.map(i=> {
     if(!plain(i))throw new PurchaseError('Item inválido.');
-    return {description:str(i.description,300,'Descrição',false),quantity:str(i.quantity,40,'Quantidade'),unit:str(i.unit,30,'Unidade'),notes:str(i.notes,1000,'Observação do item')};
+    const quantity=str(i.quantity,40,'Quantidade'),notes=str(i.notes,1000,'Observação do item');
+    return {description:str(i.description,300,'Descrição',false),quantity,unit:str(i.unit,30,'Unidade'),notes:quantity?notes.replace(/(^|\s)Quantidade não informada\.(?=\s|$)/g,' ').trim():notes};
   });
 }
 export function destinationOf(v) {

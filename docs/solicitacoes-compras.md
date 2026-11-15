@@ -20,3 +20,12 @@ Implementação: `compras/`, `api/_lib/purchase-requests.mjs`, `purchase-store.m
 Limites atuais: 80 itens/pedido, 2.000 pedidos e índice de até 3 MiB. Antes de atingir o limite, ampliar armazenamento ou arquivar preservando referências. Uploads abandonados podem deixar fotos sem pedido; só descartar após cruzar IDs, idade e índice, nunca pela aparência do nome. Não há monitoramento em segundo plano nem envio automático aos fornecedores.
 
 Validação: testes de contrato e concorrência em `tests/purchase-requests.test.mjs`, acesso real do middleware em `tests/system-access.test.mjs`, além da conferência visual e funcional no navegador. Não colocar dados reais de pedidos, imagens privadas, tokens ou credenciais no repositório.
+
+
+## Organização assistida — 15/11/2026
+
+Fotos são referência por padrão. Somente a opção explícita Extrair lista desta foto envia a imagem à IA, até duas por análise; todas continuam anexadas ao pedido. A API rejeita imagens sem purpose=extract-list. Fotos sem texto legível não autorizam inferir lista por aparência.
+
+A nomenclatura privada no Drive (ID 1ZAm-ie0MMqfRKpyfQr5qTz4y0613emDb, Compras/nomenclatura-materiais.json) contém nomes, aliases e fonte de confirmação, sem preços ou dados pessoais. Versão inicial: sete referências, seis da BASE-PRECOS-2026.csv e a confirmação específica de Leandro para Joelho 45° — 25 mm — soldável para água fria. Não é leitura automática de todo o financeiro. Acrescentar referências apenas com fonte e revisar ambiguidades. Não generalizar soldável/água fria pela bitola. API consulta a base no Drive; falha produz aviso e usa apenas o conteúdo fornecido. Nenhuma referência ou credencial é embutida no frontend.
+
+Texto original permanece preservado. Campos incertos continuam vazios; IA padroniza nomes/unidades e propõe a lista para revisão. Quantidade preenchida remove somente a frase automática Quantidade não informada., preservando observações técnicas. Registros antigos têm exibição/cópia corrigidas e persistem a limpeza ao salvar, sem migração destrutiva da fila.
