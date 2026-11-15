@@ -1,5 +1,6 @@
 import { requireMasterAuth } from '../auth.mjs';
 import { getGoogleDriveAccessToken } from '../google.mjs';
+import { nextFridays } from '../../../dashboard/rh-forecast.js';
 
 const ORIGIN = 'https://apresentacoes.agoracons.com.br';
 const MASTER = 'user_3Jvm8LQLtHINAqVtQhagyoDC6nT';
@@ -30,7 +31,9 @@ const readDriveJsonDefault = async (id, token) => {
   if (!response.ok) throw new Error(`RH source unavailable (${response.status})`);
   return response.json();
 };
-export async function loadRhForecast(raw, readDriveJson) {
+const isoDate = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) && Number.isFinite(Date.parse(v)) && new Date(v).toISOString().slice(0,10) === v;
+const nonempty = v => typeof v === 'string' && v.trim().length > 0;
+export async function loadRhForecast(raw, readDriveJson, now = new Date()) {
   const pointer = record(raw?.rhForecast) ? raw.rhForecast : {};
   const fileId = String(pointer.rhForecastFileId || '').trim();
   if (!ID_RE.test(fileId)) return { error: 'RH_FORECAST_SOURCE_MISSING' };
@@ -39,11 +42,11 @@ export async function loadRhForecast(raw, readDriveJson) {
     const ledgerId = String(base?.adjustmentsFileId || '').trim();
     if (!ID_RE.test(ledgerId)) return { error: 'RH_LEDGER_SOURCE_MISSING' };
     const ledger = await readDriveJson(ledgerId);
-    if (!record(base) || !record(ledger) || !Array.isArray(ledger.compensacoes) || !Array.isArray(ledger.adiantamentos)) throw Error('Invalid RH ledger');
+    if (!record(base) || !record(ledger) || !Array.isArray(ledger.compensacoes) || !Array.isArray(ledger.adiantamentos) || !Array.isArray(ledger.ocorrencias)) throw Error('Invalid RH ledger');
     const adjustments = [];
     const seen = new Map();
     const add = (x, kind, status) => {
-      if (!record(x) || !x.id || !x.pessoa_id || !/^\d{4}-\d{2}-\d{2}$/.test(x.pagamento || '') || number(x.valor) === null || x.valor < 0) throw Error('Invalid RH event');
+      if (!record(x) || !nonempty(x.id) || !nonempty(x.pessoa_id) || !isoDate(x.pagamento) || number(x.valor) === null || x.valor < 0) throw Error('Invalid RH event');
       const id = String(x.id).trim();
       const a = { id, personId: String(x.pessoa_id), paymentDate: x.pagamento, amount: x.valor, status, kind,
         source: [x.origem, x.fonte, kind === 'advance' && x.aplicar_na_previsao === true && x.transferencia_comprovada !== true ? 'Desconto previsto autorizado; transferência ainda não comprovada.' : ''].filter(Boolean).join(' · ') };
@@ -52,9 +55,23 @@ export async function loadRhForecast(raw, readDriveJson) {
     };
     for (const x of ledger.compensacoes) add(x, 'compensation', x?.liquidada === true ? 'settled' : x?.confirmada === true ? 'open' : 'planned');
     for (const x of ledger.adiantamentos) add(x, 'advance', x?.liquidada === true ? 'settled' : x?.aplicar_na_previsao === true || x?.transferencia_comprovada === true ? 'open' : 'planned');
-    if(adjustments.length > 200) throw Error('RH ledger exceeds forecast limit');
+    const [first,last] = nextFridays(now);
+    const start = new Date(Date.parse(first)-13*86400000).toISOString().slice(0,10);
+    const eventIds = new Map(), events = [];
+    for (const x of ledger.ocorrencias) {
+      if (!record(x) || !nonempty(x.id) || !nonempty(x.personId) || !isoDate(x.date) || !nonempty(x.source) ||
+          !['absence','extra','attendance','allocation','note'].includes(x.type) || !['reported','confirmed','planned','cancelled'].includes(x.status) ||
+          number(x.days) === null || x.days < 0 || (['absence','extra'].includes(x.type) && x.days !== 1)) throw Error('Invalid RH occurrence');
+      const id=x.id.trim();
+      if(eventIds.has(id)) { if(JSON.stringify(eventIds.get(id))!==JSON.stringify(x)) throw Error('Conflicting RH occurrence'); continue; }
+      eventIds.set(id,x);
+      // The full ledger is retained in Drive. Only the active planning window leaves the server.
+      if(x.date < start || x.date > last || !['absence','extra'].includes(x.type) || !['reported','confirmed'].includes(x.status)) continue;
+      events.push({id,personId:x.personId,date:x.date,type:x.type,days:x.days,projectId:text(x.projectId,80),status:x.status,source:text(x.source,800)});
+    }
+    const activeAdjustments = adjustments.filter(a=>a.status!=='settled' && a.paymentDate<=last);
     const dates=[base.asOf,ledger.atualizado_em].filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x||'')).sort();
-    return { asOf: dates.at(-1), source: text(base.source, 800), sourceUrl: `https://drive.google.com/file/d/${ledgerId}/view`, groups: Array.isArray(base.groups) ? base.groups : [], events: Array.isArray(base.events) ? base.events : [], notes: Array.isArray(base.notes) ? base.notes : [], calendarNotes: Array.isArray(base.calendarNotes) ? base.calendarNotes : [], adjustments };
+    return { asOf: dates.at(-1), source: text(base.source, 800), sourceUrl: `https://drive.google.com/file/d/${ledgerId}/view`, groups: Array.isArray(base.groups) ? base.groups : [], events, notes: Array.isArray(base.notes) ? base.notes : [], calendarNotes: Array.isArray(base.calendarNotes) ? base.calendarNotes : [], adjustments:activeAdjustments };
   } catch (error) { return { error: 'RH_FORECAST_UNAVAILABLE' }; }
 }
 function item(v, depth = 0) {
@@ -87,7 +104,7 @@ export function sanitizeDashboardData(raw) {
   const wm = record(w.meta) ? w.meta : {};
   const workday = {items:Array.isArray(w.items)?w.items.slice(0,200).map(x=>item(x)).filter(Boolean):[],meta:{asOf:text(wm.asOf,80),coverage:text(wm.coverage,1500),queueUpdatedAt:text(wm.queueUpdatedAt,80)}};
   const rf = record(src.rhForecast) ? src.rhForecast : {};
-  const rows = (v, n=200) => Array.isArray(v) ? v.filter(record).slice(0,n) : [];
+  const rows = (v, n=Infinity) => Array.isArray(v) ? v.filter(record).slice(0,n) : [];
   const rhForecast = {
     error:text(rf.error,120), asOf:text(rf.asOf,20), source:text(rf.source,800), sourceUrl:safeUrl(rf.sourceUrl),
     groups:rows(rf.groups,20).map(g=>({id:text(g.id,80),label:text(g.label,200),anchor:text(g.anchor,20),
