@@ -1,6 +1,7 @@
 import { requireMasterAuth } from '../auth.mjs';
 import { getGoogleDriveAccessToken } from '../google.mjs';
 import { nextFridays } from '../../../dashboard/rh-forecast.js';
+import { normalizeWorkday, consolidateFinancial } from '../dashboard-consolidation.mjs';
 
 const ORIGIN = 'https://apresentacoes.agoracons.com.br';
 const MASTER = 'user_3Jvm8LQLtHINAqVtQhagyoDC6nT';
@@ -16,6 +17,7 @@ function cors(req, res) {
 
 const text = (v, max = 800) => typeof v === 'string' ? v.slice(0, max) : undefined;
 const number = v => typeof v === 'number' && Number.isFinite(v) ? v : null;
+const listStrings=(v,n)=>Array.isArray(v)?v.slice(0,n).map(x=>text(x,180)).filter(Boolean):[];
 const record = v => v && typeof v === 'object' && !Array.isArray(v);
 const safeUrl = v => {
   if (typeof v !== 'string') return undefined;
@@ -74,6 +76,13 @@ export async function loadRhForecast(raw, readDriveJson, now = new Date()) {
     return { asOf: dates.at(-1), source: text(base.source, 800), sourceUrl: `https://drive.google.com/file/d/${ledgerId}/view`, groups: Array.isArray(base.groups) ? base.groups : [], events, notes: Array.isArray(base.notes) ? base.notes : [], calendarNotes: Array.isArray(base.calendarNotes) ? base.calendarNotes : [], adjustments:activeAdjustments };
   } catch (error) { return { error: 'RH_FORECAST_UNAVAILABLE' }; }
 }
+export async function loadWorkday(raw, readDriveJson, now = new Date()) {
+  const pointer = record(raw?.workday) ? raw.workday : {};
+  const id = String(pointer.queueFileId || '').trim();
+  if (!ID_RE.test(id)) return normalizeWorkday(raw, now);
+  try { const queue = await readDriveJson(id); return normalizeWorkday({...raw, workday:{...pointer,tasks:queue.tasks,updated_at:queue.updated_at,queueSourceUrl:`https://drive.google.com/file/d/${id}/view`}}, now); }
+  catch { return normalizeWorkday({...raw,workday:{...pointer,queueError:true}},now); }
+}
 function item(v, depth = 0) {
   if (!record(v)) return null;
   const out = {};
@@ -102,7 +111,7 @@ export function sanitizeDashboardData(raw) {
   const meta = record(src.meta) ? {asOf:text(src.meta.asOf,80),sourcesCoverage:text(src.meta.sourcesCoverage,500)} : {};
   const w = record(src.workday) ? src.workday : {};
   const wm = record(w.meta) ? w.meta : {};
-  const workday = {items:Array.isArray(w.items)?w.items.slice(0,200).map(x=>item(x)).filter(Boolean):[],meta:{asOf:text(wm.asOf,80),coverage:text(wm.coverage,1500),queueUpdatedAt:text(wm.queueUpdatedAt,80)}};
+  const workday = {items:Array.isArray(w.items)?w.items.slice(0,200).map(x=>item(x)).filter(Boolean):[],meta:{asOf:text(wm.asOf,80),coverage:text(wm.coverage,1500),queueUpdatedAt:text(wm.queueUpdatedAt,80),consultedAt:text(wm.consultedAt,80),queueError:wm.queueError===true}};
   const rf = record(src.rhForecast) ? src.rhForecast : {};
   const rows = (v, n=Infinity) => Array.isArray(v) ? v.filter(record).slice(0,n) : [];
   const rhForecast = {
@@ -114,7 +123,17 @@ export function sanitizeDashboardData(raw) {
     notes:Array.isArray(rf.notes)?rf.notes.slice(0,30).map(x=>text(x,1000)).filter(Boolean):[],
     calendarNotes:rows(rf.calendarNotes,30).map(n=>({date:text(n.date,20),text:text(n.text,800)}))
   };
-  return {workday,rhForecast,projects:arr('projects'),modules:arr('modules'),decisions:arr('decisions'),automation:arr('automation'),agenda:arr('agenda'),financial,meta,user:{displayName:'Leandro'}};
+  const fc=record(src.financialConsolidated)?src.financialConsolidated:null;
+  const financialItem=x=>{const i=item(x);return i?{...i,eventId:text(x.eventId,180),payee:text(x.payee,180),dueDate:text(x.dueDate,20),amount:number(x.amount)}:null};
+  const financialItems=v=>rows(v,500).map(financialItem).filter(Boolean);
+  const periods={};
+  for(const key of ['next7days','currentWeek','nextWeek']){const p=fc?.periods?.[key];if(!record(p))continue;periods[key]={name:key,from:text(p.from,20),to:text(p.to,20),items:financialItems(p.items),confirmedTotal:number(p.confirmedTotal),unconfirmedTotal:number(p.unconfirmedTotal),rhTotal:number(p.rhTotal),rh:rows(p.rh,2).map(r=>({paymentDate:text(r.paymentDate,20),total:number(r.total),group:text(r.group,160),status:text(r.status,80),asOf:text(r.asOf,20),sourceUrl:safeUrl(r.sourceUrl)}))};}
+  const coverage=record(fc?.coverage)?fc.coverage:{};
+  const projects=Object.fromEntries(Object.entries(record(coverage.projects)?coverage.projects:{}).filter(([k])=>/^\d{3}$|^RH$/.test(k)).map(([k,v])=>[k,text(v,1200)]));
+  const controls=Object.fromEntries(Object.entries(record(fc?.controls)?fc.controls:{}).filter(([k,v])=>/^\d{3}$/.test(k)&&safeUrl(v)).map(([k,v])=>[k,safeUrl(v)]));
+  const financialConsolidated=fc?{asOf:text(fc.asOf,30),consultedAt:text(fc.consultedAt,80),periods,overdue:financialItems(fc.overdue),unknown:financialItems(fc.unknown),coverage:{status:text(coverage.status,40),note:text(coverage.note,1500),projects,conflicts:listStrings(coverage.conflicts,100),invalid:number(coverage.invalid),rhStatus:text(coverage.rhStatus,40)},controls}:null;
+
+  return {workday,rhForecast,projects:arr('projects'),modules:arr('modules'),decisions:arr('decisions'),automation:arr('automation'),agenda:arr('agenda'),financial,financialConsolidated,meta,user:{displayName:'Leandro'}};
 }
 
 export default async function handler(req, res) {
@@ -130,7 +149,12 @@ export default async function handler(req, res) {
     const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&supportsAllDrives=true`, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30000) });
     if (!response.ok) return res.status(503).json({ error: 'DASHBOARD_DATA_UNAVAILABLE' });
     const raw = await response.json();
-    const rhForecast = await loadRhForecast(raw, id => readDriveJsonDefault(id, token));
-    return res.status(200).json(sanitizeDashboardData({ ...raw, rhForecast }));
+    const read = id => readDriveJsonDefault(id, token);
+    const [rhForecast,workday] = await Promise.all([loadRhForecast(raw, read),loadWorkday(raw, read)]);
+    let financeRaw = raw;
+    const financeId = String(raw?.financeConsolidated?.fileId || '').trim();
+    if (ID_RE.test(financeId)) { try { financeRaw = {...raw, financeConsolidated: await read(financeId)}; } catch { financeRaw = {...raw, financeConsolidated:{items:[],error:true}}; } }
+    const financialConsolidated = consolidateFinancial(financeRaw, {rhForecast});
+    return res.status(200).json(sanitizeDashboardData({ ...raw, rhForecast, workday, financialConsolidated }));
   } catch { return res.status(503).json({ error: 'DASHBOARD_DATA_UNAVAILABLE' }); }
 }
