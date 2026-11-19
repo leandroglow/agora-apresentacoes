@@ -1,0 +1,2341 @@
+{
+  "sourceSha256": "043e4617f3d2ed7a67c1ea09211d6377af30e415103b8be1e6481689409d0bcd",
+  "sourceName": "016_G13_R18_Arquitetura_e_Interiores_R07.skp",
+  "savedActiveName": "C03-06 · Borda infinita e soleira",
+  "viewport": [
+    812,
+    822
+  ],
+  "scenes": [
+    {
+      "id": "scene-1",
+      "name": "01 · Casa no lote",
+      "camera": {
+        "eye": [
+          28.635817112043625,
+          26.94749928217303,
+          30.133914237289456
+        ],
+        "target": [
+          3.305440008000045,
+          0.5158014344753831,
+          -11.716274021565145
+        ],
+        "up": [
+          -0.2461447727785733,
+          0.8797891969060238,
+          -0.4066739724167733
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 24.983867915176486,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-2",
+      "name": "02 · Planta mobiliada",
+      "camera": {
+        "eye": [
+          3.7500000000000004,
+          60.07040089288383,
+          -10.981734026198918
+        ],
+        "target": [
+          3.7500000000000004,
+          1.4687185776879819,
+          -10.981734026198918
+        ],
+        "up": [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 32.07841183936175,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-3",
+      "name": "03 · Lajes e aberturas",
+      "camera": {
+        "eye": [
+          -24.95627855154894,
+          40.31758211091275,
+          -46.11484094462676
+        ],
+        "target": [
+          3.224233304069326,
+          -0.0604647269880451,
+          -11.625259270586504
+        ],
+        "up": [
+          0.4249732267750446,
+          0.7408620634061841,
+          0.5201164865008009
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 27.273604614049408,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-4",
+      "name": "04 · Varanda e piscina",
+      "camera": {
+        "eye": [
+          -21.782019870020935,
+          22.346132077995247,
+          -55.98737796003585
+        ],
+        "target": [
+          3.582708356707002,
+          -0.009221613358186172,
+          -11.276670577328977
+        ],
+        "up": [
+          0.19678666379168672,
+          0.9170335502704513,
+          0.3468781870226341
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 23.579204615764723,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-5",
+      "name": "05 · Portão aberto",
+      "camera": {
+        "eye": [
+          6.227201943111283,
+          8.51642487113883,
+          39.66323389072816
+        ],
+        "target": [
+          3.731319989627214,
+          1.8607396618479766,
+          -11.363686047168379
+        ],
+        "up": [
+          -0.006311399501745181,
+          0.9916202078274358,
+          -0.12903305648012367
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 10.263016658234562,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "16 Portão aberto | conferência",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-6",
+      "name": "06 · Estrutural e arranques da casa",
+      "camera": {
+        "eye": [
+          32.495189028523946,
+          25.331228677901585,
+          30.082772155034206
+        ],
+        "target": [
+          3.7338596977869294,
+          -1.562481865125236,
+          -11.004841174590105
+        ],
+        "up": [
+          -0.2710015448202153,
+          0.8812927221435178,
+          -0.3871450640288791
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 25.7388430147358,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "14 Baldrames | referência estrutural",
+        "17 Furos medidos | registro de campo",
+        "18 Subestrutura da piscina | referência",
+        "19 Calçada, guia e soleiras de entrada",
+        "22 Arranques da casa e encontros",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-7",
+      "name": "07 · Baldrames e piso acabado",
+      "camera": {
+        "eye": [
+          31.739462888349852,
+          18.344746064000155,
+          32.91991185659754
+        ],
+        "target": [
+          3.715148504706741,
+          -0.08220038003914693,
+          -10.844085947995802
+        ],
+        "up": [
+          -0.18022001350885877,
+          0.9425033526112547,
+          -0.2814394731508205
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 24.587259716999302,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "02 Pisos e acabamentos",
+        "10 Piscina de borda infinita",
+        "14 Baldrames | referência estrutural",
+        "18 Subestrutura da piscina | referência",
+        "19 Calçada, guia e soleiras de entrada",
+        "22 Arranques da casa e encontros",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-8",
+      "name": "08 · Corte A-A | da guia à piscina",
+      "camera": {
+        "eye": [
+          45.0,
+          1.3,
+          -11.0
+        ],
+        "target": [
+          4.8,
+          1.3,
+          -11.0
+        ],
+        "up": [
+          0.0,
+          1.0,
+          -0.0
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 18.0,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "14 Baldrames | referência estrutural",
+        "15 Portão fechado",
+        "18 Subestrutura da piscina | referência",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+        {
+          "id": 291746,
+          "name": "Corte A-A | guia, garagem, casa, deck e piscina",
+          "root": true,
+          "normal": [
+            -1.0,
+            0.0,
+            -0.0
+          ],
+          "constant": 4.8
+        }
+      ],
+      "sectionPlanes": [
+        {
+          "id": 291746,
+          "name": "Corte A-A | guia, garagem, casa, deck e piscina",
+          "root": true,
+          "normal": [
+            -1.0,
+            0.0,
+            -0.0
+          ],
+          "constant": 4.8
+        }
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-9",
+      "name": "09 · Coberturas e calhas centrais",
+      "camera": {
+        "eye": [
+          24.11004197212941,
+          33.18840496498926,
+          3.8902140900696915
+        ],
+        "target": [
+          3.673700679234974,
+          2.341097353073127,
+          -13.075805096484176
+        ],
+        "up": [
+          -0.5830525670639051,
+          0.6524963279995823,
+          -0.484043640581355
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 18.62506585492321,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "03 Alvenaria rebocada e platibandas",
+        "06 Lajes da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-10",
+      "name": "10 · Piscina pelas formas estruturais",
+      "camera": {
+        "eye": [
+          11.0,
+          6.0,
+          -17.0
+        ],
+        "target": [
+          3.7499999999999996,
+          -0.45,
+          -22.9
+        ],
+        "up": [
+          -0.44051182573105296,
+          0.8230659073763468,
+          -0.3584854857673395
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 6.2,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "18 Subestrutura da piscina | referência",
+        "25 Piscina | alternativa ajustada às formas",
+        "27 Guarda-corpo do fundo",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-11",
+      "name": "11 · Arranques da piscina | hipótese",
+      "camera": {
+        "eye": [
+          12.0,
+          5.0,
+          -14.999999999999998
+        ],
+        "target": [
+          3.7499999999999996,
+          -1.35,
+          -22.6
+        ],
+        "up": [
+          -0.3623304895536287,
+          0.8702329376637834,
+          -0.3337832388615246
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 7.000000000000001,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "14 Baldrames | referência estrutural",
+        "17 Furos medidos | registro de campo",
+        "22 Arranques da casa e encontros",
+        "26 Arranques 20 × 30 da piscina | hipótese",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-12",
+      "name": "12 · Estar",
+      "camera": {
+        "eye": [
+          4.4,
+          1.7,
+          -10.24
+        ],
+        "target": [
+          6.27,
+          1.03,
+          -7.4
+        ],
+        "up": [
+          0.10631479874183172,
+          0.981135653645486,
+          0.16146204728706
+        ],
+        "perspective": true,
+        "fovDegrees": 62.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-13",
+      "name": "13 · Cozinha e ilha",
+      "camera": {
+        "eye": [
+          4.24,
+          1.74,
+          -13.72
+        ],
+        "target": [
+          6.8,
+          1.41,
+          -16.43
+        ],
+        "up": [
+          0.060550268842208516,
+          0.9961049612788362,
+          -0.06409813615718164
+        ],
+        "perspective": true,
+        "fovDegrees": 62.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-14",
+      "name": "14 · Suíte",
+      "camera": {
+        "eye": [
+          3.16,
+          1.68,
+          -16.55
+        ],
+        "target": [
+          1.0,
+          1.08,
+          -18.12
+        ],
+        "up": [
+          -0.17733301797353546,
+          0.9756736764354119,
+          -0.1288948325085418
+        ],
+        "perspective": true,
+        "fovDegrees": 62.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-15",
+      "name": "15 · Quarto",
+      "camera": {
+        "eye": [
+          3.18,
+          1.7,
+          -8.58
+        ],
+        "target": [
+          1.01,
+          1.02,
+          -7.049999999999999
+        ],
+        "up": [
+          -0.20276672069190427,
+          0.9687346350866,
+          0.1429645542205592
+        ],
+        "perspective": true,
+        "fovDegrees": 62.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-16",
+      "name": "16 · Jantar e cozinha",
+      "camera": {
+        "eye": [
+          4.16,
+          1.79,
+          -9.43
+        ],
+        "target": [
+          5.66,
+          1.12,
+          -13.65
+        ],
+        "up": [
+          0.049552283824067685,
+          0.9889945570713232,
+          -0.13940709182504382
+        ],
+        "perspective": true,
+        "fovDegrees": 62.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-17",
+      "name": "17 · Do deck à borda infinita",
+      "camera": {
+        "eye": [
+          6.4,
+          2.08,
+          -20.3
+        ],
+        "target": [
+          3.45,
+          0.47,
+          -23.28
+        ],
+        "up": [
+          -0.2521714218875849,
+          0.9335519304994668,
+          -0.2547358770254248
+        ],
+        "perspective": true,
+        "fovDegrees": 58.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-18",
+      "name": "18 · Piscina, varanda e casa",
+      "camera": {
+        "eye": [
+          7.949999999999999,
+          4.95,
+          -29.3
+        ],
+        "target": [
+          3.6,
+          1.15,
+          -21.2
+        ],
+        "up": [
+          -0.1807189633694708,
+          0.9241757877211008,
+          0.33651117317073886
+        ],
+        "perspective": true,
+        "fovDegrees": 53.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-19",
+      "name": "19 · Fachada a partir da rua",
+      "camera": {
+        "eye": [
+          7.65,
+          3.42,
+          7.750000000000001
+        ],
+        "target": [
+          3.6500000000000004,
+          1.56,
+          -3.2999999999999994
+        ],
+        "up": [
+          -0.05321066260952541,
+          0.9877050447623634,
+          -0.14699445545881396
+        ],
+        "perspective": true,
+        "fovDegrees": 43.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-20",
+      "name": "20 · Sala e cozinha | pé-direito alto",
+      "camera": {
+        "eye": [
+          4.25,
+          1.6499999999999997,
+          -10.15
+        ],
+        "target": [
+          6.4,
+          1.8899999999999997,
+          -15.650000000000002
+        ],
+        "up": [
+          -0.014784554606268135,
+          0.9991751560214841,
+          0.03782095364394174
+        ],
+        "perspective": true,
+        "fovDegrees": 58.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-21",
+      "name": "21 · Blocos por fiada | estrutura e fechamentos",
+      "camera": {
+        "eye": [
+          18.0,
+          5.0,
+          -31.000000000000004
+        ],
+        "target": [
+          3.7499999999999996,
+          -0.6,
+          -17.35
+        ],
+        "up": [
+          -0.197153186499552,
+          0.9620111970567424,
+          0.18885199969957084
+        ],
+        "perspective": false,
+        "fovDegrees": null,
+        "fovIsHeight": null,
+        "height": 11.5,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "14 Baldrames | referência estrutural",
+        "18 Subestrutura da piscina | referência",
+        "22 Arranques da casa e encontros",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-22",
+      "name": "C03-01 · Piscina, varanda e churrasqueira",
+      "camera": {
+        "eye": [
+          7.949999999999999,
+          4.95,
+          -29.3
+        ],
+        "target": [
+          3.6,
+          1.15,
+          -21.2
+        ],
+        "up": [
+          -0.1807189633694708,
+          0.9241757877211008,
+          0.33651117317073886
+        ],
+        "perspective": true,
+        "fovDegrees": 53.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-23",
+      "name": "C03-02 · Cozinha e ilha para a piscina",
+      "camera": {
+        "eye": [
+          4.8,
+          1.6499999999999997,
+          -13.100000000000001
+        ],
+        "target": [
+          6.42,
+          1.05,
+          -20.85
+        ],
+        "up": [
+          0.015461299733060235,
+          0.9971408953049119,
+          -0.0739660944019857
+        ],
+        "perspective": true,
+        "fovDegrees": 56.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-24",
+      "name": "C03-03 · Sala para a garagem",
+      "camera": {
+        "eye": [
+          4.15,
+          1.68,
+          -10.55
+        ],
+        "target": [
+          5.85,
+          1.52,
+          -6.15
+        ],
+        "up": [
+          0.012217692516539393,
+          0.9994252150478009,
+          0.03162226298398434
+        ],
+        "perspective": true,
+        "fovDegrees": 59.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-25",
+      "name": "C03-04 · Garagem e duas platibandas",
+      "camera": {
+        "eye": [
+          3.7499999999999996,
+          1.7,
+          -0.22999999999999998
+        ],
+        "target": [
+          3.7499999999999996,
+          2.58,
+          -5.82
+        ],
+        "up": [
+          0.0,
+          0.9878345021658714,
+          0.15550883039462735
+        ],
+        "perspective": true,
+        "fovDegrees": 58.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-26",
+      "name": "C03-05 · Fachada e portão",
+      "camera": {
+        "eye": [
+          3.7499999999999996,
+          2.32,
+          12.8
+        ],
+        "target": [
+          3.7499999999999996,
+          2.32,
+          -2.0
+        ],
+        "up": [
+          0.0,
+          1.0,
+          -0.0
+        ],
+        "perspective": true,
+        "fovDegrees": 28.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-27",
+      "name": "C03-06 · Borda infinita e soleira",
+      "camera": {
+        "eye": [
+          6.4,
+          2.08,
+          -20.3
+        ],
+        "target": [
+          3.45,
+          0.47,
+          -23.28
+        ],
+        "up": [
+          -0.2521714218875849,
+          0.9335519304994668,
+          -0.2547358770254248
+        ],
+        "perspective": true,
+        "fovDegrees": 58.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-28",
+      "name": "C03-07 · Estar, jantar, cozinha e piscina",
+      "camera": {
+        "eye": [
+          4.4,
+          1.6499999999999997,
+          -6.25
+        ],
+        "target": [
+          5.91,
+          1.4,
+          -17.95
+        ],
+        "up": [
+          0.0027118990549489584,
+          0.9997755302441124,
+          -0.021012727776756834
+        ],
+        "perspective": true,
+        "fovDegrees": 63.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    },
+    {
+      "id": "scene-29",
+      "name": "C03-08 · Churrasqueira quadrada, grelha e cobertura",
+      "camera": {
+        "eye": [
+          4.45,
+          1.61,
+          -18.38
+        ],
+        "target": [
+          6.98,
+          1.86,
+          -19.07
+        ],
+        "up": [
+          -0.09155813287638888,
+          0.9954866083651016,
+          0.024970399875378847
+        ],
+        "perspective": true,
+        "fovDegrees": 65.0,
+        "fovIsHeight": true,
+        "height": null,
+        "aspectRatio": 0.0,
+        "twoPoint": false
+      },
+      "visibleTags": [
+        "Layer0",
+        "01 Terreno natural levantado",
+        "02 Pisos e acabamentos",
+        "03 Alvenaria rebocada e platibandas",
+        "04 Muros e ferragens dos portões",
+        "05 Esquadrias",
+        "06 Lajes da casa",
+        "07 Forros da casa",
+        "08 Coberturas TR40",
+        "09 Domo e arremates",
+        "10 Piscina de borda infinita",
+        "11 Cozinha e churrasqueira",
+        "12 Louças e metais",
+        "13 Jardins",
+        "15 Portão fechado",
+        "19 Calçada, guia e soleiras de entrada",
+        "20 Fechamentos inferiores das paredes",
+        "21 Mobiliário dos interiores",
+        "27 Guarda-corpo do fundo",
+        "28 Blocos de concreto | laterais",
+        "29 Blocos de concreto | vãos do arrimo",
+        "30 Blocos cerâmicos | piscina",
+        "31 Reboco externo | piscina",
+        "32 Juntas de assentamento",
+        "33 Iluminação | estudo C02"
+      ],
+      "hiddenIds": [
+
+      ],
+      "clipPlanes": [
+
+      ],
+      "sectionPlanes": [
+
+      ],
+      "flags": {
+        "camera": true,
+        "hidden_layers": true,
+        "hidden_objects": true,
+        "hidden_geometry": true,
+        "section_planes": true,
+        "rendering_options": true
+      },
+      "render": {
+        "DisplaySectionCuts": true,
+        "DisplaySectionPlanes": false,
+        "SectionCutFilled": true,
+        "RenderMode": 2,
+        "Texture": true,
+        "EdgeDisplayMode": 1,
+        "DrawBackEdges": false,
+        "DrawHidden": false,
+        "DrawHiddenGeometry": false,
+        "DrawHiddenObjects": false,
+        "DisplayColorByLayer": false
+      }
+    }
+  ]
+}
