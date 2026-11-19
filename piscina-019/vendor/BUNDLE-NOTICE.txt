@@ -1,0 +1,1 @@
+three-gltf.bundle.js contains Three.js and GLTFLoader/OrbitControls code. Three.js is MIT licensed; see THREE-LICENSE.txt. The bundled loader code is distributed under the same MIT terms.
