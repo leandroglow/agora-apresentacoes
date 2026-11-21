@@ -5,6 +5,11 @@ const day = x => { const t=/^\d{4}-\d{2}-\d{2}$/.test(x||'')?Date.parse(x+'T00:0
 const iso = x => new Date(x).toISOString().slice(0,10);
 const finite = x => typeof x === 'number' && Number.isFinite(x) && x >= 0;
 const cents = x => Math.round(x * 100);
+export function normalizePix(pix) {
+  if (!pix || !['cpf','celular'].includes(pix.type) || typeof pix.key !== 'string' || !/^\d{11}$/.test(pix.key) || typeof pix.payee !== 'string' || !pix.payee.trim()) return undefined;
+  return {key:pix.key,type:pix.type,payee:pix.payee.trim()};
+}
+export function pixTypeLabel(type) { return type === 'cpf' ? 'CPF' : type === 'celular' ? 'Celular' : ''; }
 export function nextFridays(now = new Date()) {
   const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now).map(x=>[x.type,x.value]));
   const today = Date.UTC(+p.year,+p.month-1,+p.day);

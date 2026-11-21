@@ -35,6 +35,12 @@ const readDriveJsonDefault = async (id, token) => {
 };
 const isoDate = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) && Number.isFinite(Date.parse(v)) && new Date(v).toISOString().slice(0,10) === v;
 const nonempty = v => typeof v === 'string' && v.trim().length > 0;
+function paymentPix(value) {
+  if (!record(value) || !['cpf', 'celular'].includes(value.type) ||
+      typeof value.key !== 'string' || !/^\d{11}$/.test(value.key) ||
+      !nonempty(value.payee) || value.payee.length > 160) return undefined;
+  return { type: value.type, key: value.key, payee: value.payee.trim() };
+}
 export async function loadRhForecast(raw, readDriveJson, now = new Date()) {
   const pointer = record(raw?.rhForecast) ? raw.rhForecast : {};
   const fileId = String(pointer.rhForecastFileId || '').trim();
@@ -122,7 +128,7 @@ export function sanitizeDashboardData(raw) {
   const rhForecast = {
     error:text(rf.error,120), asOf:text(rf.asOf,20), source:text(rf.source,800), sourceUrl:safeUrl(rf.sourceUrl),
     groups:rows(rf.groups,20).map(g=>({id:text(g.id,80),label:text(g.label,200),anchor:text(g.anchor,20),
-      people:rows(g.people,100).map(p=>({id:text(p.id,80),name:text(p.name,160),dailyLabor:number(p.dailyLabor),dailyCar:number(p.dailyCar)}))})),
+      people:rows(g.people,100).map(p=>({id:text(p.id,80),name:text(p.name,160),dailyLabor:number(p.dailyLabor),dailyCar:number(p.dailyCar),pix:paymentPix(p.pix)}))})),
     events:rows(rf.events).map(e=>({id:text(e.id,120),personId:text(e.personId,80),date:text(e.date,20),type:text(e.type,30),days:number(e.days),projectId:text(e.projectId,80),status:text(e.status,40),source:text(e.source,800)})),
     attendance:rows(rf.attendance).map(e=>({id:text(e.id,120),personId:text(e.personId,80),date:text(e.date,20),shift:text(e.shift,20),projectId:text(e.projectId,80),activity:text(e.activity,240),status:text(e.status,40),source:text(e.source,800)})),
     adjustments:rows(rf.adjustments).map(a=>({id:text(a.id,120),personId:text(a.personId,80),paymentDate:text(a.paymentDate,20),amount:number(a.amount),status:text(a.status,30),kind:text(a.kind,40),source:text(a.source,800)})),

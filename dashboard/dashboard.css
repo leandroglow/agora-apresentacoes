@@ -50,8 +50,36 @@
 .rh-warning {font-size:12px;line-height:1.6;padding:10px 12px;border-left:2px solid var(--gold);background:#b997540b;color:#cfc5ae}
 .rh-notes {margin-top:20px;padding:24px}
 .rh-notes h3 {font-family:inherit;font-size:16px}
+.rh-pix {
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+  gap:0 8px;margin-top:6px;text-align:left;white-space:normal;
+}
+.rh-pix-copy {min-width:0;overflow-wrap:anywhere}
+.rh-pix-copy b {font-size:13px;font-variant-numeric:tabular-nums;user-select:all}
+.rh-copy-pix {min-width:44px;min-height:44px;white-space:nowrap}
+.rh-pix-status {grid-column:1/-1;font-size:12px;color:var(--gold)}
+.clipboard-fallback {position:fixed;left:0;top:0;opacity:0;pointer-events:none}
 @media(max-width:1200px){.rh-grid{grid-template-columns:1fr}.rh-heading{align-items:flex-start;flex-direction:column}}
-@media(max-width:480px){.rh-card,.rh-notes{padding:16px}.rh-table{min-width:470px}}
+@media(max-width:600px) {
+  .rh-card,.rh-notes {padding:16px}
+  .rh-attendance .rh-table {min-width:470px}
+  .rh-card .rh-table {display:block}
+  .rh-card .rh-table tbody {display:block}
+  .rh-card .rh-table thead {position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+  .rh-card .rh-payment-row {
+    display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;
+    gap:6px 10px;border-top:1px solid var(--line);padding-top:12px;
+  }
+  .rh-card .rh-payment-row td {padding:0}
+  .rh-payment-row td:first-child {grid-area:1/1;font-size:15px}
+  .rh-payment-row .rh-payment-total {display:contents}
+  .rh-payment-total > b {grid-area:1/2;text-align:right;font-size:15px}
+  .rh-payment-total .rh-pix {grid-area:2/1/3/-1;width:100%;margin:0}
+  .rh-payment-row td[data-label] {grid-column:1/-1;color:var(--muted);font-size:11px}
+  .rh-payment-row td[data-label]::before {content:attr(data-label) " · "}
+  .rh-card tr:has(td[colspan]),.rh-card td[colspan] {display:block}
+  .rh-card td[colspan] {padding:6px 0 12px;border:0}
+}
 .dashboard-shortcuts a:hover { border-color: var(--gold); }
 .dashboard-shortcuts a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 @media (max-width: 420px) {
