@@ -59,7 +59,7 @@ export async function loadRhForecast(raw, readDriveJson, now = new Date()) {
     for (const x of ledger.adiantamentos) add(x, 'advance', x?.liquidada === true ? 'settled' : x?.aplicar_na_previsao === true || x?.transferencia_comprovada === true ? 'open' : 'planned');
     const [first,last] = nextFridays(now);
     const start = new Date(Date.parse(first)-13*86400000).toISOString().slice(0,10);
-    const eventIds = new Map(), events = [];
+    const eventIds = new Map(), events = [], attendance = [];
     for (const x of ledger.ocorrencias) {
       if (!record(x) || !nonempty(x.id) || !nonempty(x.personId) || !isoDate(x.date) || !nonempty(x.source) ||
           !['absence','extra','attendance','allocation','note'].includes(x.type) || !['reported','confirmed','planned','cancelled'].includes(x.status) ||
@@ -67,13 +67,18 @@ export async function loadRhForecast(raw, readDriveJson, now = new Date()) {
       const id=x.id.trim();
       if(eventIds.has(id)) { if(JSON.stringify(eventIds.get(id))!==JSON.stringify(x)) throw Error('Conflicting RH occurrence'); continue; }
       eventIds.set(id,x);
+      if (x.date < start || x.date > last) continue;
+      if (x.type === 'attendance' && ['reported','confirmed'].includes(x.status)) {
+        if (x.shift !== undefined && !['manha','tarde','dia'].includes(x.shift)) throw Error('Invalid RH attendance shift');
+        attendance.push({id,personId:x.personId,date:x.date,shift:text(x.shift,20),projectId:text(x.projectId,80),activity:text(x.activity,240),status:x.status,source:text(x.source,800)});
+      }
       // The full ledger is retained in Drive. Only the active planning window leaves the server.
-      if(x.date < start || x.date > last || !['absence','extra'].includes(x.type) || !['reported','confirmed'].includes(x.status)) continue;
+      if(!['absence','extra'].includes(x.type) || !['reported','confirmed'].includes(x.status)) continue;
       events.push({id,personId:x.personId,date:x.date,type:x.type,days:x.days,projectId:text(x.projectId,80),status:x.status,source:text(x.source,800)});
     }
     const activeAdjustments = adjustments.filter(a=>a.status!=='settled' && a.paymentDate<=last);
     const dates=[base.asOf,ledger.atualizado_em].filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x||'')).sort();
-    return { asOf: dates.at(-1), source: text(base.source, 800), sourceUrl: `https://drive.google.com/file/d/${ledgerId}/view`, groups: Array.isArray(base.groups) ? base.groups : [], events, notes: Array.isArray(base.notes) ? base.notes : [], calendarNotes: Array.isArray(base.calendarNotes) ? base.calendarNotes : [], adjustments:activeAdjustments };
+    return { asOf: dates.at(-1), source: text(base.source, 800), sourceUrl: `https://drive.google.com/file/d/${ledgerId}/view`, groups: Array.isArray(base.groups) ? base.groups : [], events, attendance, notes: Array.isArray(base.notes) ? base.notes : [], calendarNotes: Array.isArray(base.calendarNotes) ? base.calendarNotes : [], adjustments:activeAdjustments };
   } catch (error) { return { error: 'RH_FORECAST_UNAVAILABLE' }; }
 }
 export async function loadWorkday(raw, readDriveJson, now = new Date()) {
@@ -119,6 +124,7 @@ export function sanitizeDashboardData(raw) {
     groups:rows(rf.groups,20).map(g=>({id:text(g.id,80),label:text(g.label,200),anchor:text(g.anchor,20),
       people:rows(g.people,100).map(p=>({id:text(p.id,80),name:text(p.name,160),dailyLabor:number(p.dailyLabor),dailyCar:number(p.dailyCar)}))})),
     events:rows(rf.events).map(e=>({id:text(e.id,120),personId:text(e.personId,80),date:text(e.date,20),type:text(e.type,30),days:number(e.days),projectId:text(e.projectId,80),status:text(e.status,40),source:text(e.source,800)})),
+    attendance:rows(rf.attendance).map(e=>({id:text(e.id,120),personId:text(e.personId,80),date:text(e.date,20),shift:text(e.shift,20),projectId:text(e.projectId,80),activity:text(e.activity,240),status:text(e.status,40),source:text(e.source,800)})),
     adjustments:rows(rf.adjustments).map(a=>({id:text(a.id,120),personId:text(a.personId,80),paymentDate:text(a.paymentDate,20),amount:number(a.amount),status:text(a.status,30),kind:text(a.kind,40),source:text(a.source,800)})),
     notes:Array.isArray(rf.notes)?rf.notes.slice(0,30).map(x=>text(x,1000)).filter(Boolean):[],
     calendarNotes:rows(rf.calendarNotes,30).map(n=>({date:text(n.date,20),text:text(n.text,800)}))

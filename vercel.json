@@ -3,6 +3,10 @@
   "functions": {
     "api/*.mjs": {
       "maxDuration": 300
+    },
+    "api/presenca.py": {
+      "maxDuration": 60,
+      "excludeFiles": "{.git/**,.github/**,node_modules/**,agora/**,automacao/**,casa*/**,catalog*/**,cliente/**,compras/**,dashboard/**,docs/**,galpao*/**,helvetia*/**,inventario/**,lib/**,piscina*/**,projeto*/**,residencia*/**,scripts/**,simulacao*/**,sistema/**,tests/**}"
     }
   },
   "headers": [
