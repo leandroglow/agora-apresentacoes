@@ -50,6 +50,23 @@ test('sanitizer exposes safe forecast, never private ledger fields',async()=>{
  assert.equal(a.adjustments[1].cpf,undefined); assert.equal(forecast(a,now)[0].total,900);
  assert.equal(sanitizeDashboardData({rhForecast:{error:'RH_FORECAST_UNAVAILABLE'}}).rhForecast.error,'RH_FORECAST_UNAVAILABLE');
 });
+test('attendance is separated from forecast and keeps shift/project/activity, including legacy rows',async()=>{
+ const files=seed(); files.ledger123456.ocorrencias=[
+  occurrence('att-1',{type:'attendance',shift:'manha',projectId:'017',activity:'Instalação <elétrica>'}),
+  occurrence('att-2',{type:'attendance',projectId:'019',activity:'Vistoria',status:'reported'}),
+  occurrence('abs-1',{type:'absence'})
+ ];
+ const raw=await resolve(files); assert.equal(raw.attendance.length,2); assert.equal(raw.events.length,1);
+ assert.equal(raw.attendance[0].shift,'manha'); assert.equal(raw.attendance[0].projectId,'017');
+ assert.equal(raw.attendance[1].shift,undefined);
+ const clean=sanitizeDashboardData({rhForecast:raw}).rhForecast;
+ assert.deepEqual(clean.attendance.map(x=>x.activity),['Instalação <elétrica>','Vistoria']);
+ assert.equal(clean.attendance[0].cpf,undefined);
+});
+test('invalid attendance shift fails closed without changing financial events',async()=>{
+ const files=seed(); files.ledger123456.ocorrencias=[occurrence('att',{type:'attendance',shift:'noite'})];
+ assert.equal((await resolve(files)).error,'RH_FORECAST_UNAVAILABLE');
+});
 test('events come only from ledger and cancellation restores the day',async()=>{
  const files=seed();files.ledger123456.ocorrencias=[{id:'o1',personId:'p1',date:'2026-11-19',type:'absence',days:1,status:'confirmed',source:'ponto'}];
  assert.equal(forecast(await resolve(files),now)[0].rows[0].normalDays,9);
