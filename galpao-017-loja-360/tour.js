@@ -22,7 +22,7 @@
     const current = ++generation;
     active = key;
     const [label, caption, hfov] = points[key];
-    const imageName = key === 'mezanino' ? 'mezanino-r07' : key;
+    const imageName = key === 'mezanino' ? 'mezanino-r08' : key;
     const src = 'assets/' + imageName + (mode==='ambientado' ? '-ambientado' : '') + '.jpg';
     const start = orientation || [0,0,hfov];
     dispose();
