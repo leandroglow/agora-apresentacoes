@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171613">
 <title>Ágora Materiais · Visita à loja em 360°</title>
 <meta name="description" content="Explore o projeto da loja Ágora Materiais em quatro panoramas, da entrada ao mezanino.">
-<link rel="icon" href="data:,"><link rel="stylesheet" href="vendor/pannellum.css"><link rel="stylesheet" href="tour.css">
+<link rel="icon" href="data:,"><link rel="stylesheet" href="vendor/pannellum.css"><link rel="stylesheet" href="tour.css?v=07">
 </head>
 <body>
 <header><div class="wrap mast"><a class="brand" href="#tour">ÁGORA <span>MATERIAIS</span></a><nav aria-label="Nesta página"><a href="#tour">Tour 360°</a><a href="#imagens">Perspectivas</a></nav></div></header>
@@ -21,6 +21,13 @@
 <div class="route" role="group" aria-label="Ambientes"><button data-s="entrada" aria-pressed="true">Entrada</button><button data-s="cafe" aria-pressed="false">Café e caixa</button><button data-s="estoque" aria-pressed="false">Estoque</button><button data-s="mezanino" aria-pressed="false">Mezanino</button></div>
 </div>
 <div class="under"><span id="caption">Do lado de dentro do portão, em diagonal para o atendimento.</span><a id="save" href="assets/entrada.jpg" download>Baixar este panorama ↓</a></div>
+<section id="vistas-mezanino" aria-labelledby="titulo-mezanino" hidden>
+<div class="gallery-head"><h2 id="titulo-mezanino">Perspectivas do mezanino</h2></div>
+<div class="galeria-mezanino">
+<button data-l="m1"><img src="assets/r07-geral.webp" alt="Mesa de reunião e distribuição do escritório" loading="lazy"><span>Escritório e mesa de reunião</span></button>
+<button data-l="m2"><img src="assets/r07-copa.webp" alt="Copa em L e churrasqueira embutida" loading="lazy"><span>Copa e churrasqueira</span></button>
+<button data-l="m3"><img src="assets/r07-gerencia.webp" alt="Duas estações gerenciais junto à parede de cimento queimado" loading="lazy"><span>Estações gerenciais</span></button>
+</div></section>
 </section>
 <section id="imagens" class="wrap"><div class="gallery-head"><h2>Perspectivas da loja</h2><p>Selecione uma imagem para ampliar.</p></div>
 <div class="gallery">
@@ -30,7 +37,7 @@
 <button data-l="f5"><img src="assets/f5.webp" alt="Do corredor para a entrada" loading="lazy"><span>Do corredor para a entrada</span></button>
 <button data-l="f1"><img src="assets/f1.webp" alt="Fachada vista da rua" loading="lazy"><span>Fachada vista da rua</span></button></div>
 </section>
-</main><footer class="wrap">Ágora Materiais <span>Estudo de layout · Revisão 06</span></footer>
+</main><footer class="wrap">Ágora Materiais <span>Layout da loja · R06 &nbsp; / &nbsp; Mezanino · R07</span></footer>
 <dialog id="box"><div class="lightbar"><strong id="photoTitle"></strong><button id="close" aria-label="Fechar imagem">Fechar ×</button></div><img id="bi" alt=""></dialog>
-<script src="vendor/pannellum.js"></script><script src="vendor/compat.js"></script><script src="tour.js"></script>
+<script src="vendor/pannellum.js"></script><script src="vendor/compat.js"></script><script src="tour.js?v=07"></script>
 </body></html>

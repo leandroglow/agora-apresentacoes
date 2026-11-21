@@ -5,3 +5,8 @@ header{border-bottom:1px solid var(--line)}.mast,.heading,.under,.gallery-head,f
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 .modes{display:flex;gap:3px;margin-bottom:9px}.modes button{color:#ddd4c7;background:transparent;border:1px solid #585448;border-radius:4px;padding:5px 12px;font-size:13px}.modes button[aria-pressed=true]{color:#201a13;background:#e8e0d3;border-color:#e8e0d3;font-weight:650}
+.galeria-mezanino {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px}
+.galeria-mezanino button {padding:0;background:transparent;border:0;color:var(--paper);text-align:left}
+.galeria-mezanino img {width:100%;display:block;aspect-ratio:16/10;object-fit:cover}
+.galeria-mezanino span {display:block;padding:9px 0 12px}
+.galeria-mezanino button:hover span {color:var(--accent)}

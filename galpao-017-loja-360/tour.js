@@ -4,7 +4,7 @@
     entrada: ['Entrada', 'Do lado de dentro do portão, em diagonal para o atendimento.', 94],
     cafe: ['Café e caixa', 'Junto à mesa do café. A vista começa no caixa e na vitrine.', 88],
     estoque: ['Estoque', 'No corredor central, entre as fileiras de porta-paletes.', 85],
-    mezanino: ['Mezanino', 'No pavimento superior, com vista para os núcleos de serviço.', 94]
+    mezanino: ['Mezanino', 'Escritório e copa no pavimento superior. Gire para ver a mesa de reunião e as estações gerenciais.', 94]
   };
   const $ = id => document.getElementById(id);
   const mount = $('panorama'), stage = $('stage');
@@ -22,11 +22,13 @@
     const current = ++generation;
     active = key;
     const [label, caption, hfov] = points[key];
-    const src = 'assets/' + key + (mode==='ambientado' ? '-ambientado' : '') + '.jpg';
+    const imageName = key === 'mezanino' ? 'mezanino-r07' : key;
+    const src = 'assets/' + imageName + (mode==='ambientado' ? '-ambientado' : '') + '.jpg';
     const start = orientation || [0,0,hfov];
     dispose();
     $('title').textContent = label;
     $('caption').textContent = caption;
+    $('vistas-mezanino').hidden = key !== 'mezanino';
     $('save').href = $('original').href = src;
     $('save').download = 'Agora-Materiais-360-' + key + '-' + mode + '.jpg';
     document.querySelectorAll('[data-s]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === key)));
@@ -82,5 +84,6 @@
   });
   $('close').onclick = () => box.close();
   box.onclick = event => { if(event.target === box) box.close(); };
-  load('entrada');
+  const requested = new URLSearchParams(location.search).get('ambiente');
+  load(Object.hasOwn(points, requested) ? requested : 'entrada');
 })();
