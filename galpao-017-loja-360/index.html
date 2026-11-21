@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171613">
+<title>Ágora Materiais · Visita à loja em 360°</title>
+<meta name="description" content="Explore o projeto da loja Ágora Materiais em quatro panoramas, da entrada ao mezanino.">
+<link rel="icon" href="data:,"><link rel="stylesheet" href="vendor/pannellum.css"><link rel="stylesheet" href="tour.css">
+</head>
+<body>
+<header><div class="wrap mast"><a class="brand" href="#tour">ÁGORA <span>MATERIAIS</span></a><nav aria-label="Nesta página"><a href="#tour">Tour 360°</a><a href="#imagens">Perspectivas</a></nav></div></header>
+<main>
+<section id="tour" class="wrap">
+<div class="heading"><div><p class="project">GALPÃO 017</p><h1>Por dentro da loja<span>.</span></h1></div><p class="guide">Arraste para olhar ao redor. <br>Escolha um ambiente para mudar de lugar.</p></div>
+<div class="modes" role="group" aria-label="Visualização"><button data-mode="ambientado" aria-pressed="true">Ambientado</button><button data-mode="modelo" aria-pressed="false">Modelo 3D</button></div>
+<div class="frame">
+<div class="scene" id="stage"><div id="panorama" tabindex="0" aria-label="Panorama navegável. Arraste ou use as setas."></div>
+<div id="fallback" hidden><p>Abra a imagem panorâmica para ver este ambiente.</p><a id="original" href="assets/entrada.jpg">Abrir panorama</a></div>
+<div class="location"><span class="loc-dot"></span><strong id="title" aria-live="polite">Entrada</strong></div>
+<div class="controls"><button id="reset" title="Voltar à vista inicial" aria-label="Voltar à vista inicial">↺</button><button id="full" title="Tela cheia" aria-label="Tela cheia">⛶</button></div>
+</div>
+<div class="route" role="group" aria-label="Ambientes"><button data-s="entrada" aria-pressed="true">Entrada</button><button data-s="cafe" aria-pressed="false">Café e caixa</button><button data-s="estoque" aria-pressed="false">Estoque</button><button data-s="mezanino" aria-pressed="false">Mezanino</button></div>
+</div>
+<div class="under"><span id="caption">Do lado de dentro do portão, em diagonal para o atendimento.</span><a id="save" href="assets/entrada.jpg" download>Baixar este panorama ↓</a></div>
+</section>
+<section id="imagens" class="wrap"><div class="gallery-head"><h2>Perspectivas da loja</h2><p>Selecione uma imagem para ampliar.</p></div>
+<div class="gallery">
+<button data-l="f2"><img src="assets/f2.webp" alt="Do portão para o café" loading="lazy"><span>Do portão para o café</span></button>
+<button data-l="f3"><img src="assets/f3.webp" alt="Da mesa do café para o caixa" loading="lazy"><span>Da mesa do café para o caixa</span></button>
+<button data-l="f4"><img src="assets/f4.webp" alt="Do balcão para o estoque" loading="lazy"><span>Do balcão para o estoque</span></button>
+<button data-l="f5"><img src="assets/f5.webp" alt="Do corredor para a entrada" loading="lazy"><span>Do corredor para a entrada</span></button>
+<button data-l="f1"><img src="assets/f1.webp" alt="Fachada vista da rua" loading="lazy"><span>Fachada vista da rua</span></button></div>
+</section>
+</main><footer class="wrap">Ágora Materiais <span>Estudo de layout · Revisão 06</span></footer>
+<dialog id="box"><div class="lightbar"><strong id="photoTitle"></strong><button id="close" aria-label="Fechar imagem">Fechar ×</button></div><img id="bi" alt=""></dialog>
+<script src="vendor/pannellum.js"></script><script src="vendor/compat.js"></script><script src="tour.js"></script>
+</body></html>
