@@ -4,7 +4,7 @@
     entrada: ['Entrada', 'Do lado de dentro do portão, em diagonal para o atendimento.', 94],
     cafe: ['Café e caixa', 'Junto à mesa do café. A vista começa no caixa e na vitrine.', 88],
     estoque: ['Estoque', 'No corredor central, entre as fileiras de porta-paletes.', 85],
-    mezanino: ['Mezanino', 'Escritório e copa no pavimento superior. Gire para ver a mesa de reunião e as estações gerenciais.', 94]
+    mezanino: ['Mezanino', 'Escritório e copa no pavimento superior. Gire para ver a copa em L e a nova mesa junto à escada.', 94]
   };
   const $ = id => document.getElementById(id);
   const mount = $('panorama'), stage = $('stage');
@@ -17,14 +17,14 @@
     mount.replaceChildren();
     mount.className = '';
   }
-  function load(key, keepView=false) {
+  function load(key, keepView=false, initialView=null) {
     const orientation = keepView && viewer ? [viewer.getPitch(),viewer.getYaw(),viewer.getHfov()] : null;
     const current = ++generation;
     active = key;
     const [label, caption, hfov] = points[key];
-    const imageName = key === 'mezanino' ? 'mezanino-r08' : key;
+    const imageName = key === 'mezanino' ? 'mezanino-r09' : key;
     const src = 'assets/' + imageName + (mode==='ambientado' ? '-ambientado' : '') + '.jpg';
-    const start = orientation || [0,0,hfov];
+    const start = orientation || initialView || [0,0,hfov];
     dispose();
     $('title').textContent = label;
     $('caption').textContent = caption;
@@ -84,6 +84,8 @@
   });
   $('close').onclick = () => box.close();
   box.onclick = event => { if(event.target === box) box.close(); };
-  const requested = new URLSearchParams(location.search).get('ambiente');
-  load(Object.hasOwn(points, requested) ? requested : 'entrada');
+  const params = new URLSearchParams(location.search);
+  const requested = params.get('ambiente');
+  const deskView = requested === 'mezanino' && params.get('vista') === 'escada' ? [-14, 129, 80] : null;
+  load(Object.hasOwn(points, requested) ? requested : 'entrada', false, deskView);
 })();
