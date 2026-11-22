@@ -1,3 +1,4 @@
+import { directoryUrl } from '../../../dashboard/link-directory.js';
 import { requireMasterAuth } from '../auth.mjs';
 import { getGoogleDriveAccessToken } from '../google.mjs';
 import { nextFridays } from '../../../dashboard/rh-forecast.js';
@@ -136,6 +137,18 @@ function item(v, depth = 0) {
 export function sanitizeDashboardData(raw) {
   const src = record(raw) ? raw : {};
   const arr = key => Array.isArray(src[key]) ? src[key].slice(0,200).map(x => item(x)).filter(Boolean) : [];
+  const modules = arr('modules');
+  const directory = modules.find(module => module.id === 'links');
+  if (directory) {
+    const entries = src.modules.find(module => module?.id === 'links').items;
+    directory.items = (Array.isArray(entries) ? entries : []).slice(0,100).filter(record).flatMap(entry => {
+      const url = directoryUrl(entry.url);
+      return url && typeof entry.title === 'string' ? [{
+        title: text(entry.title,160), category: text(entry.category,100), subtitle: text(entry.subtitle,180),
+        status: text(entry.status,80), projectId: text(entry.projectId,60), url
+      }] : [];
+    });
+  }
   const f = record(src.financial) ? src.financial : {};
   const financial = {status:text(f.status,100) || 'A consolidar',committed:number(f.committed),invoiced:number(f.invoiced),paid:number(f.paid)};
   const meta = record(src.meta) ? {asOf:text(src.meta.asOf,80),sourcesCoverage:text(src.meta.sourcesCoverage,500)} : {};
@@ -164,7 +177,7 @@ export function sanitizeDashboardData(raw) {
   const controls=Object.fromEntries(Object.entries(record(fc?.controls)?fc.controls:{}).filter(([k,v])=>/^\d{3}$/.test(k)&&safeUrl(v)).map(([k,v])=>[k,safeUrl(v)]));
   const financialConsolidated=fc?{asOf:text(fc.asOf,30),consultedAt:text(fc.consultedAt,80),periods,overdue:financialItems(fc.overdue),unknown:financialItems(fc.unknown),coverage:{status:text(coverage.status,40),note:text(coverage.note,1500),projects,conflicts:listStrings(coverage.conflicts,100),invalid:number(coverage.invalid),rhStatus:text(coverage.rhStatus,40)},controls}:null;
 
-  return {workday,rhForecast,projects:arr('projects'),modules:arr('modules'),decisions:arr('decisions'),automation:arr('automation'),agenda:arr('agenda'),financial,financialConsolidated,meta,user:{displayName:'Leandro'}};
+  return {workday,rhForecast,projects:arr('projects'),modules,decisions:arr('decisions'),automation:arr('automation'),agenda:arr('agenda'),financial,financialConsolidated,meta,user:{displayName:'Leandro'}};
 }
 
 export default async function handler(req, res) {
