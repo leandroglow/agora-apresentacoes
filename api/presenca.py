@@ -21,7 +21,8 @@ class handler(BaseHTTPRequestHandler):
         self.reply(405, {"ok":False,"error":"Use POST."})
 
     def do_POST(self):
-        if parse_qs(urlsplit(self.path).query).get("_route") == ["fontes-coordenador"]:
+        target = urlsplit(self.path)
+        if target.path == "/api/fontes_coordenador" or parse_qs(target.query).get("_route") == ["fontes-coordenador"]:
             return fontes_handler.handle_post(self)
         try:
             if os.environ.get("VERCEL_ENV") != "production":

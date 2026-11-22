@@ -1,4 +1,9 @@
 import base64, json, os, time, unittest
+from email.message import Message
+from io import BytesIO
+from pathlib import Path
+from unittest.mock import Mock, patch
+from api.presenca import handler
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from rh_gateway.fontes import SourceError, anotar, editar, ler, listar, verify_fontes
@@ -50,9 +55,21 @@ class FontesTests(unittest.TestCase):
         with self.assertRaises(SourceError): editar({"fonte":"status","anterior":"<!-- AGORA-FONTES","texto":"novo","evento":"telegram:12","revisao":1},self.drive,self.map)
     def test_handler_module_is_the_single_secondary_route(self):
         self.assertTrue(callable(fontes_handler.handle_post))
-        source = open("api/presenca.py", encoding="utf-8").read()
-        vercel = open("vercel.json", encoding="utf-8").read()
+        source = Path("api/presenca.py").read_text(encoding="utf-8")
+        vercel = Path("vercel.json").read_text(encoding="utf-8")
         self.assertIn("fontes-coordenador", source)
         self.assertIn('"destination": "/api/presenca?_route=fontes-coordenador"', vercel)
+
+    def test_caminhos_originais_e_reescritos_exigem_a_mesma_assinatura(self):
+        body = b'{"op":"listar"}'
+        headers = Message()
+        headers["Content-Type"] = "application/json"
+        headers["Content-Length"] = str(len(body))
+        headers["X-Agora-Time"] = str(int(time.time()))
+        for path in ("/api/fontes_coordenador", "/api/presenca?_route=fontes-coordenador"):
+            request = Mock(path=path, headers=headers, rfile=BytesIO(body))
+            with patch.dict(os.environ, {"VERCEL_ENV": "production", "AGORA_FONTES_PUBLIC_KEY": self.pem}):
+                handler.do_POST(request)
+            self.assertEqual(request.reply.call_args.args[0], 401)
 
 if __name__ == "__main__": unittest.main(verbosity=2)
