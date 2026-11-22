@@ -58,7 +58,6 @@
 .rh-pix-copy b {font-size:13px;font-variant-numeric:tabular-nums;user-select:all}
 .rh-copy-pix {min-width:44px;min-height:44px;white-space:nowrap}
 .rh-pix-status {grid-column:1/-1;font-size:12px;color:var(--gold)}
-.clipboard-fallback {position:fixed;left:0;top:0;opacity:0;pointer-events:none}
 @media(max-width:1200px){.rh-grid{grid-template-columns:1fr}.rh-heading{align-items:flex-start;flex-direction:column}}
 @media(max-width:600px) {
   .rh-card,.rh-notes {padding:16px}

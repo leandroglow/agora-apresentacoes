@@ -1,4 +1,5 @@
-import {forecast,normalizePix,pixTypeLabel} from './rh-forecast.js?v=20261121-pix';
+import {forecast,pixTypeLabel} from './rh-forecast.js?v=20261121-individual';
+import {copyPaymentPix} from './pix-clipboard.js?v=20261121-individual';
 import {renderFinancial,financialSummary} from './finance-view.js?v=20261115-1';
 'use strict';
 (() => {
@@ -33,10 +34,10 @@ function renderRh(){
  if(f.error)return `<section class="panel rh-forecast" role="alert"><h2>Previsão de RH indisponível</h2><p>Não foi possível consultar o registro de pagamentos do RH.</p><p>Use Atualizar leitura para consultar novamente a fonte única. Valores anteriores não são usados quando a consulta falha.</p></section>`;
  const detail=p=>`<details class="rh-detail"><summary>Ver composição</summary><p>Mão de obra: ${money(p.labor)} · Carro: ${money(p.car)}</p>${p.events.map(e=>`<p>${esc(date(e.date))}: ${e.type==='extra'?'Trabalho extra informado':'Ausência informada'}${e.projectId?' · Obra '+esc(e.projectId):''}. ${esc(e.source)}</p>`).join('')}${p.deductions.map(a=>`<p>− ${money(a.amount)} · ${esc(a.source)}</p>`).join('')}${p.pending.map(a=>`<p class="rh-warning">${money(a.amount)} programado, ainda não descontado. ${esc(a.source)}</p>`).join('')}</details>`;
  function pixView(person) {
-   const pix=normalizePix(person.pix);
-   if (!pix) return '';
+   const pix=person.pix;
+   if (!person.id || !pix || !pixTypeLabel(pix.type) || typeof pix.last4!=='string' || !/^\d{4}$/.test(pix.last4)) return '';
    const payee=pix.payee===person.name?'':`<small>Favorecido: ${esc(pix.payee)}</small>`;
-   return `<div class="rh-pix"><div class="rh-pix-copy"><small>${pixTypeLabel(pix.type)}</small><b>${esc(pix.key)}</b>${payee}</div><button type="button" class="outline compact rh-copy-pix" data-pix-key="${esc(pix.key)}" aria-label="Copiar Pix de ${esc(person.name)}">Copiar Pix</button><span class="rh-pix-status" role="status"></span></div>`;
+   return `<div class="rh-pix"><div class="rh-pix-copy"><small>${pixTypeLabel(pix.type)}</small><b>•••• ${esc(pix.last4)}</b>${payee}</div><button type="button" class="outline compact rh-copy-pix" data-person-id="${esc(person.id)}" aria-label="Copiar Pix de ${esc(person.name)}">Copiar Pix</button><span class="rh-pix-status" role="status"></span></div>`;
  }
  const people=new Map(list(f.groups).flatMap(g=>list(g.people)).map(p=>[p.id,p.name]));
  const shiftLabel={manha:'Manhã',tarde:'Tarde',dia:'Dia'};
@@ -44,32 +45,43 @@ function renderRh(){
  const attendanceView=`<section class="panel rh-attendance" aria-label="Registros de presença"><div class="rh-heading"><div><h2>Frequência por turno</h2><p>Presenças lidas do registro único de RH; registros antigos sem turno permanecem identificados.</p></div><span class="pill">${attendance.length} registro${attendance.length===1?'':'s'}</span></div>${attendance.length?`<div class="rh-table-scroll"><table class="rh-table"><thead><tr><th>Data</th><th>Pessoa</th><th>Turno</th><th>Projeto</th><th>Atividade</th></tr></thead><tbody>${attendance.map(a=>`<tr><td>${esc(date(a.date))}</td><td><b>${esc(people.get(a.personId)||a.personId||'Pessoa não identificada')}</b></td><td>${esc(shiftLabel[a.shift]||'Sem turno (legado)')}</td><td>${esc(a.projectId||'—')}</td><td>${esc(a.activity||'—')}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">Nenhum registro de presença encontrado na fonte de RH.</p>'}</section>`;
  return `<section class="rh-forecast" aria-label="Previsão das duas próximas sextas"><div class="rh-heading"><div><h2>Próximos pagamentos</h2><p>Base atualizada em ${esc(date(f.asOf))}. Datas calculadas no horário de São Paulo.</p></div><span class="pill">Planejamento de caixa</span></div><div class="rh-grid">${cards.map(c=>`<article class="panel rh-card"><div class="rh-date">SEXTA-FEIRA · ${esc(date(c.paymentDate))}</div><strong class="rh-total">${c.total===null?'Pendente':money(c.total)}</strong><p>${esc(c.group||'Grupo a conferir')} <span class="pill">${esc(c.status)}</span></p><p class="source">Competência: ${esc(date(c.start))} a ${esc(date(c.end))}</p>${c.rows.length?`<div class="rh-table-scroll"><table class="rh-table"><thead><tr><th>Pessoa</th><th>Dias-base</th><th>Extra</th><th>Descontos</th><th>Previsão</th></tr></thead><tbody>${c.rows.map(p=>`<tr class="rh-payment-row"><td><b>${esc(p.name)}</b><small>${money(p.dailyLabor)} / dia${p.dailyCar?' + '+money(p.dailyCar)+' carro':''}</small></td><td data-label="Dias-base">${p.normalDays}</td><td data-label="Extra">${p.extraDays?'+'+p.extraDays:'—'}</td><td data-label="Descontos">${p.discount? '− '+money(p.discount):'—'}</td><td class="rh-payment-total"><b>${p.total===null?'Pendente':money(p.total)}</b>${pixView(p)}</td></tr><tr><td colspan="5">${detail(p)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">A fonte RH ainda não tem os dados necessários para esta previsão.</p>'}${c.notices.map(n=>`<p class="rh-warning">${esc(n)}</p>`).join('')}</article>`).join('')}</div>${attendanceView}<div class="panel rh-notes"><h3>Premissas da previsão</h3>${list(f.notes).map(n=>`<p>${esc(n)}</p>`).join('')||'<p>Valores dependem da conferência da base de RH.</p>'}<p class="source">${esc(f.source||'Fonte RH pendente')}</p>${link({label:'Abrir controles de RH',url:f.sourceUrl})}</div></section>`;
 }
+let pixCopyInProgress = false;
 async function copyPix(button) {
- const key=button.dataset.pixKey;
- if (!/^\d{11}$/.test(key)) return;
- const status=button.parentElement.querySelector('.rh-pix-status');
- try {
-   await navigator.clipboard.writeText(key);
-   status.textContent='Pix copiado';
-   return;
- } catch {
-   // Some mobile browsers only allow copying a focused text selection.
+ const status = button.parentElement.querySelector('.rh-pix-status');
+ if (pixCopyInProgress) { status.textContent = 'Aguarde a cópia em andamento.'; return; }
+ const personId = button.dataset.personId;
+ const expected = data?.rhForecast?.groups.flatMap(group => group.people).find(person => person.id === personId)?.pix;
+ const sid = clerk?.session?.id, generation = requestId;
+ if (!sid || !expected) return;
+ const current = () => button.isConnected && clerk?.session?.id === sid && generation === requestId;
+ async function load() {
+   const token = await clerk.session.getToken();
+   if (!token || !current()) throw Error('A sessão mudou. Abra o RH novamente.');
+   const response = await fetch(API, {
+     method:'POST', headers:{Authorization:'Bearer '+token, 'Content-Type':'application/json'},
+     cache:'no-store', credentials:'omit', signal:AbortSignal.timeout(30000),
+     body:JSON.stringify({action:'copy-pix', personId})
+   });
+   if (!response.ok) throw Error('Não foi possível consultar este Pix. Atualize a previsão e tente novamente.');
+   const result = await response.json(), pix = result.pix;
+   if (result.personId !== personId || typeof pix?.key !== 'string' || !/^\d{11}$/.test(pix.key) ||
+       pix.key.slice(-4) !== expected.last4 || pix.type !== expected.type || pix.payee !== expected.payee) {
+     throw Error('O cadastro Pix mudou. Atualize a previsão antes de copiar.');
+   }
+   return pix.key;
  }
- const selection=document.createElement('textarea');
- selection.className='clipboard-fallback';
- selection.value=key;
- selection.readOnly=true;
- document.body.append(selection);
+ pixCopyInProgress = true;
+ button.disabled = true;
+ status.textContent = 'Consultando Pix…';
  try {
-   selection.focus({preventScroll:true});
-   selection.select();
-   selection.setSelectionRange(0,key.length);
-   status.textContent=document.execCommand('copy')?'Pix copiado':'Toque e segure a chave para copiar.';
- } catch {
-   status.textContent='Toque e segure a chave para copiar.';
+   await copyPaymentPix({load, current, clipboard:navigator.clipboard, ClipboardItem:window.ClipboardItem});
+   if (current()) status.textContent = 'Pix copiado';
+ } catch (error) {
+   if (current()) status.textContent = error.name === 'NotAllowedError' ? 'Autorize a cópia neste navegador e tente novamente.' :
+     (error.name === 'Error' ? error.message : 'Não foi possível copiar. Tente novamente.');
  } finally {
-   selection.remove();
-   button.focus({preventScroll:true});
+   pixCopyInProgress = false;
+   button.disabled = false;
  }
 }
 function clearRhRefresh(){if(rhRefreshTimer){clearInterval(rhRefreshTimer);rhRefreshTimer=null}}

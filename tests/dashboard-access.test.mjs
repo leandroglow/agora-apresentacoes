@@ -15,6 +15,45 @@ test('dashboard signed authorization matrix and no Drive before auth', async () 
   try { assert.equal((await call(MASTER)).code,200); assert.equal((await call(WILIAM)).code,403); assert.equal((await call(LAERTE)).code,403); assert.equal((await call(MASTER,{origin,authorization:'Bearer '+token(MASTER,{exp:0})})).code,401); assert.equal((await call(MASTER,{origin:'https://evil.example',authorization:'Bearer '+token(MASTER)})).code,401); assert.equal((await call(MASTER,{origin})).code,401); assert.ok(calls>0); calls=0; assert.equal((await call(LAERTE,{origin,authorization:'Bearer '+token(LAERTE)})).code,403); assert.equal(calls,0); } finally { globalThis.fetch = old; }
 });
 
+test('individual Pix requires Master, reads the configured RH file and returns only the requested worker',async t=>{
+  const sourceId='rh_test_source_0001', ledgerId='rh_test_ledger_0001';
+  const workers=['alpha','beta'].map((id,i)=>({id,name:id,pix:{type:'celular',key:String(i+1).padStart(11,'0'),payee:id}}));
+  const counts=[];
+  t.mock.method(globalThis,'fetch',async url=>{
+    const path=String(url);
+    counts.push(path);
+    const values=path.includes('oauth2')?{access_token:'test',expires_in:3600}:
+      path.includes(process.env.DASHBOARD_DATA_FILE_ID)?{rhForecast:{rhForecastFileId:sourceId}}:
+      path.includes(sourceId)?{groups:[{people:workers}],adjustmentsFileId:ledgerId}:
+      path.includes(ledgerId)?{compensacoes:[],adiantamentos:[],ocorrencias:[]}:undefined;
+    assert.ok(values,'only configured files are read');
+    return {ok:true,json:async()=>values};
+  });
+  async function copy(sub,body,contentType='application/json') {
+    const res=response(), headers={origin,'content-type':contentType};
+    if(sub) headers.authorization='Bearer '+token(sub);
+    await dashboard({method:'POST',url:'/api/dashboard',body,headers},res);
+    assert.match(res.headers['Cache-Control'],/no-store/);
+    return res;
+  }
+  const body={action:'copy-pix',personId:'alpha'};
+  for (const [user,code] of [[null,401],[WILIAM,403],[LAERTE,403]]) assert.equal((await copy(user,body)).code,code);
+  for (const invalid of [{...body,personId:['alpha','beta']},{...body,fileId:'arbitrary'},{}]) assert.equal((await copy(MASTER,invalid)).code,400);
+  assert.equal((await copy(MASTER,body,'text/plain')).code,415);
+  assert.equal(counts.length,0);
+  const only=await copy(MASTER,body);
+  assert.equal(only.code,200);
+  assert.deepEqual(only.body,{personId:'alpha',pix:workers[0].pix});
+  assert.equal(JSON.stringify(only.body).includes(workers[1].pix.key),false);
+  assert.equal(counts.some(url=>url.includes(ledgerId)),false);
+  assert.equal((await copy(MASTER,{...body,personId:'missing'})).code,404);
+  const normal=await call(MASTER);
+  assert.equal(normal.code,200);
+  for(const worker of workers) assert.equal(JSON.stringify(normal.body).includes(worker.pix.key),false);
+  workers.push({...workers[0]});
+  assert.equal((await copy(MASTER,body)).code,409);
+});
+
 test('dashboard sanitizer preserves nulls and only approved links', () => {
   const out = sanitizeDashboardData({ financial: { committed: null, paid: 12 }, agenda: [{ title: 'x', link: 'https://evil.example/x', url: 'https://drive.google.com/file/d/a/view' }], projects: [{ subtitle: 'ok', url: 'javascript:alert(1)', thumbUrl: 'https://docs.google.com/a' , secret: 'drop' }] });
   assert.equal(out.financial.committed, null); assert.equal(out.financial.invoiced, null); assert.equal(out.projects[0].url, undefined); assert.equal(out.projects[0].secret, undefined); assert.match(out.projects[0].thumbUrl, /^https:\/\/docs\.google\.com/); assert.equal(out.agenda[0].link, undefined);

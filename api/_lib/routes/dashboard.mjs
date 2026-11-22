@@ -11,8 +11,9 @@ function cors(req, res) {
   res.setHeader('Access-Control-Allow-Origin', ORIGIN);
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
 }
 
 const text = (v, max = 800) => typeof v === 'string' ? v.slice(0, max) : undefined;
@@ -40,6 +41,24 @@ function paymentPix(value) {
       typeof value.key !== 'string' || !/^\d{11}$/.test(value.key) ||
       !nonempty(value.payee) || value.payee.length > 160) return undefined;
   return { type: value.type, key: value.key, payee: value.payee.trim() };
+}
+function maskedPix(value) {
+  const pix = paymentPix(value);
+  if (pix) return { type: pix.type, last4: pix.key.slice(-4), payee: pix.payee };
+}
+
+async function readIndividualPix(raw, personId, read, res) {
+  const sourceId = raw?.rhForecast?.rhForecastFileId;
+  if (typeof sourceId !== 'string' || !ID_RE.test(sourceId)) {
+    return res.status(503).json({ error: 'RH_FORECAST_SOURCE_MISSING' });
+  }
+  const base = await read(sourceId);
+  if (!Array.isArray(base?.groups)) return res.status(503).json({ error: 'RH_FORECAST_UNAVAILABLE' });
+  const matches = base.groups.flatMap(group => Array.isArray(group?.people) ? group.people.filter(p => p?.id === personId) : []);
+  if (matches.length > 1) return res.status(409).json({ error: 'RH_PIX_AMBIGUOUS' });
+  const pix = paymentPix(matches[0]?.pix);
+  if (!pix) return res.status(404).json({ error: 'RH_PIX_UNAVAILABLE' });
+  return res.status(200).json({ personId, pix });
 }
 export async function loadRhForecast(raw, readDriveJson, now = new Date()) {
   const pointer = record(raw?.rhForecast) ? raw.rhForecast : {};
@@ -128,7 +147,7 @@ export function sanitizeDashboardData(raw) {
   const rhForecast = {
     error:text(rf.error,120), asOf:text(rf.asOf,20), source:text(rf.source,800), sourceUrl:safeUrl(rf.sourceUrl),
     groups:rows(rf.groups,20).map(g=>({id:text(g.id,80),label:text(g.label,200),anchor:text(g.anchor,20),
-      people:rows(g.people,100).map(p=>({id:text(p.id,80),name:text(p.name,160),dailyLabor:number(p.dailyLabor),dailyCar:number(p.dailyCar),pix:paymentPix(p.pix)}))})),
+      people:rows(g.people,100).map(p=>({id:text(p.id,80),name:text(p.name,160),dailyLabor:number(p.dailyLabor),dailyCar:number(p.dailyCar),pix:maskedPix(p.pix)}))})),
     events:rows(rf.events).map(e=>({id:text(e.id,120),personId:text(e.personId,80),date:text(e.date,20),type:text(e.type,30),days:number(e.days),projectId:text(e.projectId,80),status:text(e.status,40),source:text(e.source,800)})),
     attendance:rows(rf.attendance).map(e=>({id:text(e.id,120),personId:text(e.personId,80),date:text(e.date,20),shift:text(e.shift,20),projectId:text(e.projectId,80),activity:text(e.activity,240),status:text(e.status,40),source:text(e.source,800)})),
     adjustments:rows(rf.adjustments).map(a=>({id:text(a.id,120),personId:text(a.personId,80),paymentDate:text(a.paymentDate,20),amount:number(a.amount),status:text(a.status,30),kind:text(a.kind,40),source:text(a.source,800)})),
@@ -151,9 +170,23 @@ export function sanitizeDashboardData(raw) {
 export default async function handler(req, res) {
   cors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method !== 'GET') return res.status(405).json({ error: 'method_not_allowed' });
+  if (!['GET','POST'].includes(req.method)) return res.status(405).json({ error: 'method_not_allowed' });
   const session = await requireMasterAuth(req, res);
   if (!session || session.sub !== MASTER) return;
+  let personId;
+  if (req.method === 'POST') {
+    if (!/^application\/json(?:\s*;|$)/i.test(req.headers?.['content-type'] || '')) return res.status(415).json({ error: 'json_required' });
+    let body = req.body;
+    if (typeof body === 'string') {
+      if (body.length > 1024) return res.status(413).json({ error: 'request_too_large' });
+      try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'invalid_request' }); }
+    }
+    if (!record(body) || body.action !== 'copy-pix' || typeof body.personId !== 'string' ||
+        !body.personId.trim() || body.personId.length > 80 || Object.keys(body).length !== 2) {
+      return res.status(400).json({ error: 'invalid_pix_request' });
+    }
+    personId = body.personId;
+  }
   const fileId = String(process.env.DASHBOARD_DATA_FILE_ID || '').trim();
   if (!ID_RE.test(fileId)) return res.status(503).json({ error: 'DASHBOARD_DATA_CONFIG' });
   try {
@@ -162,6 +195,7 @@ export default async function handler(req, res) {
     if (!response.ok) return res.status(503).json({ error: 'DASHBOARD_DATA_UNAVAILABLE' });
     const raw = await response.json();
     const read = id => readDriveJsonDefault(id, token);
+    if (personId) return await readIndividualPix(raw, personId, read, res);
     const [rhForecast,workday] = await Promise.all([loadRhForecast(raw, read),loadWorkday(raw, read)]);
     let financeRaw = raw;
     const financeId = String(raw?.financeConsolidated?.fileId || '').trim();

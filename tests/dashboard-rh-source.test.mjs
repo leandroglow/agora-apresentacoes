@@ -116,7 +116,7 @@ test('sanitizer does not truncate active adjustments after long histories',async
  const clean=sanitizeDashboardData({rhForecast:await resolve(files)}).rhForecast;
  assert.equal(clean.adjustments.length,351);assert.equal(forecast(clean,now)[0].total,950);
 });
-test('Master RH returns only a valid payable Pix string for the corresponding person',()=>{
+test('the forecast serializes only the last four digits of valid Pix keys',()=>{
  const people=[
    {id:'a',pix:{type:'cpf',key:'01234567890',payee:'Pessoa de teste',unrelated:'private'}},
    {id:'b',pix:{type:'celular',key:'19900000000',payee:'Titular de teste'}},
@@ -126,7 +126,8 @@ test('Master RH returns only a valid payable Pix string for the corresponding pe
  ];
  const out=sanitizeDashboardData({rhForecast:{groups:[{people}]}}).rhForecast.groups[0].people;
  assert.deepEqual(out.map(p=>p.id),people.map(p=>p.id));
- assert.deepEqual(out[0].pix,{type:'cpf',key:'01234567890',payee:'Pessoa de teste'});
- assert.deepEqual(out[1].pix,people[1].pix);
+ assert.deepEqual(out[0].pix,{type:'cpf',last4:'7890',payee:'Pessoa de teste'});
+ assert.deepEqual(out[1].pix,{type:'celular',last4:'0000',payee:'Titular de teste'});
+ for(const p of people.slice(0,2)) assert.equal(JSON.stringify(out).includes(p.pix.key),false);
  assert.ok(out.slice(2).every(p=>p.pix===undefined));
 });
