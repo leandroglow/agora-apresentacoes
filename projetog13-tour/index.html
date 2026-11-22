@@ -4,68 +4,78 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#1c2521">
-  <meta name="description" content="Percorra a Residência G13, em Smart City Salto, da garagem à piscina. Explore quatro ambientes em 360 graus.">
+  <meta name="description" content="Entre na Casa G13, em Salto. Percorra cinco ambientes em 360°, acompanhe sua posição na planta e amplie os renders da residência.">
   <meta property="og:title" content="Residência G13 · Visita 360°">
   <meta property="og:description" content="Da rua à borda infinita. Percorra a casa e olhe ao redor de cada ambiente.">
-  <meta property="og:image" content="https://apresentacoes.agoracons.com.br/projetog13-tour/assets/deck-capa.jpg">
+  <meta property="og:image" content="https://apresentacoes.agoracons.com.br/projetog13-tour/assets/deck-capa.jpg?r19">
+  <link rel="preload" as="image" href="assets/fachada-capa.jpg?r19">
   <title>Residência G13 · Visita 360° | Ágora Construtora</title>
   <link rel="stylesheet" href="pannellum.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=r19c">
   <script defer src="pannellum.js"></script>
   <script defer src="planob.js"></script>
-  <script defer src="app.js"></script>
+  <script defer src="app.js?v=r19c"></script>
 </head>
 <body>
   <main>
     <section class="arrival" id="inicio" aria-labelledby="title">
-      <img class="hero-photo" src="assets/fachada-capa.jpg" alt="Fachada alinhada à rua, com portão grafite e duas alturas de platibanda." fetchpriority="high">
+      <img class="hero-photo" src="assets/fachada-capa.jpg?r19" alt="Fachada alinhada à rua, com portão grafite e duas alturas de platibanda." fetchpriority="high">
       <header><a class="signature" href="../projetog13/" aria-label="Apresentação do projeto G13">ÁGORA <small>CONSTRUTORA</small></a>
-        <a class="nav-link" href="#vistas">Visitas 360°</a>
+        <nav class="hero-nav" aria-label="Navegação principal"><a href="#galeria">Galeria</a><a href="#garagem">Visita 360° ↗</a></nav>
       </header>
       <div class="hero-copy">
         <p class="eyebrow">Smart City Salto <span> / </span> Residência</p>
         <h1 id="title">Casa <em>G13</em></h1>
-        <p class="lead">Da rua à borda infinita.</p>
-        <div class="actions"><a class="pill pale" href="#percurso">Percorrer a casa</a><a class="text-link" href="../projetog13-3d/">Explorar a casa em 3D</a><a class="text-link" href="#cozinha">Entrar pela cozinha em 360°</a></div>
+        <p class="lead">Da entrada à piscina de borda infinita.</p>
+        <div class="actions"><a class="pill pale" href="#garagem">Entrar na casa <span aria-hidden="true">↗</span></a><a class="text-link" href="#percurso">Percorrer as vistas ↓</a></div>
       </div>
     </section>
     <section class="walk" id="percurso" aria-label="Percurso da garagem ao deck">
       <div class="stage">
         <div class="layers" aria-hidden="true">
-          <img src="assets/garagem-capa.jpg" alt="" decoding="async">
-          <img src="assets/sala-piscina-capa.jpg" alt="" loading="lazy">
-          <img src="assets/cozinha-capa.jpg" alt="" loading="lazy">
-          <img src="assets/deck-capa.jpg" alt="" loading="lazy">
+          <img src="assets/garagem-capa.jpg?r19" alt="" decoding="async">
+          <img src="assets/sala-piscina-capa.jpg?r19" alt="" loading="lazy">
+          <img src="assets/cozinha-capa.jpg?r19" alt="" loading="lazy">
+          <img src="assets/deck-capa.jpg?r19" alt="" loading="lazy">
         </div>
         <div class="stage-shade"></div>
         <div class="stage-top"><span class="eyebrow">Percurso pela casa</span><a href="#vistas">Escolher ambiente</a></div>
-        <div class="stage-info"><p id="stage-detail">O acesso entre as duas platibandas.</p><h2 id="stage-title">Garagem</h2><a id="stage-open" class="text-link" href="#sala-garagem">Olhar da sala para a garagem em 360°</a></div>
+        <div class="stage-info"><p id="stage-detail">O acesso entre as duas platibandas.</p><h2 id="stage-title">Garagem</h2><a id="stage-open" class="text-link" href="#garagem">Entrar pela garagem em 360°</a></div>
         <nav class="rail" aria-label="Etapas do percurso">
           <button type="button" aria-current="step">Garagem</button><button type="button">Sala</button><button type="button">Cozinha</button><button type="button">Deck</button>
         </nav>
       </div>
     </section>
     <section class="selection" id="vistas">
-      <div class="select-intro"><div><p class="eyebrow">Visita 360°</p><h2>Olhe ao redor.</h2></div><p>Escolha onde ficar. Arraste a imagem para virar o olhar ou compare a ambientação com a mesma vista no SketchUp.</p></div>
-      <div class="cards">
-        <a href="#cozinha"><img src="assets/cozinha-capa.jpg" alt="" loading="lazy"><div><span>Cozinha</span><small>Ilha e piscina</small></div></a>
-        <a href="#sala-garagem"><img src="assets/sala-garagem-capa.jpg" alt="" loading="lazy"><div><span>Estar</span><small>Vista para a garagem</small></div></a>
-        <a href="#deck"><img src="assets/deck-capa.jpg" alt="" loading="lazy"><div><span>Deck da piscina</span><small>Varanda e quarto</small></div></a>
-        <a href="#sala-piscina"><img src="assets/sala-piscina-capa.jpg" alt="" loading="lazy"><div><span>Sala de entrada</span><small>Vista até o fundo da casa</small></div></a>
+      <div class="select-intro"><div><p class="eyebrow">Visita 360°</p><h2>Olhe ao redor.</h2></div><p>Escolha um ambiente. Use os pontos na planta ou as setas dentro do panorama para caminhar pela casa.</p></div>
+      <div class="cards"><a href="#garagem"><img src="assets/garagem-capa.jpg?r19" alt="" loading="lazy"><div><span>Garagem</span><small>Entrada da casa</small></div></a>
+        <a href="#cozinha"><img src="assets/cozinha-capa.jpg?r19" alt="" loading="lazy"><div><span>Cozinha</span><small>Ilha e piscina</small></div></a>
+        <a href="#sala-garagem"><img src="assets/sala-garagem-capa.jpg?r19" alt="" loading="lazy"><div><span>Estar</span><small>Vista para a garagem</small></div></a>
+        <a href="#deck"><img src="assets/deck-capa.jpg?r19" alt="" loading="lazy"><div><span>Deck da piscina</span><small>Varanda e quarto</small></div></a>
+        <a href="#sala-piscina"><img src="assets/sala-piscina-capa.jpg?r19" alt="" loading="lazy"><div><span>Sala de entrada</span><small>Vista até o fundo da casa</small></div></a>
       </div>
     </section>
+  <section class="gallery selection" id="galeria" aria-labelledby="gallery-title"><div class="select-intro"><div><p class="eyebrow">Casa G13 · R19</p><h2 id="gallery-title">Galeria de vistas</h2></div><p>Abra uma vista em 4K e alterne entre a ambientação decorada e o render do modelo.</p></div><div class="photo-grid"><button type="button" class="photo-thumb" data-index="0"><img src="assets/fachada-mini.jpg?r19" alt="" loading="lazy"><span>Fachada da rua<b aria-hidden="true">↗</b></span></button><button type="button" class="photo-thumb" data-index="1"><img src="assets/garagem-mini.jpg?r19" alt="" loading="lazy"><span>Garagem e acesso<b aria-hidden="true">↗</b></span></button><button type="button" class="photo-thumb" data-index="2"><img src="assets/sala-piscina-mini.jpg?r19" alt="" loading="lazy"><span>Sala de entrada<b aria-hidden="true">↗</b></span></button><button type="button" class="photo-thumb" data-index="3"><img src="assets/sala-garagem-mini.jpg?r19" alt="" loading="lazy"><span>Estar e jardim<b aria-hidden="true">↗</b></span></button><button type="button" class="photo-thumb" data-index="4"><img src="assets/cozinha-mini.jpg?r19" alt="" loading="lazy"><span>Cozinha e ilha<b aria-hidden="true">↗</b></span></button><button type="button" class="photo-thumb" data-index="5"><img src="assets/deck-mini.jpg?r19" alt="" loading="lazy"><span>Deck da piscina<b aria-hidden="true">↗</b></span></button></div></section>
   </main>
   <footer><span>Ágora Construtora · G13</span><a href="../projetog13/">Apresentação do projeto</a></footer>
+  <!-- Entorno ilustrativo. HDRI Forest Slope, Poly Haven (CC0), https://polyhaven.com/a/forest_slope -->
 
+  <dialog id="foto" aria-labelledby="legenda-foto"><figure><div class="photo-bar"><figcaption id="legenda-foto"></figcaption><button id="close-photo" aria-label="Fechar imagem">Fechar ×</button></div><img id="foto-grande" alt=""><div class="photo-switch modes" role="group" aria-label="Versão da imagem"><button data-photo-mode="ambientacao" aria-pressed="true">Ambientação</button><button data-photo-mode="modelo" aria-pressed="false">Render do modelo</button></div><div class="photo-footer"><button id="prev-photo" aria-label="Imagem anterior">←</button><a id="original" target="_blank" rel="noopener">Abrir original 4K ↗</a><button id="next-photo" aria-label="Próxima imagem">→</button></div></figure></dialog>
   <dialog id="tour" aria-labelledby="room-title">
     <div class="viewer-shell">
       <header class="viewer-head"><div><p class="eyebrow">Casa G13 <span> / </span> Visita 360°</p><h2 id="room-title">Cozinha</h2></div><button class="close" type="button" aria-label="Fechar visita">Fechar <b aria-hidden="true">×</b></button></header>
       <div class="viewport"><div id="sphere" tabindex="0" aria-label="Panorama. Arraste ou use as setas do teclado para olhar ao redor."></div><div id="loading" role="status">Abrindo vista…</div>
+        <button id="map-toggle" type="button" aria-expanded="true" aria-controls="floor-map">Planta da casa</button>
+        <aside id="floor-map" aria-label="Planta interativa da Casa G13">
+          <div class="plan-heading"><span>Planta da casa</span><button id="hide-map" type="button" aria-label="Recolher planta">×</button></div>
+          <div class="plan-box"><img src="assets/planta-r19.webp" alt="Implantação do G13, com rua embaixo e piscina nos fundos" loading="lazy"><div id="map-points"></div></div>
+          <div class="plan-status" aria-live="polite"></div>
+        </aside>
         <div class="viewer-tools"><button id="turn" type="button">Girar 180°</button><button id="full" type="button" aria-label="Tela cheia">Tela cheia</button></div>
       </div>
-      <div class="console"><div class="modes" role="group" aria-label="Representação"><button type="button" data-mode="photo" aria-pressed="true">Ambientado</button><button type="button" data-mode="model" aria-pressed="false">SketchUp</button></div>
+      <div class="console"><div class="modes" role="group" aria-label="Representação"><button type="button" data-mode="photo" aria-pressed="true">Render 4K</button><button type="button" data-mode="model" aria-pressed="false">SketchUp</button></div>
         <div id="sightlines" aria-label="Direções de interesse"></div></div>
-      <nav class="scene-nav" aria-label="Trocar de ambiente"><a href="#sala-garagem">Estar</a><a href="#sala-piscina">Sala de entrada</a><a href="#cozinha">Cozinha</a><a href="#deck">Deck</a></nav>
+      <nav class="scene-nav" aria-label="Trocar de ambiente"><a href="#garagem">Garagem</a><a href="#sala-piscina">Entrada</a><a href="#sala-garagem">Estar</a><a href="#cozinha">Cozinha</a><a href="#deck">Deck</a></nav>
     </div>
   </dialog>
 </body>

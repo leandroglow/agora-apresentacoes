@@ -1,16 +1,18 @@
 "use strict";
 const steps = [
-  ["Garagem", "Acesso pela porta de vidro da sala.", "sala-garagem", "Olhar da sala para a garagem em 360°"],
+  ["Garagem", "Acesso pela porta de vidro da sala.", "garagem", "Entrar pela garagem em 360°"],
   ["Sala de entrada", "A vista atravessa o jantar e chega à piscina.", "sala-piscina", "Explorar a sala em 360°"],
   ["Cozinha", "Da ilha de São Gabriel ao deck.", "cozinha", "Explorar a cozinha em 360°"],
   ["Deck da piscina", "A borda de vidro se abre para a mata.", "deck", "Explorar o deck em 360°"]
 ];
 const cameras = {
-  "cozinha": {label:"Cozinha", pitch:-4, views:[["piscina","Ver a piscina",0,-5,80],["garagem","Olhar para a garagem",161,-4,68],["jardim","Jardim de inverno",-90,-2,77]]},
-  "sala-garagem": {label:"Estar · vista para a garagem", pitch:-4, views:[["garagem","Olhar para a garagem",4,-4,77],["piscina","Olhar para a piscina",-148,-3,64]]},
-  "sala-piscina": {label:"Sala de entrada", pitch:-4, views:[["piscina","Olhar para a piscina",0,-2,68],["garagem","Olhar para a garagem",155,-3,80]]},
-  "deck": {label:"Deck da piscina", pitch:-17, views:[["piscina","Ver a borda",12,-16,84],["cozinha","Olhar para dentro",-119,-3,80],["quarto","Ver o quarto",-43,-5,64]]}
+  garagem:{label:"Garagem",xy:[3.75,2.70],yaw:18,pitch:0,views:[["casa","Olhar para a casa",18,0,82],["rua","Olhar para o portão",180,-3,82]]},
+  "sala-piscina":{label:"Sala de entrada",xy:[4.40,6.25],yaw:7,pitch:-2,views:[["piscina","Olhar para a piscina",7,-2,76],["garagem","Olhar para a garagem",162,-3,82]]},
+  "sala-garagem":{label:"Estar",xy:[4.15,10.55],yaw:159,pitch:-3,views:[["garagem","Olhar para a garagem",159,-4,77],["piscina","Olhar para a cozinha",16,-2,72]]},
+  cozinha:{label:"Cozinha",xy:[4.80,13.10],yaw:12,pitch:-3,views:[["piscina","Olhar para a piscina",12,-4,77],["garagem","Olhar para o estar",-170,-3,75],["jardim","Olhar para o jardim",-90,-2,78]]},
+  deck:{label:"Deck da piscina",xy:[6.40,20.30],yaw:-45,pitch:-13,views:[["piscina","Ver a borda",-45,-14,83],["cozinha","Olhar para a cozinha",-167,-3,75],["quarto","Olhar para a suíte",-114,-3,75]]}
 };
+const routeOrder=Object.keys(cameras);
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
 const walk = document.querySelector(".walk");
 const stage = walk.querySelector(".stage");
@@ -53,6 +55,79 @@ window.addEventListener("resize",updateWalk);
 reduced.addEventListener("change",updateWalk);
 showStep();
 
+let headingFrame=0;
+const plan=document.getElementById("floor-map");
+const planToggle=document.getElementById("map-toggle");
+function showPlan(yes){
+  plan.hidden=!yes;
+  planToggle.setAttribute("aria-expanded",String(yes));
+  planToggle.hidden=yes;
+}
+function initPlan(){
+  const layer=document.getElementById("map-points");
+  routeOrder.forEach((id,i)=>{
+    const cfg=cameras[id],button=document.createElement("button");
+    button.type="button";button.className="floorpoint";button.dataset.room=id;
+    button.setAttribute("aria-label","Ir para "+cfg.label);button.title=cfg.label;
+    button.style.left=(cfg.xy[0]/7.5*100)+"%";
+    button.style.top=((25-cfg.xy[1])/25*100)+"%";
+    const mark=document.createElement("span");mark.className="disc";mark.textContent=String(i+1);button.append(mark);
+    button.addEventListener("click",()=>{if(location.hash!=="#"+id)location.hash=id;});
+    layer.append(button);
+  });
+  showPlan(!matchMedia("(max-width:700px), (max-height:510px)").matches);
+  planToggle.addEventListener("click",()=>{showPlan(true);plan.querySelector("[aria-current]")?.focus({preventScroll:true});});
+  document.getElementById("hide-map").addEventListener("click",()=>{showPlan(false);planToggle.focus({preventScroll:true});});
+}
+function syncPlan(room){
+  for(const btn of plan.querySelectorAll("[data-room]")){
+    if(btn.dataset.room===room)btn.setAttribute("aria-current","location");else btn.removeAttribute("aria-current");
+  }
+  plan.querySelector(".plan-status").textContent=cameras[room].label;
+}
+function updateHeading(){
+  cancelAnimationFrame(headingFrame);
+  const tick=()=>{
+    if(!viewer || !dialog.open)return;
+    if(!plan.hidden)plan.style.setProperty("--heading",(viewer.getYaw()||0)+"deg");
+    headingFrame=requestAnimationFrame(tick);
+  };tick();
+}
+function portalLinks(room){
+  const index=routeOrder.indexOf(room),from=cameras[room].xy;
+  return [routeOrder[index-1],routeOrder[index+1]].filter(Boolean).map(id=>{
+    const xy=cameras[id].xy, yaw=Math.atan2(xy[0]-from[0],xy[1]-from[1])*180/Math.PI;
+    return {pitch:-13,yaw,type:"info",cssClass:"g13-portal",createTooltipFunc:(div)=>{
+      const b=document.createElement("button");b.className="jump-hotspot";b.type="button";b.dataset.room=id;
+      b.setAttribute("aria-label","Caminhar para "+cameras[id].label);
+      const icon=document.createElement("span");icon.setAttribute("aria-hidden","true");icon.textContent="⌃";
+      const label=document.createElement("span");label.textContent=cameras[id].label;b.append(icon,label);
+      b.onclick=e=>{e.preventDefault();e.stopPropagation();location.hash=id;};
+      div.appendChild(b);
+    }};
+  });
+}
+const fotos=[["fachada","Fachada da rua"],["garagem","Garagem e acesso"],["sala-piscina","Sala de entrada"],["sala-garagem","Estar e jardim"],["cozinha","Cozinha e ilha"],["deck","Deck da piscina"]];
+const foto=document.getElementById("foto");let indexFoto=0,photoMode="ambientacao";
+function verFoto(index){
+  indexFoto=(index+fotos.length)%fotos.length;const [id,title]=fotos[indexFoto];
+  const src="assets/"+id+(photoMode==="ambientacao"?"-ambientacao.jpg":"-4k.jpg");
+  document.querySelectorAll("[data-photo-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.photoMode===photoMode)));
+  document.getElementById("foto-grande").src=src;document.getElementById("foto-grande").alt=title+" da Casa G13";
+  document.getElementById("original").href=src;document.getElementById("legenda-foto").textContent=title+" · "+(indexFoto+1)+" / "+fotos.length;
+  if(!foto.open)foto.showModal();
+}
+document.querySelectorAll(".photo-thumb").forEach(b=>b.addEventListener("click",()=>verFoto(+b.dataset.index)));
+document.querySelectorAll("[data-photo-mode]").forEach(b=>b.onclick=()=>{photoMode=b.dataset.photoMode;verFoto(indexFoto);});
+document.getElementById("close-photo").onclick=()=>foto.close();
+document.getElementById("prev-photo").onclick=()=>verFoto(indexFoto-1);
+document.getElementById("next-photo").onclick=()=>verFoto(indexFoto+1);
+foto.addEventListener("click",e=>{if(e.target===foto)foto.close();});
+foto.addEventListener("keydown",e=>{if(e.key==="ArrowRight")verFoto(indexFoto+1);if(e.key==="ArrowLeft")verFoto(indexFoto-1);});
+let startX=null;
+foto.addEventListener("touchstart",e=>{startX=e.touches.length===1?e.touches[0].clientX:null;},{passive:true});
+foto.addEventListener("touchend",e=>{if(startX!==null && Math.abs(startX-e.changedTouches[0].clientX)>65)verFoto(indexFoto+(startX>e.changedTouches[0].clientX?1:-1));startX=null;},{passive:true});
+
 const dialog = document.querySelector("#tour");
 const mount = document.querySelector("#sphere");
 const loading = document.querySelector("#loading");
@@ -65,6 +140,7 @@ function pose() {
 }
 function stop() {
   generation++;
+  cancelAnimationFrame(headingFrame);
   if (viewer) { viewer.destroy(); viewer = null; }
   mount.replaceChildren();
 }
@@ -74,10 +150,10 @@ function openCamera(room, mode, target) {
   activeRoom = room;
   activeMode = mode;
   const config = cameras[room];
-  const angles = target || {yaw:0, pitch:config.pitch, hfov:82};
-  const src = "assets/"+room+(mode==="model"?"-modelo":"")+".jpg";
+  const angles = target || {yaw:config.yaw, pitch:config.pitch, hfov:82};
+  const src = "assets/"+room+(mode==="model"?"-modelo":"")+".jpg?r19";
   dialog.querySelector("#room-title").textContent=config.label;
-  mount.style.backgroundImage="url('assets/"+room+"-capa.jpg')";
+  mount.style.backgroundImage="url('assets/"+room+"-capa.jpg?r19')";
   modeButtons.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode === mode)));
   dialog.querySelectorAll(".scene-nav a").forEach(a=>a.hash==="#"+room ? a.setAttribute("aria-current","location") : a.removeAttribute("aria-current"));
   const directions = document.querySelector("#sightlines");
@@ -88,11 +164,13 @@ function openCamera(room, mode, target) {
     b.addEventListener("click",()=>viewer?.lookAt(rel[3],rel[2],rel[4],reduced.matches?0:560));
     directions.append(b);
   });
+  syncPlan(room);
   loading.hidden=false;
   loading.textContent="Abrindo vista…";
   function ready() {
     if (generation !== ticket) return;
     loading.hidden=true;
+    updateHeading();
     document.querySelector("#turn").disabled=false;
   }
   function fallback() {
@@ -107,7 +185,7 @@ function openCamera(room, mode, target) {
   if (!window.pannellum) { fallback(); return; }
   try {
     viewer=window.pannellum.viewer(mount,{
-      type:"equirectangular", panorama:src, autoLoad:true, ...angles,
+      type:"equirectangular", panorama:src, autoLoad:true, ...angles, hotSpots:portalLinks(room),
       minHfov:50,maxHfov:106, showFullscreenCtrl:false, showZoomCtrl:true,
       keyboardZoom:true, mouseZoom:true, showControls:true, orientationOnByDefault:false,
       strings:{loadingLabel:"Abrindo vista…",zoomIn:"Aproximar",zoomOut:"Afastar"}
@@ -159,13 +237,17 @@ modeButtons.forEach(b=>b.addEventListener("click",()=>{
 document.querySelector("#turn").addEventListener("click",()=>viewer?.setYaw(viewer.getYaw()+180,reduced.matches?0:650));
 const full=document.querySelector("#full");
 const shell=document.querySelector(".viewer-shell");
-if (!shell.requestFullscreen || !document.fullscreenEnabled) full.hidden=true;
-else {
-  full.addEventListener("click",async()=>{
-    try { if(document.fullscreenElement) await document.exitFullscreen(); else await shell.requestFullscreen(); }
-    catch { full.hidden=true; }
-  });
-  document.addEventListener("fullscreenchange",()=>{full.textContent=document.fullscreenElement?"Sair da tela cheia":"Tela cheia";viewer?.resize();});
-}
+full.addEventListener("click",async()=>{
+  try{
+    if(document.fullscreenElement)await document.exitFullscreen();
+    else if(shell.requestFullscreen && document.fullscreenEnabled)await shell.requestFullscreen();
+    else shell.classList.toggle("theater");
+  }catch{shell.classList.toggle("theater");}
+  syncFullscreen();
+});
+function syncFullscreen(){const on=!!document.fullscreenElement||shell.classList.contains("theater");full.textContent=on?"Sair da tela cheia":"Tela cheia";full.setAttribute("aria-pressed",String(on));viewer?.resize();}
+document.addEventListener("fullscreenchange",syncFullscreen);
+dialog.addEventListener("close",()=>{shell.classList.remove("theater");syncFullscreen();});
+initPlan();
 syncRoute();
 
