@@ -2,15 +2,15 @@
 
 Entrada: primeiro cartão de Organização no Sistema → `/compras/`.
 
-Fluxo: texto informal ou fotos → revisão opcional dos itens → solicitação → cotação → pedido → recebimento. Projeto é opcional; destinos também incluem estoque, gastos gerais e a definir. A IA organiza especificações sem presumir quantidade ou preço. O texto original é preservado. Copiar para WhatsApp copia apenas texto; não envia mensagens nem compra materiais. Estados não geram despesas ou lançamentos financeiros.
+Fluxo: texto informal ou fotos → revisão opcional dos itens → solicitação → cotação → pedido → recebimento. Projeto é opcional; destinos também incluem estoque, gastos gerais e a definir. A IA organiza especificações sem presumir quantidade ou preço. O texto original é preservado. O histórico exibe um cartão por material. Texto em linhas separadas ou uma lista extraída de foto permite acompanhar projeto, fornecedor e situação de cada item. O texto original e os anexos permanecem vinculados à mesma solicitação. Estados não geram despesas ou lançamentos financeiros.
 
 ## Acesso e armazenamento
 
 - Clerk autentica e a API autoriza exclusivamente as identidades internas já permitidas pelo Sistema. Clientes não têm acesso à fila nem às fotos.
-- Master acompanha todos os pedidos, edita e altera o andamento. William pode registrar e editar seus pedidos ainda solicitados/em cotação.
+- O Master acompanha e atualiza cada item. William pode editar itens próprios ainda solicitados ou em cotação.
 - Índice JSON privado no Drive; fotos privadas na mesma pasta. Referências e credenciais permanecem no backend. Variáveis opcionais `PURCHASE_DATA_FILE_ID` e `PURCHASE_FOLDER_ID` permitem substituir os IDs canônicos configurados no módulo de armazenamento.
 - O cadastro não muda compartilhamento de arquivos. As fotos só são servidas com autenticação e vínculo válido ao pedido, proprietário e pasta.
-- A escrita usa ETag do Drive, comparação condicional e leitura de confirmação. Um pedido tem UUID estável; repetição idêntica não duplica. Edição com versão desatualizada é recusada.
+- A escrita usa ETag do Drive, comparação condicional e leitura de confirmação. O primeiro toque faz a gravação. Se a conexão falhar, o navegador repete o envio com o mesmo UUID e o mesmo conteúdo. Edição com versão desatualizada é recusada.
 - Rascunho de texto local por usuário; fotos só persistem após upload. Até seis imagens por pedido, JPEG/PNG/WebP de até 900 KiB após compressão. IA usa até duas fotos por chamada. Fotos podem perder resolução; este módulo não substitui o arquivo fiscal original.
 
 ## Manutenção

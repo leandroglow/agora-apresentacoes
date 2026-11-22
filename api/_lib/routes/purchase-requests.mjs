@@ -1,6 +1,6 @@
 import { createOrganizer } from '../purchase-organizer.mjs';
 import { DrivePurchaseStore } from '../purchase-store.mjs';
-import { PurchaseError,MASTER_ID,PROJECTS,UUID,plain,digest,recordTag,photosOf,createRecord,changeRecord,decodePhoto,itemsOf } from '../purchase-requests.mjs';
+import { PurchaseError,MASTER_ID,PROJECTS,UUID,plain,digest,recordTag,photosOf,createRecord,changeRecord,decodePhoto,itemsOf,linesForRecord } from '../purchase-requests.mjs';
 
 const ORIGIN='https://apresentacoes.agoracons.com.br';
 const MAX_BODY=4_100_000;
@@ -21,6 +21,12 @@ function bodyOf(req) {
 function envelope(raw) {
   if(!plain(raw)||raw.version!==1||!Array.isArray(raw.requests)||!Array.isArray(raw.mutationIds)||!plain(raw.mutationHashes))throw new PurchaseError('A base de compras precisa de conferência.',503,'data_invalid');
   return raw;
+}
+function publicRequest(record) {
+  return {...record,lines:linesForRecord(record)};
+}
+function saved(record,duplicate) {
+  return {request:publicRequest(record),etag:recordTag(record),duplicate};
 }
 const organize=createOrganizer();
 export function createPurchaseHandler({authorize=null,store=null,organizer=organize,rateLimit=limit,clock=()=>new Date().toISOString()}={}) {
@@ -46,10 +52,10 @@ export function createPurchaseHandler({authorize=null,store=null,organizer=organ
    }
    let loaded=await storage.get(),data=envelope(loaded.envelope);
    if(req.method==='GET'){
-    if(action==='list')return res.status(200).json({requests:[...data.requests].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)),projects:PROJECTS,canManage});
+    if(action==='list')return res.status(200).json({requests:[...data.requests].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).map(publicRequest),projects:PROJECTS,canManage});
     const id=url.searchParams.get('id');if(!UUID.test(id||''))throw new PurchaseError('Identificador inválido.');
     const record=data.requests.find(r=>r.id===id);if(!record)throw new PurchaseError('Solicitação não encontrada.',404);
-    if(action==='read')return res.status(200).json({request:record,etag:recordTag(record),canManage});
+    if(action==='read')return res.status(200).json({request:publicRequest(record),etag:recordTag(record),canManage});
     if(action==='photo'){
       const photoId=url.searchParams.get('photoId');if(!record.photos.some(p=>p.id===photoId))throw new PurchaseError('Foto não pertence a esta solicitação.',403,'photo_denied');
       const photo=await storage.photo(photoId,id,record.createdBy);
@@ -67,7 +73,7 @@ export function createPurchaseHandler({authorize=null,store=null,organizer=organ
     const duplicate=data.requests.find(r=>r.id===body.request.id);
     if(duplicate){
       if(duplicate.createdBy!==session.sub||duplicate.creationHash!==hash)throw new PurchaseError('Identificador já utilizado com outro pedido.',409);
-      return res.status(200).json({request:duplicate,etag:recordTag(duplicate),duplicate:true});
+      return res.status(200).json(saved(duplicate,true));
     }
     const photos=[];for(const p of photosOf(body.request.photos||[]))photos.push(await storage.photoMetadata(p.id,body.request.id,session.sub));
     nextRecord={...createRecord(body.request,session,photos,clock()),creationHash:hash};
@@ -77,7 +83,7 @@ export function createPurchaseHandler({authorize=null,store=null,organizer=organ
     let next;
     if(action==='create') {
       const prior=data.requests.find(r=>r.id===nextRecord.id);
-      if(prior){if(prior.createdBy===session.sub&&prior.creationHash===hash)return res.status(200).json({request:prior,etag:recordTag(prior),duplicate:true});throw new PurchaseError('Identificador já usado.',409);}
+      if(prior){if(prior.createdBy===session.sub&&prior.creationHash===hash){return res.status(200).json(saved(prior,true));}throw new PurchaseError('Identificador já usado.',409);}
       if(data.mutationIds.includes(body.mutationId)&&data.mutationHashes[body.mutationId]!==hash)throw new PurchaseError('Operação já usada com outros dados.',409);
       if(data.requests.length>=2000)throw new PurchaseError('A base chegou ao limite. Solicite o arquivamento dos pedidos antigos.',409);
       const ids=[...data.mutationIds,body.mutationId].slice(-100),hashes={...data.mutationHashes,[body.mutationId]:hash};for(const key of Object.keys(hashes))if(!ids.includes(key))delete hashes[key];
@@ -90,7 +96,7 @@ export function createPurchaseHandler({authorize=null,store=null,organizer=organ
     const result=await storage.put(next,loaded.etag);if(result.conflict)continue;
     const readback=envelope((await storage.get()).envelope).requests.find(r=>r.id===nextRecord.id);
     if(!readback||recordTag(readback)!==recordTag(nextRecord))throw new PurchaseError('O pedido mudou durante a gravação. Reabra para conferir.',409,'revision_conflict');
-    return res.status(200).json({request:readback,etag:recordTag(readback),duplicate:false});
+    return res.status(200).json(saved(readback,false));
    }
    throw new PurchaseError('Outra solicitação está sendo salva. Tente novamente.',409,'revision_conflict');
   } catch(error) {

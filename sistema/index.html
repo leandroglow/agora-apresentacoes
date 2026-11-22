@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="expense-workflow.css?v=20261109-1">
 <script src="expense-workflow.js?v=20261109-1" defer></script>
 <link rel="stylesheet" href="catalogos-images.css?v=1">
-<link rel="stylesheet" href="organizacao.css?v=20261022">
+<link rel="stylesheet" href="organizacao.css?v=20261121-1">
 <style>
 :root {
   --ardosia: #3A4A5A; --ardosia-light: #4E6070;
@@ -504,28 +504,14 @@ select.rel-filter-input{min-width:160px;cursor:pointer}
 
   <!-- ORGANIZAÇÃO -->
   <section id="secao-organizacao" class="organizacao-page" style="display:none" aria-labelledby="organizacao-title">
-    <div class="organizacao-intro"><p>ÁGORA CONSTRUTORA</p><h1 id="organizacao-title">Organização</h1><span>Recursos de IA e a estrutura que apoia o trabalho da empresa.</span></div>
+    <div class="organizacao-intro"><p>ÁGORA CONSTRUTORA</p><h1 id="organizacao-title">Organização</h1></div>
     <div class="organizacao-grid">
-      <button type="button" class="organizacao-card" id="card-compras"><span class="organizacao-symbol" aria-hidden="true">＋</span><span class="organizacao-card-title">Solicitação de compras</span><span class="organizacao-card-description">Registre materiais e acompanhe cotações, pedidos e recebimentos.</span><span class="organizacao-card-action">Abrir solicitações →</span></button>
-      <button type="button" class="organizacao-card" id="card-cad"><span class="organizacao-symbol" aria-hidden="true">▧</span><span class="organizacao-card-title">Arquivos CAD</span><span class="organizacao-card-description">Abra DWG e DXF com zoom e navegação pelo celular.</span><span class="organizacao-card-action">Abrir desenho →</span></button>
-      <button type="button" class="organizacao-card" id="card-catalogos-ia">
-        <span class="organizacao-symbol" aria-hidden="true">✦</span>
-        <span class="organizacao-card-title">Catálogo de IA</span>
-        <span class="organizacao-card-description">Consulte os catálogos de produtos por texto ou áudio, com as fontes do acervo autorizado.</span>
-        <span class="organizacao-card-action">Abrir catálogo <span aria-hidden="true">→</span></span>
-      </button>
-      <button type="button" class="organizacao-card" id="card-estrutura-ia">
-        <span class="organizacao-symbol" aria-hidden="true">◎</span>
-        <span class="organizacao-card-title">Agentes IA</span>
-        <span class="organizacao-card-description">Conheça quem cuida de cada área, como o trabalho acontece e onde ficam os sistemas e a memória da Ágora.</span>
-        <span class="organizacao-card-action">Explorar o painel <span aria-hidden="true">→</span></span>
-      </button>
-      <button type="button" class="organizacao-card" id="card-inventario" hidden><span class="organizacao-symbol" aria-hidden="true">▤</span><span class="organizacao-card-title">Inventário</span><span class="organizacao-card-description">Consulte e atualize o inventário de materiais da Ágora.</span><span class="organizacao-card-action">Abrir inventário <span aria-hidden="true">→</span></span></button><button type="button" class="organizacao-card" id="card-organizacao-despesas">
-        <span class="organizacao-symbol" aria-hidden="true">▣</span>
-        <span class="organizacao-card-title">Despesas</span>
-        <span class="organizacao-card-description">Registre comprovantes, combustível e custos de obras com fotos armazenadas no Drive.</span>
-        <span class="organizacao-card-action">Abrir despesas <span aria-hidden="true">→</span></span>
-      </button>
+      <button type="button" class="organizacao-card organizacao-card--primary" id="card-compras"><span class="organizacao-symbol" aria-hidden="true">＋</span><span class="organizacao-card-title">Solicitação de compras</span><span class="organizacao-card-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="organizacao-card" id="card-cad"><span class="organizacao-symbol" aria-hidden="true">▧</span><span class="organizacao-card-title">Arquivos CAD</span><span class="organizacao-card-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="organizacao-card" id="card-catalogos-ia"><span class="organizacao-symbol" aria-hidden="true">✦</span><span class="organizacao-card-title">Catálogo de IA</span><span class="organizacao-card-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="organizacao-card" id="card-estrutura-ia"><span class="organizacao-symbol" aria-hidden="true">◎</span><span class="organizacao-card-title">Agentes IA</span><span class="organizacao-card-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="organizacao-card" id="card-inventario" hidden><span class="organizacao-symbol" aria-hidden="true">▤</span><span class="organizacao-card-title">Inventário</span><span class="organizacao-card-arrow" aria-hidden="true">→</span></button>
+      <button type="button" class="organizacao-card" id="card-organizacao-despesas"><span class="organizacao-symbol" aria-hidden="true">▣</span><span class="organizacao-card-title">Despesas</span><span class="organizacao-card-arrow" aria-hidden="true">→</span></button>
     </div>
   </section>
   <section id="secao-estrutura-ia" style="display:none" aria-label="Agentes IA">

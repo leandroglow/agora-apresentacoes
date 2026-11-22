@@ -1,12 +1,66 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#151515"><title>Solicitação de compras | Ágora</title><link rel="stylesheet" href="compras.css"><script defer src="../sistema/clerk-auth.js"></script><script defer src="compras.js"></script></head>
-<body class="loading"><header class="topbar"><a class="brand" href="/sistema/" aria-label="Voltar ao Sistema Ágora"><b>ÁGORA</b><small>CONSTRUTORA</small></a><span class="crumb">Organização <span>/</span> <strong>Solicitação de compras</strong></span><div class="account"><span id="accountName">Sessão interna</span><button id="logout" class="text-button" type="button">Sair</button></div></header>
-<main><div class="page-heading"><div><p class="eyebrow">ORGANIZAÇÃO · COMPRAS</p><h1>Solicitação de compras</h1><p class="subhead">Registre o que você precisa e acompanhe cada etapa.</p><a class="history-jump" href="#historyPanel">Acompanhar solicitações ↓</a></div><button id="refresh" class="button quiet" type="button">Atualizar histórico</button></div>
-<div id="notice" class="notice" role="status" hidden></div><section class="layout"><div class="primary-column"><section class="panel composer"><div class="panel-title"><div><span class="step">01</span><h2>Nova solicitação</h2></div><span id="saveState" class="save-state">Rascunho local</span></div><form id="requestForm" novalidate><label class="field"><span>O que você precisa?</span><textarea id="rawText" maxlength="8000" rows="5" placeholder="Escreva do seu jeito: material, quantidade se souber, onde será usado…"></textarea><small><span id="charCount">0</span>/8000 · O texto original será preservado.</small></label>
-<div class="photo-field"><div><strong>Fotos <span class="optional">opcional</span></strong><p>JPEG, PNG ou WebP. Até 6 imagens, comprimidas no aparelho. Cada foto começa como referência e só é enviada à IA se você escolher extraí-la.</p></div><div class="photo-actions"><label class="button quiet file-button">Câmera<input id="cameraFiles" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple></label><label class="button quiet file-button">Galeria<input id="galleryFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple></label></div><div id="photoTray" class="photo-tray" aria-label="Fotos anexadas"></div><small class="hint">Fotos de referência ficam anexadas à solicitação e não são enviadas à IA. Até 2 fotos podem ser selecionadas para extração. Fotos permanecem apenas nesta tela até o envio; rascunho local não guarda imagens.</small></div>
-<div class="form-grid"><label class="field"><span>Destino</span><select id="destination"><option value="unassigned">A definir</option><option value="stock">Estoque</option><option value="general">Gastos gerais</option><option value="project">Projeto</option></select></label><label class="field" id="projectField" hidden><span>Projeto</span><select id="project"><option value="">Selecione um projeto</option></select></label><label class="field"><span>Prioridade</span><select id="priority"><option value="normal">Normal</option><option value="urgent">Urgente</option></select></label><label class="field"><span>Necessário até <span class="optional">opcional</span></span><input id="neededBy" type="date"></label></div>
-<div class="organize-row"><button id="organize" class="button quiet" type="button">✦ Organizar com IA</button><span id="organizeHint">A IA recebe o texto e somente as fotos marcadas para extração (máximo 2). Você revisa as sugestões antes de salvar.</span></div><section id="itemsPanel" class="items-panel" hidden><div class="items-heading"><div><span class="eyebrow">REVISÃO</span><h3>Itens da solicitação</h3></div><button id="addItem" class="text-button" type="button">＋ Adicionar item</button></div><div id="itemsList"></div><label class="field"><span>Observações adicionais</span><textarea id="notes" maxlength="1000" rows="2" placeholder="Detalhes que ajudam na compra"></textarea></label></section>
-<label class="field"><span>Título <span class="optional">opcional</span></span><input id="title" maxlength="140" placeholder="Ex.: Materiais para instalação hidráulica"></label><div class="form-actions"><button id="copyText" class="button quiet" type="button">Copiar para WhatsApp</button><button id="submitRequest" class="button primary" type="submit">Enviar solicitação</button></div><p class="privacy-note">O botão de copiar prepara o texto no seu aparelho. Nada é enviado ao WhatsApp automaticamente.</p></form></section>
-</div><aside id="historyPanel" class="panel history-panel"><div class="panel-title"><div><span class="step">02</span><h2>Histórico</h2></div><button id="printList" class="text-button" type="button">Imprimir / copiar</button></div><div class="filters"><input id="search" type="search" placeholder="Buscar solicitações" aria-label="Buscar solicitações"><select id="statusFilter" aria-label="Filtrar por situação"><option value="">Todas as situações</option></select><select id="projectFilter" aria-label="Filtrar por projeto"><option value="">Todos os projetos</option></select></div><div id="historyList" class="history-list" aria-live="polite"><p class="muted">Carregando solicitações…</p></div></aside></section></main>
-<dialog id="detailDialog" aria-labelledby="detailTitle"><div class="dialog-shell"><header><div><p class="eyebrow">SOLICITAÇÃO</p><h2 id="detailTitle">Detalhes</h2></div><button id="closeDetail" class="close-button" type="button" aria-label="Fechar">×</button></header><div id="detailBody"></div><footer id="detailFooter"></footer></div></dialog><div id="authGate" class="auth-gate" hidden><div class="gate-card"><b class="gate-brand">ÁGORA</b><h1 id="gateTitle">Conectando ao Sistema</h1><p id="gateMessage">Verificando sessão interna…</p><div id="gateActions"></div></div></div>
-</body></html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#151515">
+  <title>Solicitação de compras | Ágora</title>
+  <link rel="stylesheet" href="compras.css?v=20261121-itens">
+  <script defer src="../sistema/clerk-auth.js"></script>
+  <script defer src="compras.js?v=20261121-itens"></script>
+</head>
+<body class="loading">
+  <header class="topbar">
+    <a class="brand" href="/sistema/" aria-label="Voltar ao Sistema Ágora"><b>ÁGORA</b><small>CONSTRUTORA</small></a>
+    <div class="account"><span id="accountName"></span><button id="logout" class="text-button" type="button">Sair</button></div>
+  </header>
+  <main>
+    <div class="page-heading"><h1>Solicitação de compras</h1><button id="refresh" class="button quiet" type="button">↻ Atualizar histórico</button></div>
+    <div id="notice" class="notice" role="status" hidden></div>
+    <div class="layout">
+      <section class="panel composer" aria-label="Nova solicitação">
+        <form id="requestForm" novalidate>
+          <label class="field"><textarea id="rawText" aria-label="Materiais da solicitação" maxlength="8000" rows="4" placeholder="Um material por linha"></textarea></label>
+          <div class="photo-field">
+            <strong>Fotos <span class="optional">(opcional)</span></strong>
+            <div class="photo-actions">
+              <label class="button quiet file-button">Câmera<input id="cameraFiles" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple></label>
+              <label class="button quiet file-button">Galeria<input id="galleryFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>
+            </div>
+            <div id="photoTray" class="photo-tray" aria-label="Fotos anexadas"></div>
+          </div>
+          <div class="form-grid">
+            <label class="field"><span>Destino</span><select id="destination"><option value="unassigned">A definir</option><option value="stock">Estoque</option><option value="general">Gastos gerais</option><option value="project">Projeto</option></select></label>
+            <label class="field" id="projectField" hidden><span>Projeto</span><select id="project"><option value="">Selecione um projeto</option></select></label>
+            <label class="field"><span>Prioridade</span><select id="priority"><option value="normal">Normal</option><option value="urgent">Urgente</option></select></label>
+          </div>
+          <div class="organize-row"><button id="organize" class="button quiet" type="button">✦ Organizar com IA</button></div>
+          <section id="itemsPanel" class="items-panel" hidden>
+            <div class="items-heading"><h2>Itens</h2><button id="addItem" class="text-button" type="button">＋ Adicionar item</button></div>
+            <div id="itemsList"></div>
+          </section>
+          <details id="extraFields" class="extra-fields"><summary>Mais opções</summary>
+            <label class="field"><span>Título</span><input id="title" maxlength="140"></label>
+            <label class="field"><span>Observações</span><textarea id="notes" maxlength="1000" rows="2"></textarea></label>
+          </details>
+          <div class="form-actions"><button id="submitRequest" class="button primary" type="submit">Enviar solicitação</button><p id="sendStatus" role="status" aria-live="polite" hidden></p></div>
+        </form>
+      </section>
+      <section id="historyPanel" class="panel history-panel">
+        <div class="panel-title"><h2>Histórico</h2><button id="printList" class="text-button" type="button">Imprimir</button></div>
+        <div class="filters">
+          <input id="search" type="search" placeholder="Buscar material" aria-label="Buscar material">
+          <select id="statusFilter" aria-label="Filtrar por situação"><option value="">Todas as situações</option></select>
+          <select id="projectFilter" aria-label="Filtrar por projeto"><option value="">Todos os projetos</option></select>
+        </div>
+        <div id="historyList" class="history-list" aria-live="polite"></div>
+      </section>
+    </div>
+  </main>
+  <dialog id="detailDialog" aria-labelledby="detailTitle">
+    <div class="dialog-shell"><header><h2 id="detailTitle">Detalhes do item</h2><button id="closeDetail" class="close-button" type="button" aria-label="Fechar">×</button></header><div id="detailBody"></div><footer id="detailFooter"></footer></div>
+  </dialog>
+  <div id="authGate" class="auth-gate" hidden><div class="gate-card"><b class="gate-brand">ÁGORA</b><h1 id="gateTitle">Conectando ao Sistema</h1><p id="gateMessage">Verificando sessão interna…</p><div id="gateActions"></div></div></div>
+</body>
+</html>

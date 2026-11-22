@@ -1,18 +1,18 @@
-.organizacao-page{max-width:960px;margin:0 auto;padding:44px 24px 60px}
-.organizacao-intro{margin-bottom:28px}
+.organizacao-page{max-width:960px;margin:0 auto;padding:36px 24px 48px;background:linear-gradient(180deg,#101820 0%,#0c1218 100%);color:#fff;min-height:calc(100vh - 65px)}
+.organizacao-intro{margin-bottom:22px}
 .organizacao-intro p{font-size:10px;font-weight:700;letter-spacing:.15em;color:var(--ambar);margin-bottom:8px}
-.organizacao-intro h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:40px;font-weight:500;line-height:1.15;margin-bottom:10px}
-.organizacao-intro>span{font-size:13px;line-height:1.7;color:var(--g600)}
+.organizacao-intro h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:40px;font-weight:500;line-height:1.15;margin-bottom:10px;color:#fff}
+.organizacao-intro>span{font-size:13px;line-height:1.7;color:rgba(255,255,255,.64)}
 .organizacao-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
-.organizacao-card{border:1px solid var(--border);border-radius:10px;background:var(--white);padding:27px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:12px;color:var(--ardosia);font-family:inherit;cursor:pointer;transition:border-color .15s,box-shadow .15s}
-.organizacao-card:hover{border-color:var(--ambar);box-shadow:0 6px 22px rgba(58,74,90,.07)}
-.organizacao-card:focus-visible{outline:3px solid var(--ambar);outline-offset:4px}
-.organizacao-symbol{font-size:29px;line-height:1;color:var(--ambar)}
-.organizacao-card-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:29px;line-height:1.2;font-weight:600}
-.organizacao-card-description{font-size:12px;line-height:1.75;color:var(--g600)}
-.organizacao-card-action{margin-top:auto;padding-top:15px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:space-between;width:100%;color:#945e07}
-.organizacao-card-action span{font-size:20px}
+.organizacao-card{border:1px solid rgba(240,168,32,.28);border-radius:12px;background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.035));padding:18px 20px;text-align:left;display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;color:#fff;font-family:'Montserrat',system-ui,sans-serif;cursor:pointer;min-height:84px;transition:background .18s,border-color .18s,box-shadow .18s,transform .18s}
+.organizacao-card:hover{border-color:var(--ambar-light);background:linear-gradient(145deg,rgba(212,136,10,.2),rgba(255,255,255,.06));box-shadow:0 10px 28px rgba(0,0,0,.24);transform:translateY(-2px)}
+.organizacao-card:focus-visible{outline:3px solid var(--ambar-light);outline-offset:4px}
+.organizacao-card--primary{border-color:rgba(240,168,32,.82);background:linear-gradient(145deg,rgba(212,136,10,.28),rgba(255,255,255,.07));box-shadow:0 8px 26px rgba(0,0,0,.18)}
+.organizacao-card[hidden]{display:none!important}
+.organizacao-symbol{width:42px;height:42px;border:1px solid rgba(240,168,32,.55);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;color:var(--ambar-light);background:rgba(212,136,10,.12)}
+.organizacao-card-title{font-family:'Montserrat',system-ui,sans-serif;font-size:15px;line-height:1.3;font-weight:700;letter-spacing:.01em}
+.organizacao-card-arrow{font-size:24px;line-height:1;color:#ffd27a;padding-left:8px}
 #iframe-estrutura-ia{width:100%;height:calc(100dvh - 65px);min-height:400px;display:block;border:0;background:#090b0a}
-@media(max-width:600px){.organizacao-page{padding:28px 18px 40px}.organizacao-grid{grid-template-columns:1fr;gap:14px}.organizacao-card{padding:22px}.organizacao-intro h1{font-size:35px}.header-center{font-size:8px;letter-spacing:.03em}.header-right{flex-wrap:wrap;justify-content:flex-end}.btn-hdr{padding:6px 8px;font-size:8px}#iframe-estrutura-ia{height:calc(100dvh - 76px)}}
+@media(max-width:600px){.organizacao-page{padding:28px 18px 40px;min-height:calc(100vh - 76px)}.organizacao-grid{grid-template-columns:1fr;gap:10px}.organizacao-card{padding:14px 16px;min-height:64px}.organizacao-symbol{width:36px;height:36px;font-size:19px}.organizacao-card-title{font-size:14px}.organizacao-card-arrow{font-size:22px}.organizacao-intro h1{font-size:35px}.header-center{font-size:8px;letter-spacing:.03em}.header-right{flex-wrap:wrap;justify-content:flex-end}.btn-hdr{padding:6px 8px;font-size:8px}#iframe-estrutura-ia{height:calc(100dvh - 76px)}}
 @media(prefers-reduced-motion:reduce){.organizacao-card{transition:none}}
 @media print{#secao-organizacao,#secao-estrutura-ia{display:none!important}}
