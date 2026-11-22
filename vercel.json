@@ -30,6 +30,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/fontes_coordenador",
+      "destination": "/api/presenca?_route=fontes-coordenador"
+    },
+    {
       "source": "/api/purchase-requests",
       "destination": "/api/service?_route=purchase-requests"
     },

@@ -1,8 +1,10 @@
 import json
 import os
 from http.server import BaseHTTPRequestHandler
+from urllib.parse import parse_qs, urlsplit
 
 from rh_gateway.gateway import Drive, Failure, dispatch, verify
+from rh_gateway import fontes_handler
 
 
 class handler(BaseHTTPRequestHandler):
@@ -19,6 +21,8 @@ class handler(BaseHTTPRequestHandler):
         self.reply(405, {"ok":False,"error":"Use POST."})
 
     def do_POST(self):
+        if parse_qs(urlsplit(self.path).query).get("_route") == ["fontes-coordenador"]:
+            return fontes_handler.handle_post(self)
         try:
             if os.environ.get("VERCEL_ENV") != "production":
                 raise Failure(403, "Canal disponível somente em produção.")
