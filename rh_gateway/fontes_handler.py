@@ -1,6 +1,7 @@
 """Handler HTTP das fontes, montado pela função existente de presença."""
 import json, os
 from rh_gateway.fontes import FontesDrive, SourceError, anotar, editar, ler, listar, verify_fontes, MAX_BODY
+from rh_gateway.gateway import Failure
 
 def handle_post(handler):
     try:
@@ -19,5 +20,5 @@ def handle_post(handler):
         elif op == "editar": result = editar(payload, FontesDrive())
         else: raise SourceError(400, "Operação inválida.")
         handler.reply(200, result)
-    except SourceError as exc: handler.reply(exc.status, {"ok": False, "error": exc.reason})
+    except Failure as exc: handler.reply(exc.status, {"ok": False, "error": exc.reason})
     except Exception: handler.reply(503, {"ok": False, "error": "Não foi possível consultar as fontes."})

@@ -2,6 +2,7 @@
 from __future__ import annotations
 import hashlib, json, os, re
 from .gateway import Failure, drive_token, request, Drive, verify
+from .fontes_nativas import DOC, SHEET, NativeRevision, read_native, write_native
 
 MAX_BODY = 32768
 MAX_SOURCE = 2_000_000
@@ -37,12 +38,17 @@ class FontesDrive:
     def snapshot(self, file_id):
         fid = Drive.valid_id(file_id)
         headers = {"Authorization": "Bearer " + self.token}
-        meta = json.loads(self.request("https://www.googleapis.com/drive/v2/files/" + fid + "?fields=id,etag,md5Checksum,version,editable,labels(trashed)&supportsAllDrives=true", headers=headers))
+        meta_url = "https://www.googleapis.com/drive/v2/files/" + fid + "?fields=id,etag,mimeType,md5Checksum,version,editable,labels(trashed)&supportsAllDrives=true"
+        meta = json.loads(self.request(meta_url, headers=headers))
         if not meta.get("etag") or meta.get("labels", {}).get("trashed"): raise SourceError(403, "Fonte sem permissão de leitura.")
+        if meta.get("mimeType") in (DOC, SHEET):
+            return read_native(self.request, headers, meta, meta_url, fid)
         raw = self.request("https://www.googleapis.com/drive/v3/files/" + fid + "?alt=media&supportsAllDrives=true", headers=headers)
         if len(raw) > MAX_SOURCE or hashlib.md5(raw, usedforsecurity=False).hexdigest() != meta.get("md5Checksum"): raise SourceError(503, "Fonte mudou durante a leitura.")
         return raw, meta.get("etag"), int(meta.get("version", 0))
     def write(self, file_id, raw, etag):
+        if isinstance(etag, NativeRevision):
+            return write_native(self.request, self.token, Drive.valid_id(file_id), raw, etag)
         fid = Drive.valid_id(file_id); headers = {"Authorization": "Bearer " + self.token, "Content-Type": "text/plain; charset=utf-8", "If-Match": etag}
         self.request("https://www.googleapis.com/upload/drive/v2/files/" + fid + "?uploadType=media&newRevision=true&supportsAllDrives=true&fields=id", method="PUT", data=raw, headers=headers)
 
@@ -78,7 +84,10 @@ def ler(payload, drive, mapping=None):
     if start is None: start = 0
     if type(start) is not int or start < 0 or start > len(text): raise SourceError(416, "Início de leitura inválido.")
     end = min(len(text), start + PAGE)
-    return {"texto": text[start:end], "revisao": revision, "proximo": end if end < len(text) else None, "tamanho": len(text), "fonte": alias}
+    resultado = {"texto": text[start:end], "revisao": revision, "proximo": end if end < len(text) else None, "tamanho": len(text), "fonte": alias}
+    if isinstance(etag, NativeRevision):
+        resultado["editavel"] = bool(item["editavel"] and etag.docs_revision)
+    return resultado
 
 def anotar(payload, drive, mapping=None):
     sources = source_map(mapping); alias, item = payload.get("fonte"), sources.get(payload.get("fonte"))
