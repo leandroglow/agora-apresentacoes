@@ -108,17 +108,15 @@ function portalLinks(room){
   });
 }
 const fotos=[["fachada","Fachada da rua"],["garagem","Garagem e acesso"],["sala-piscina","Sala de entrada"],["sala-garagem","Estar e jardim"],["cozinha","Cozinha e ilha"],["deck","Deck da piscina"]];
-const foto=document.getElementById("foto");let indexFoto=0,photoMode="ambientacao";
+const foto=document.getElementById("foto");let indexFoto=0;
 function verFoto(index){
   indexFoto=(index+fotos.length)%fotos.length;const [id,title]=fotos[indexFoto];
-  const src="assets/"+id+(photoMode==="ambientacao"?"-ambientacao.jpg":"-4k.jpg");
-  document.querySelectorAll("[data-photo-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.photoMode===photoMode)));
+  const src="assets/"+id+"-ambientacao.jpg?v=r19real";
   document.getElementById("foto-grande").src=src;document.getElementById("foto-grande").alt=title+" da Casa G13";
   document.getElementById("original").href=src;document.getElementById("legenda-foto").textContent=title+" · "+(indexFoto+1)+" / "+fotos.length;
   if(!foto.open)foto.showModal();
 }
 document.querySelectorAll(".photo-thumb").forEach(b=>b.addEventListener("click",()=>verFoto(+b.dataset.index)));
-document.querySelectorAll("[data-photo-mode]").forEach(b=>b.onclick=()=>{photoMode=b.dataset.photoMode;verFoto(indexFoto);});
 document.getElementById("close-photo").onclick=()=>foto.close();
 document.getElementById("prev-photo").onclick=()=>verFoto(indexFoto-1);
 document.getElementById("next-photo").onclick=()=>verFoto(indexFoto+1);
@@ -131,30 +129,24 @@ foto.addEventListener("touchend",e=>{if(startX!==null && Math.abs(startX-e.chang
 const dialog = document.querySelector("#tour");
 const mount = document.querySelector("#sphere");
 const loading = document.querySelector("#loading");
-const modeButtons = [...dialog.querySelectorAll("[data-mode]")];
-let activeRoom = "", activeMode = "photo", viewer = null, generation = 0;
+let activeRoom = "", viewer = null, generation = 0;
 let returnHash = "#vistas", focusOrigin = null;
 
-function pose() {
-  return viewer ? { yaw:viewer.getYaw(), pitch:viewer.getPitch(), hfov:viewer.getHfov() } : null;
-}
 function stop() {
   generation++;
   cancelAnimationFrame(headingFrame);
   if (viewer) { viewer.destroy(); viewer = null; }
   mount.replaceChildren();
 }
-function openCamera(room, mode, target) {
+function openCamera(room, target) {
   stop();
   const ticket = generation;
   activeRoom = room;
-  activeMode = mode;
   const config = cameras[room];
   const angles = target || {yaw:config.yaw, pitch:config.pitch, hfov:82};
-  const src = "assets/"+room+(mode==="model"?"-modelo":"")+".jpg?r19";
+  const src = "assets/"+room+".jpg?v=r19real";
   dialog.querySelector("#room-title").textContent=config.label;
   mount.style.backgroundImage="url('assets/"+room+"-capa.jpg?r19')";
-  modeButtons.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode === mode)));
   dialog.querySelectorAll(".scene-nav a").forEach(a=>a.hash==="#"+room ? a.setAttribute("aria-current","location") : a.removeAttribute("aria-current"));
   const directions = document.querySelector("#sightlines");
   directions.replaceChildren();
@@ -214,7 +206,7 @@ function syncRoute() {
   }
   const rel=cameras[room].views.find(v=>v[0]===direction);
   const camera=rel?{yaw:rel[2],pitch:rel[3],hfov:rel[4]}:null;
-  if(room!==activeRoom) openCamera(room,activeMode,camera);
+  if(room!==activeRoom) openCamera(room,camera);
   else if(camera) viewer?.lookAt(camera.pitch,camera.yaw,camera.hfov,reduced.matches?0:500);
 }
 function leave() {
@@ -231,9 +223,6 @@ dialog.querySelector(".close").addEventListener("click",leave);
 dialog.addEventListener("cancel",e=>{e.preventDefault();leave();});
 dialog.addEventListener("click",e=>{if(e.target===dialog)leave();});
 window.addEventListener("hashchange",syncRoute);
-modeButtons.forEach(b=>b.addEventListener("click",()=>{
-  if(activeMode!==b.dataset.mode && activeRoom) openCamera(activeRoom,b.dataset.mode,pose());
-}));
 document.querySelector("#turn").addEventListener("click",()=>viewer?.setYaw(viewer.getYaw()+180,reduced.matches?0:650));
 const full=document.querySelector("#full");
 const shell=document.querySelector(".viewer-shell");
