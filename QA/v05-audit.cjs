@@ -10,10 +10,10 @@ if (views.desktopHfov !== 63.7) errors.push('HFOV desktop divergente');
 for (const id of ['p1','p2','p3','p4']) {
   const v = views.views[id];
   if (!v?.still?.startsWith('assets/hd/v')) errors.push(`${id} sem still HD`);
-  if (!app.includes('assets/hd/${id}/%l/%s%y_%x.jpg')) errors.push(`${id} sem path multirres`);
+  if (!app.includes('assets/hd/${id}/%l/%s%y_%x`')) errors.push(`${id} sem path multirres sem extensão`);
   if (!app.includes('assets/hd/${id}/fallback/%s')) errors.push(`${id} sem fallback`);
 }
-for (const token of ['tileResolution:512','cubeResolution:4096','maxLevel:4','webkitRequestFullscreen','touch-action:none']) {
+for (const token of ["extension:'jpg'",'tileResolution:512','cubeResolution:4096','maxLevel:4','minHfov:28','multiResMinHfov:true','webkitRequestFullscreen','touch-action:none']) {
   if (!app.includes(token) && !css.includes(token)) errors.push(`contrato ausente: ${token}`);
 }
 if (!index.includes('scene-picker') || !index.includes('panorama')) errors.push('estrutura protagonista ausente');
