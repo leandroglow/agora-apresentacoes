@@ -15,11 +15,17 @@ export function directoryUrl(value) {
 const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
 
 // Explicitly retired from the Master directory; preserve all other destinations.
+const retiredKey = value => {
+  try {
+    const url = new URL(value);
+    return `${url.origin}${url.pathname.replace(/\/+$/, '') || '/'}`;
+  } catch { return null; }
+};
 const RETIRED_MASTER_DESTINATIONS = new Set([
-  'https://project-pyfyj.vercel.app',
-  'https://apresentacoes.agoracons.com.br/automacao/',
-  'https://apresentacoes.agoracons.com.br/automacao/admin.html',
-  'https://simulacao-financiamento-caixa.leglow.chatgpt.site/'
+  retiredKey('https://project-pyfyj.vercel.app/'),
+  retiredKey('https://apresentacoes.agoracons.com.br/automacao/'),
+  retiredKey('https://apresentacoes.agoracons.com.br/automacao/admin.html'),
+  retiredKey('https://simulacao-financiamento-caixa.leglow.chatgpt.site/')
 ]);
 
 export function mountDirectory(container, items) {
@@ -35,7 +41,7 @@ export function mountDirectory(container, items) {
     for (const item of items) {
       const href = directoryUrl(item.url);
       if (!href || !item.title) continue;
-      if (RETIRED_MASTER_DESTINATIONS.has(href)) continue;
+      if (RETIRED_MASTER_DESTINATIONS.has(retiredKey(href))) continue;
       const category = item.category || 'Outros';
       const searchable = normalize([item.title, category, item.subtitle || '', item.projectId || '', href].join(' '));
       if (!words.every(word => searchable.includes(word))) continue;
