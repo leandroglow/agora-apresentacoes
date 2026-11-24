@@ -14,6 +14,14 @@ export function directoryUrl(value) {
 
 const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
 
+// Explicitly retired from the Master directory; preserve all other destinations.
+const RETIRED_MASTER_DESTINATIONS = new Set([
+  'https://project-pyfyj.vercel.app',
+  'https://apresentacoes.agoracons.com.br/automacao/',
+  'https://apresentacoes.agoracons.com.br/automacao/admin.html',
+  'https://simulacao-financiamento-caixa.leglow.chatgpt.site/'
+]);
+
 export function mountDirectory(container, items) {
   container.innerHTML = '<h1 class="module-title">Links</h1><label class="directory-search">Buscar um link<input type="search" placeholder="Nome, cliente ou projeto" autocomplete="off"></label><p class="directory-count" role="status"></p><div class="directory-groups"></div>';
   const input = container.querySelector('input');
@@ -27,6 +35,7 @@ export function mountDirectory(container, items) {
     for (const item of items) {
       const href = directoryUrl(item.url);
       if (!href || !item.title) continue;
+      if (RETIRED_MASTER_DESTINATIONS.has(href)) continue;
       const category = item.category || 'Outros';
       const searchable = normalize([item.title, category, item.subtitle || '', item.projectId || '', href].join(' '));
       if (!words.every(word => searchable.includes(word))) continue;
