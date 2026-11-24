@@ -5,9 +5,9 @@
   "desktopHfov": 63.7,
   "mobileHfov": {"portrait": 58, "landscape": 68},
   "views": {
-    "p1": {"title":"Penteadeira e TV","panorama":"assets/p1.jpg","thumbnail":"assets/v1.jpg","yaw":0,"pitch":-1.725,"verticalFov":45},
-    "p2": {"title":"Cabeceira e cama","panorama":"assets/p2.jpg","thumbnail":"assets/v2.jpg","yaw":0,"pitch":-6.186,"verticalFov":45},
-    "p3": {"title":"Banheiro e box","panorama":"assets/p3.jpg","thumbnail":"assets/v3.jpg","yaw":0,"pitch":-6.836,"verticalFov":45,"nicho":{"label":"Ver nicho","yaw":21.398,"pitch":-2.419,"image":"assets/n.jpg"},"vaso":{"label":"Ver vaso","image":"assets/wc.jpg"}},
-    "p4": {"title":"Bancada dupla","panorama":"assets/p4.jpg","thumbnail":"assets/v4.jpg","yaw":0,"pitch":-4.362,"verticalFov":45,"nicho":{"label":"Ver nicho","yaw":148.144,"pitch":-8.654,"image":"assets/n.jpg"},"vaso":{"label":"Ver vaso","image":"assets/wc.jpg"}}
+    "p1": {"title":"Penteadeira e TV","still":"assets/hd/v1.jpg","yaw":0,"pitch":-1.725,"verticalFov":45},
+    "p2": {"title":"Cabeceira e cama","still":"assets/hd/v2.jpg","yaw":0,"pitch":-6.186,"verticalFov":45},
+    "p3": {"title":"Banheiro e box","still":"assets/hd/v3.jpg","yaw":0,"pitch":-6.836,"verticalFov":45,"nicho":{"label":"Ver nicho","yaw":21.398,"pitch":-2.419,"image":"assets/hd/n.jpg"},"vaso":{"label":"Ver vaso","image":"assets/hd/wc.jpg"}},
+    "p4": {"title":"Bancada dupla","still":"assets/hd/v4.jpg","yaw":0,"pitch":-4.362,"verticalFov":45,"nicho":{"label":"Ver nicho","yaw":148.144,"pitch":-8.654,"image":"assets/hd/n.jpg"},"vaso":{"label":"Ver vaso","image":"assets/hd/wc.jpg"}}
   }
 }
