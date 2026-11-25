@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const revision = '06';
+  const revision = '07';
   const pixelSize = 4096;
   const byId = id => document.getElementById(id);
   const panorama = byId('panorama');
@@ -11,6 +11,11 @@
   const degrees = angle => angle * 180 / Math.PI;
   const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
   let config, viewer, current;
+  const focusButton = document.createElement('button');
+  focusButton.type = 'button';
+  focusButton.hidden = true;
+  focusButton.id = 'focus-detail';
+  document.querySelector('.detail-actions').prepend(focusButton);
 
   function lens() {
     const w = Math.max(1, panorama.clientWidth);
@@ -37,6 +42,8 @@
     document.querySelectorAll('[data-scene]').forEach(button =>
       button.setAttribute('aria-selected', String(button.dataset.scene === current)));
     for (const key of ['nicho', 'vaso']) byId(key).hidden = !view[key];
+    focusButton.hidden = !view.focus;
+    if (view.focus) focusButton.textContent = view.focus.label;
   }
 
   function openImage(title, src) {
@@ -138,6 +145,10 @@
       };
     }
     byId('reset').onclick = () => selectScene(current);
+    focusButton.onclick = () => {
+      const focus = config.views[current].focus;
+      if (focus) viewer.lookAt(focus.pitch, focus.yaw, lens().normal, 500);
+    };
     byId('fullscreen').onclick = fullscreen;
     for (const key of ['nicho', 'vaso']) byId(key).onclick = () => {
       const detail = config.views[current][key];
@@ -150,7 +161,7 @@
     });
     byId('modal-close').onclick = () => byId('image-modal').close();
     byId('image-modal').onclick = event => {if (event.target === byId('image-modal')) byId('image-modal').close();};
-    window.agoraSuite = {version:'v06', getState:() => ({view:current, loaded:viewer.isLoaded(), yaw:viewer.getYaw(),
+    window.agoraSuite = {version:'v07', getState:() => ({view:current, loaded:viewer.isLoaded(), yaw:viewer.getYaw(),
       pitch:viewer.getPitch(), hfov:viewer.getHfov(), bounds:viewer.getHfovBounds()})};
     sync();
   }

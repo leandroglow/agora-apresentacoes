@@ -1,10 +1,11 @@
 {
-  "version": 3,
+  "version": 7,
   "projection": "cubemap",
   "initial": "p1",
   "views": {
     "p1": {
       "title": "Penteadeira e TV",
+      "focus": {"label": "Ver janela da TV", "yaw": 45.0, "pitch": -4.82},
       "thumbnail": "assets/hd/t1.jpg",
       "still": "assets/hd/v1.jpg",
       "yaw": 0,
@@ -39,6 +40,7 @@
     },
     "p4": {
       "title": "Bancada dupla",
+      "focus": {"label": "Ver ralo do box", "yaw": 70.64, "pitch": -45.95},
       "thumbnail": "assets/hd/t4.jpg",
       "still": "assets/hd/v4.jpg",
       "yaw": 0,
