@@ -1,5 +1,159 @@
-(()=>{'use strict';const $=id=>document.getElementById(id),order=['p1','p2','p3','p4'],state={id:null,viewer:null,data:null,config:null};
-fetch('views.json?v=05',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('views.json indisponível');return r.json()}).then(build).catch(e=>{$('status').textContent=e.message});
-function hfov(){return innerWidth<760?(innerHeight>innerWidth?state.config.mobileHfov.portrait:state.config.mobileHfov.landscape):state.config.desktopHfov}
-function build(config){state.config=config;state.data=config.views;state.id=config.initial||order[0];const picker=$('scene-picker'),gallery=$('gallery'),scenes={};order.forEach(id=>{const v=config.views[id],b=document.createElement('button');b.type='button';b.dataset.scene=id;b.setAttribute('role','tab');b.innerHTML=`<img src="${v.thumbnail||v.still}" alt=""><span>${v.title}</span>`;b.onclick=()=>load(id);picker.append(b);scenes[id]={type:'multires',multiRes:{basePath:'',path:`assets/hd/${id}/%l/%s%y_%x`,fallbackPath:`assets/hd/${id}/fallback/%s`,extension:'jpg',tileResolution:512,cubeResolution:4096,maxLevel:4},minHfov:28,multiResMinHfov:true,yaw:v.yaw,pitch:v.pitch,hfov:hfov(),autoLoad:true}});order.forEach(id=>{const v=config.views[id],f=document.createElement('figure');f.tabIndex=0;f.setAttribute('aria-label',`Abrir ${v.title}`);f.innerHTML=`<img src="${v.still}" loading="lazy" alt="${v.title}"><figcaption>${v.title}</figcaption>`;f.onclick=()=>openModal(v.title,v.still);f.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f.click()}};gallery.append(f)});state.viewer=pannellum.viewer('panorama',{default:{firstScene:state.id,showControls:false,showFullscreenCtrl:false,mouseZoom:true,keyboardZoom:true,minHfov:28,multiResMinHfov:true,maxHfov:110,hfov:hfov(),ignoreGPanoXMP:true},scenes});state.viewer.on('scenechange',id=>{state.id=id;sync()});state.viewer.on('load',sync);sync();$('reset').onclick=reset;$('zoom-in').onclick=()=>zoom(-8);$('zoom-out').onclick=()=>zoom(8);$('fullscreen').onclick=full;$('nicho').onclick=()=>detail('nicho');$('vaso').onclick=()=>detail('vaso');document.addEventListener('fullscreenchange',()=>{syncFullscreen();state.viewer?.resize()});document.addEventListener('webkitfullscreenchange',()=>{syncFullscreen();state.viewer?.resize()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('css-fullscreen'))toggleCssFullscreen(false)});addEventListener('resize',()=>state.viewer?.resize())}
-function sync(){const v=state.data[state.id];$('scene-label').textContent=v.title;document.querySelectorAll('[data-scene]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.scene===state.id)));$('nicho').hidden=!v.nicho?.image;$('vaso').hidden=!v.vaso?.image}function load(id){const v=state.data[id];state.viewer.loadScene(id,v.pitch,v.yaw,hfov())}function reset(){const v=state.data[state.id];state.viewer.lookAt(v.pitch,v.yaw,hfov(),500)}function zoom(delta){state.viewer.setHfov(Math.max(28,Math.min(110,state.viewer.getHfov()+delta)),220)}function detail(kind){const v=state.data[state.id]?.[kind];if(v?.image)openModal(v.label,v.image)}function openModal(title,src){$('modal-title').textContent=title;$('modal-image').src=src;$('modal-image').alt=title;$('image-modal').showModal()}function syncFullscreen(){const active=Boolean(document.fullscreenElement||document.webkitFullscreenElement||document.body.classList.contains('css-fullscreen'));$('fullscreen').textContent=active?'Fechar tela cheia':'Tela cheia'}async function full(){const el=document.querySelector('.viewer');if(document.body.classList.contains('css-fullscreen'))return toggleCssFullscreen(false);try{if(document.fullscreenElement||document.webkitFullscreenElement){await(document.exitFullscreen?.()||document.webkitExitFullscreen?.());return}if(el.requestFullscreen)await el.requestFullscreen();else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();else toggleCssFullscreen(true)}catch{toggleCssFullscreen(true)}state.viewer?.resize()}function toggleCssFullscreen(active){document.body.classList.toggle('css-fullscreen',active);syncFullscreen();state.viewer?.resize()}$('modal-close').onclick=()=>$('image-modal').close();$('image-modal').addEventListener('click',e=>{if(e.target.id==='image-modal')e.target.close()});window.agoraSuite={getState:()=>({view:state.id,loaded:Boolean(state.viewer?.isLoaded?.()),yaw:state.viewer?.getYaw?.(),pitch:state.viewer?.getPitch?.(),hfov:state.viewer?.getHfov?.()}),version:'v05b'}})();
+(() => {
+  'use strict';
+
+  const revision = '06';
+  const pixelSize = 4096;
+  const byId = id => document.getElementById(id);
+  const panorama = byId('panorama');
+  const scenes = ['p1', 'p2', 'p3', 'p4'];
+  const asset = url => url + '?v=' + revision;
+  const radians = angle => angle * Math.PI / 180;
+  const degrees = angle => angle * 180 / Math.PI;
+  const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+  let config, viewer, current;
+
+  function lens() {
+    const w = Math.max(1, panorama.clientWidth);
+    const h = Math.max(1, panorama.clientHeight);
+    const horizontal = vertical => degrees(2 * Math.atan(Math.tan(radians(vertical / 2)) * w / h));
+    const max = Math.min(78, horizontal(78));
+    const physicalWidth = viewer?.getRenderer()?.getCanvas()?.width || w * (window.devicePixelRatio || 1);
+    const min = Math.min(max - 4, Math.max(24, degrees(2 * Math.atan(physicalWidth / (1.55 * pixelSize)))));
+    const normal = w / h >= 1 ? Math.min(64, horizontal(45)) : horizontal(64);
+    return {min, max, normal: clamp(normal, min, max)};
+  }
+
+  function resize() {
+    if (!viewer?.isLoaded()) return;
+    viewer.resize();
+    const {min, max} = lens();
+    viewer.setHfovBounds([min, max]);
+    viewer.setHfov(clamp(viewer.getHfov(), min, max));
+  }
+
+  function sync() {
+    const view = config.views[current];
+    byId('scene-label').textContent = view.title;
+    document.querySelectorAll('[data-scene]').forEach(button =>
+      button.setAttribute('aria-selected', String(button.dataset.scene === current)));
+    for (const key of ['nicho', 'vaso']) byId(key).hidden = !view[key];
+  }
+
+  function openImage(title, src) {
+    byId('modal-title').textContent = title;
+    byId('modal-image').alt = title;
+    byId('modal-image').src = asset(src);
+    byId('image-modal').showModal();
+  }
+
+  function selectScene(id) {
+    const view = config.views[id];
+    if (id === current) {
+      viewer.lookAt(view.pitch, view.yaw, lens().normal, 320);
+    } else {
+      viewer.loadScene(id, view.pitch, view.yaw, lens().normal);
+    }
+  }
+
+  function decorateScene(id) {
+    const view = config.views[id];
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.scene = id;
+    button.setAttribute('role', 'tab');
+    const thumbnail = new Image();
+    thumbnail.alt = '';
+    thumbnail.src = asset(view.thumbnail);
+    const label = document.createElement('span');
+    label.textContent = view.title;
+    button.append(thumbnail, label);
+    button.onclick = () => selectScene(id);
+    byId('scene-picker').append(button);
+
+    const figure = document.createElement('figure');
+    figure.tabIndex = 0;
+    figure.setAttribute('role', 'button');
+    figure.setAttribute('aria-label', 'Abrir ' + view.title);
+    const photo = new Image();
+    photo.loading = 'lazy';
+    photo.alt = view.title;
+    photo.src = asset(view.still);
+    const caption = document.createElement('figcaption');
+    caption.textContent = view.title;
+    figure.append(photo, caption);
+    figure.onclick = () => openImage(view.title, view.still);
+    figure.onkeydown = event => {
+      if (event.key === 'Enter' || event.key === ' ') {event.preventDefault(); figure.click();}
+    };
+    byId('gallery').append(figure);
+  }
+
+  const isFull = () => !!(document.fullscreenElement || document.webkitFullscreenElement || document.body.classList.contains('css-fullscreen'));
+  function fullscreenChanged() {
+    byId('fullscreen').textContent = isFull() ? 'Fechar tela cheia' : 'Tela cheia';
+    requestAnimationFrame(resize);
+  }
+  function cssFull(enabled) {
+    document.body.classList.toggle('css-fullscreen', enabled);
+    fullscreenChanged();
+  }
+  async function fullscreen() {
+    const el = document.querySelector('.viewer');
+    if (document.body.classList.contains('css-fullscreen')) return cssFull(false);
+    if (document.fullscreenElement) return document.exitFullscreen();
+    if (document.webkitFullscreenElement) return document.webkitExitFullscreen();
+    try {
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else cssFull(true);
+    } catch {cssFull(true);}
+  }
+
+  async function start() {
+    const response = await fetch(asset('views.json'), {cache:'no-store'});
+    if (!response.ok) throw new Error('Não foi possível abrir as vistas.');
+    config = await response.json();
+    current = config.initial;
+    const catalog = {};
+    const {min, max, normal} = lens();
+    for (const id of scenes) {
+      const v = config.views[id];
+      decorateScene(id);
+      catalog[id] = {
+        type:'multires', multiRes:{
+          path:'assets/hd/' + id + '/%l/%s%y_%x', fallbackPath:'assets/hd/' + id + '/fallback/%s',
+          extension:'jpg?v=' + revision, tileResolution:512, cubeResolution:pixelSize, maxLevel:4,
+        },
+        minHfov:min, maxHfov:max, multiResMinHfov:true, yaw:v.yaw, pitch:v.pitch, hfov:normal, autoLoad:true,
+      };
+    }
+    viewer = pannellum.viewer('panorama', {default:{firstScene:current, showControls:false, showFullscreenCtrl:false,
+      mouseZoom:true, keyboardZoom:true, multiResMinHfov:true, minHfov:min, maxHfov:max, hfov:normal, ignoreGPanoXMP:true}, scenes:catalog});
+    viewer.on('scenechange', id => {current=id; sync();});
+    viewer.on('load', () => {resize(); sync();});
+    for (const [id, delta] of [['zoom-in',-7],['zoom-out',7]]) {
+      byId(id).onclick = () => {
+        const {min,max} = lens();
+        viewer.setHfov(clamp(viewer.getHfov()+delta,min,max),220);
+      };
+    }
+    byId('reset').onclick = () => selectScene(current);
+    byId('fullscreen').onclick = fullscreen;
+    for (const key of ['nicho', 'vaso']) byId(key).onclick = () => {
+      const detail = config.views[current][key];
+      if (detail) openImage(detail.label, detail.image);
+    };
+    for (const name of ['fullscreenchange','webkitfullscreenchange']) document.addEventListener(name, fullscreenChanged);
+    new ResizeObserver(resize).observe(panorama);
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && document.body.classList.contains('css-fullscreen')) cssFull(false);
+    });
+    byId('modal-close').onclick = () => byId('image-modal').close();
+    byId('image-modal').onclick = event => {if (event.target === byId('image-modal')) byId('image-modal').close();};
+    window.agoraSuite = {version:'v06', getState:() => ({view:current, loaded:viewer.isLoaded(), yaw:viewer.getYaw(),
+      pitch:viewer.getPitch(), hfov:viewer.getHfov(), bounds:viewer.getHfovBounds()})};
+    sync();
+  }
+
+  start().catch(error => {byId('status').classList.remove('sr-only'); byId('status').textContent = error.message;});
+})();
